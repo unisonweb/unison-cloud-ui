@@ -1,0 +1,26 @@
+module UnisonCloud.Page.OverviewPage exposing (..)
+
+import UI.AppDocument exposing (AppDocument)
+import UI.PageContent as PageContent
+import UI.PageLayout as PageLayout
+import UnisonCloud.AppHeader as Appheader
+
+
+view : AppDocument msg
+view =
+    let
+        page =
+            PageLayout.CenteredLayout
+                { content =
+                    PageContent.oneColumn []
+                , footer = PageLayout.PageFooter []
+                }
+    in
+    { pageId = "overview-page"
+    , title = "Unison Cloud | Overview"
+    , announcement = Nothing
+    , appHeader = Appheader.appHeader
+    , pageHeader = Nothing
+    , page = PageLayout.view page
+    , modal = Nothing
+    }

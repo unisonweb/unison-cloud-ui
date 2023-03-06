@@ -1,0 +1,26 @@
+#app {
+  display: grid;
+  height: 100vh;
+  grid-template-rows: auto auto auto 1fr;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "announcement"
+    "app-header"
+    "page-header"
+    "page-layout";
+
+  --c-height_announcement: 2rem; /* its 0 when there's no banner visible, 2rem otherwise */
+}
+
+/* TODO: move this be to the modal module in ui-core? */
+body:has(#modal-overlay) {
+  overflow: clip;
+}
+
+@media only screen and (--u-viewport_max-md) {
+  #app {
+    width: 100vw;
+    --app-header-height: 7rem;
+    --c-height_announcement: 4rem;
+  }
+}
