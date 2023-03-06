@@ -1,7 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const FileManagerPlugin = require("filemanager-webpack-plugin");
 const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
 const webpack = require("webpack");
 const postcssPresetEnv = require("postcss-preset-env");
@@ -108,32 +107,10 @@ const unisonCloud = {
           to: "unison-cloud-social.png",
         },
         {
-          from: "src/assets/unison-logo-circle.png",
-          to: "unison-logo-circle.png",
-        },
-        {
-          from: "src/assets/unison-logo-square.png",
-          to: "unison-logo-square.png",
-        },
-        {
-          from: "src/assets/unison-cloud-splash.svg",
-          to: "unison-cloud-splash.svg",
-        },
-        {
           from: "src/robots.txt",
           to: "robots.txt",
         },
       ],
-    }),
-
-    new FileManagerPlugin({
-      events: {
-        onEnd: {
-          archive: [
-            { source: "dist/unisonCloud", destination: "dist/unisonCloud.zip" },
-          ],
-        },
-      },
     }),
 
     new webpack.DefinePlugin({
