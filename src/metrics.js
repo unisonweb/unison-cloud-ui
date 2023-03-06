@@ -5,7 +5,7 @@ let plausible;
 function init() {
   if (APP_ENV === "production") {
     plausible = Plausible({
-      domain: "unison.cloud",
+      domain: "app.unison.cloud",
     });
 
     plausible.enableAutoPageviews();
