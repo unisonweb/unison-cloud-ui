@@ -46,6 +46,7 @@ const flags = {
   operatingSystem: detectOs(window.navigator),
   basePath,
   apiUrl: API_URL,
+  websiteUrl: WEBSITE_URL,
   xsrfToken: getCookie("XSRF-TOKEN"),
   appEnv: APP_ENV,
 };
