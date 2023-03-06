@@ -10,7 +10,6 @@ import Lib.Util as Util
 import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
-import UI.ViewMode as ViewMode
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.App as App
 import UnisonCloud.AppHeader as AppHeader

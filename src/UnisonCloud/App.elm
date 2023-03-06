@@ -5,6 +5,7 @@ import UI.AppDocument as AppDocument
 import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Page.OverviewPage as OverviewPage
 import UnisonCloud.Route as Route exposing (Route)
+import Url exposing (Url)
 
 
 
@@ -50,6 +51,8 @@ init env route =
 
 type Msg
     = NoOp
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
