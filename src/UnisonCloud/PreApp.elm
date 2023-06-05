@@ -128,10 +128,9 @@ viewAppLoading =
     div [ id "app" ]
         [ AppHeader.viewBlank
         , PageLayout.view
-            (PageLayout.CenteredLayout
-                { content = PageContent.empty
-                , footer = PageFooter.pageFooter
-                }
+            (PageLayout.centeredLayout
+                PageContent.empty
+                PageFooter.pageFooter
             )
         ]
 
@@ -141,17 +140,16 @@ viewAppError error =
     div [ id "app" ]
         [ AppHeader.viewBlank
         , PageLayout.view
-            (PageLayout.CenteredLayout
-                { content =
-                    PageContent.oneColumn
-                        [ div [ class "app-error" ]
-                            [ Icon.view Icon.warn
-                            , p [ title (Util.httpErrorToString error) ]
-                                [ text "Unison Cloud could not be started." ]
-                            ]
+            (PageLayout.centeredLayout
+                (PageContent.oneColumn
+                    [ div [ class "app-error" ]
+                        [ Icon.view Icon.warn
+                        , p [ title (Util.httpErrorToString error) ]
+                            [ text "Unison Cloud could not be started." ]
                         ]
-                , footer = PageFooter.pageFooter
-                }
+                    ]
+                )
+                PageFooter.pageFooter
             )
         ]
 
