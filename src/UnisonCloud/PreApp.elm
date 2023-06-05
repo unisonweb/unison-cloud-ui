@@ -163,7 +163,7 @@ view model =
         NotSignedIn _ ->
             { title = "Unison Cloud"
             , body =
-                [ div [ id "app" ]
+                [ div [ id "app", class "sign-in-page" ]
                     [ AppHeader.viewBlank
                     , PageLayout.view
                         (PageLayout.centeredLayout
