@@ -163,10 +163,20 @@ view model =
         NotSignedIn _ ->
             { title = "Unison Cloud"
             , body =
-                [ Button.button_ Link.login "Sign In"
-                    |> Button.large
-                    |> Button.emphasized
-                    |> Button.view
+                [ div [ id "app" ]
+                    [ AppHeader.viewBlank
+                    , PageLayout.view
+                        (PageLayout.centeredLayout
+                            (PageContent.oneColumn
+                                [ Button.button_ Link.login "Sign In to Unison Cloud"
+                                    |> Button.large
+                                    |> Button.emphasized
+                                    |> Button.view
+                                ]
+                            )
+                            PageFooter.pageFooter
+                        )
+                    ]
                 ]
             }
 
