@@ -7,6 +7,7 @@ import Html.Attributes exposing (class, id, title)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
 import Lib.Util as Util
+import UI.Button as Button
 import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
@@ -14,6 +15,7 @@ import UnisonCloud.Api as CloudApi
 import UnisonCloud.App as App
 import UnisonCloud.AppHeader as AppHeader
 import UnisonCloud.Env as Env exposing (Flags)
+import UnisonCloud.Link as Link
 import UnisonCloud.PageFooter as PageFooter
 import UnisonCloud.Route as Route exposing (Route)
 import UnisonCloud.Session as Session exposing (Session)
@@ -23,6 +25,7 @@ import Url exposing (Url)
 type Model
     = Initializing PreEnv
     | InitializationError PreEnv Http.Error
+    | NotSignedIn PreEnv
     | Initialized App.Model
 
 
@@ -71,17 +74,7 @@ update msg model =
                 Err e ->
                     case e of
                         Http.BadStatus 401 ->
-                            let
-                                env =
-                                    Env.init
-                                        preEnv.flags
-                                        preEnv.navKey
-                                        Session.Anonymous
-
-                                ( app, cmd ) =
-                                    App.init env preEnv.route
-                            in
-                            ( Initialized app, Cmd.map AppMsg cmd )
+                            ( NotSignedIn preEnv, Cmd.none )
 
                         _ ->
                             ( InitializationError preEnv e, Cmd.none )
@@ -165,6 +158,16 @@ view model =
         InitializationError _ error ->
             { title = "Application Error | Unison Cloud"
             , body = [ viewAppError error ]
+            }
+
+        NotSignedIn _ ->
+            { title = "Unison Cloud"
+            , body =
+                [ Button.button_ Link.login "Sign In"
+                    |> Button.large
+                    |> Button.emphasized
+                    |> Button.view
+                ]
             }
 
         Initialized appModel ->
