@@ -126,15 +126,16 @@ viewLogMessage entry =
     let
         viewRawData =
             if LogEntry.hasData entry then
-                div [ class "log-entry_log-message_no-data" ] [ text "NO DATA" ]
-
-            else
                 entry
+                    |> Debug.log "hi"
                     |> LogEntry.dataToList
                     |> List.map (\( k, v ) -> "\"" ++ k ++ "\": " ++ "\"" ++ v)
                     |> String.join ", "
                     |> (\d -> text ("{ " ++ d ++ " }"))
                     |> (\d -> div [ class "log-entry_log-message_raw-data" ] [ d ])
+
+            else
+                div [ class "log-entry_log-message_no-data" ] [ text "NO DATA" ]
     in
     case entry.message of
         Nothing ->
