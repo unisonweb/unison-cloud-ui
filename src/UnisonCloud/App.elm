@@ -103,6 +103,13 @@ update msg model =
             in
             ( m, c )
 
+        ( Service sh service, ServicePageMsg spMsg ) ->
+            let
+                ( service_, serviceCmd ) =
+                    ServicePage.update model.env sh spMsg service
+            in
+            ( { model | page = Service sh service_ }, Cmd.map ServicePageMsg serviceCmd )
+
         _ ->
             ( model, Cmd.none )
 

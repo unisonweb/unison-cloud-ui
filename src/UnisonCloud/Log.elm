@@ -6,11 +6,16 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (on)
 import Http
 import Json.Decode as Decode
+import Set exposing (Set)
+import Set.Extra as SetE
 import Time
+import UI
+import UI.Button as Button
 import UI.DateTime as DateTime exposing (DateTime)
+import UI.Icon as Icon
 import UI.Sizing as Sizing
 import UnisonCloud.Env exposing (Env)
-import UnisonCloud.LogEntry as LogEntry exposing (LogEntry)
+import UnisonCloud.LogEntry as LogEntry exposing (LogEntry, LogEntryId)
 import UnisonCloud.LogLevel as LogLevel
 
 
@@ -52,30 +57,22 @@ type alias LogEntries =
     List LogEntry
 
 
-
--- WHERE IS BOOKMARK?
-
-
-type Log
-    = NotAsked
-    | FirstTimeLoading
-    | Loading LogEntries
-    | Success LogEntries
-    | Failure Http.Error
-
-
 type Direction
     = Before
     | After
 
 
+
+-- WHERE IS BOOKMARK?
+
+
 type alias Model =
-    Log
+    { expandedEntries : Set String }
 
 
 init : Env -> ( Model, Cmd Msg )
 init _ =
-    ( NotAsked, Cmd.none )
+    ( { expandedEntries = Set.empty }, Cmd.none )
 
 
 
@@ -86,11 +83,21 @@ type Msg
     = LogEntriesFetchFinished
     | Scroll
     | FetchMore
+    | ToggleLogEntry LogEntry
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg )
-update _ _ model =
-    ( model, Cmd.none )
+update _ msg model =
+    case msg of
+        ToggleLogEntry entry ->
+            let
+                loggedAt =
+                    DateTime.toISO8601 entry.loggedAt
+            in
+            ( { model | expandedEntries = SetE.toggle loggedAt model.expandedEntries }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
@@ -160,14 +167,44 @@ viewLoggedAt dateTime =
     div [ class "log-entry_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
 
 
-viewEntry : LogEntry -> Html Msg
-viewEntry entry =
+viewEntry : Model -> LogEntry -> Html Msg
+viewEntry model entry =
+    let
+        isExpanded =
+            Set.member (DateTime.toISO8601 entry.loggedAt) model.expandedEntries
+
+        icon =
+            if isExpanded then
+                Icon.caretDown
+
+            else
+                Icon.caretRight
+
+        caret =
+            if LogEntry.hasData entry then
+                Button.icon (ToggleLogEntry entry) icon
+                    |> Button.small
+                    |> Button.subdued
+                    |> Button.view
+
+            else
+                UI.nothing
+
+        expanded =
+            if isExpanded then
+                div [ class "log-entry_expanded" ] [ viewDataTable entry.data ]
+
+            else
+                UI.nothing
+    in
     div [ class "log-entry" ]
         [ div [ class "log-entry_collapsed" ]
-            [ LogLevel.view entry.level
+            [ caret
+            , LogLevel.view entry.level
             , viewLoggedAt entry.loggedAt
             , viewLogMessage entry
             ]
+        , expanded
         ]
 
 
@@ -191,10 +228,10 @@ fauxEntries =
 
 
 view : Model -> Html Msg
-view _ =
+view model =
     let
         entries =
             fauxEntries
-                |> List.map viewEntry
+                |> List.map (viewEntry model)
     in
     div [ on "scroll" (Decode.succeed Scroll), class "log" ] entries

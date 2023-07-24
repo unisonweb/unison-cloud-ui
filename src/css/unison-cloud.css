@@ -18,7 +18,9 @@
   font-family: var(--font-monospace);
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
   font-size: var(--font-size-small);
+  align-items: flex-start;
 }
 
 .log-entry .log-entry_collapsed {
@@ -28,6 +30,32 @@
   align-items: center;
   flex-shrink: 0;
   gap: 0.5rem;
+}
+
+.log-entry .log-entry_expanded {
+  margin-left: 3.5rem;
+  border: 1px solid var(--u-color_border);
+  border-radius: var(--border-radius-base);
+  overflow: hidden;
+}
+
+.log-entry .log-entry_expanded th,
+.log-entry .log-entry_expanded td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--u-color_border_subdued);
+}
+
+.log-entry .log-entry_expanded tr:last-child th,
+.log-entry .log-entry_expanded tr:last-child td {
+  border-bottom: 0;
+}
+
+.log-entry .log-entry_expanded th {
+  background: var(--u-color_container_subdued);
+  border-right: 1px solid var(--u-color_border);
+  text-align: right;
+  font-weight: normal;
+  color: var(--u-color_text_subdued);
 }
 
 .log-entry .log-entry_logged-at {

@@ -19,6 +19,10 @@ type alias LogEntry =
     }
 
 
+type LogEntryId
+    = LogEntryId String
+
+
 
 -- HELPERS
 
