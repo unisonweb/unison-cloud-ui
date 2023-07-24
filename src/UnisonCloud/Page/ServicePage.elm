@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicePage exposing (..)
 
-import Html
+import Html exposing (text)
 import UI.AppDocument exposing (AppDocument)
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
@@ -47,7 +47,7 @@ view serviceHash model =
 
         page =
             PageLayout.centeredLayout
-                (PageContent.oneColumn [ Html.map LogMsg log ])
+                (PageContent.oneColumn [ text "service page", Html.map LogMsg log ])
                 (PageLayout.PageFooter [])
     in
     { pageId = "service-page"

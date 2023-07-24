@@ -6,6 +6,7 @@ import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class, id, title)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
+import Lib.UserHandle as UserHandle
 import Lib.Util as Util
 import UI.Button as Button
 import UI.Icon as Icon
@@ -47,8 +48,20 @@ init flags url navKey =
             , route = route
             , navKey = navKey
             }
+
+        ( app, _ ) =
+            App.init
+                (Env.init flags
+                    navKey
+                    { handle = UserHandle.unsafeFromString "hojberg"
+                    , name = Nothing
+                    , avatarUrl = Nothing
+                    }
+                )
+                route
     in
-    ( Initializing preEnv, fetchSession preEnv )
+    -- ( Initializing preEnv, fetchSession preEnv )
+    ( Initialized app, Cmd.none )
 
 
 type Msg
