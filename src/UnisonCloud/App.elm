@@ -1,10 +1,14 @@
 module UnisonCloud.App exposing (..)
 
 import Browser
+import Browser.Navigation as Nav
 import UI.AppDocument as AppDocument
 import UnisonCloud.Env exposing (Env)
+import UnisonCloud.Page.NotFoundPage as NotFoundPage
 import UnisonCloud.Page.OverviewPage as OverviewPage
+import UnisonCloud.Page.ServicePage as ServicePage
 import UnisonCloud.Route as Route exposing (Route)
+import UnisonCloud.ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
 
 
@@ -14,6 +18,7 @@ import Url exposing (Url)
 
 type Page
     = Overview
+    | Service ServiceHash ServicePage.Model
     | NotFound
 
 
@@ -36,6 +41,13 @@ init env route =
                 Route.Overview ->
                     ( Overview, Cmd.none )
 
+                Route.Service sh ->
+                    let
+                        ( service, serviceCmd ) =
+                            ServicePage.init env sh
+                    in
+                    ( Service sh service, Cmd.map ServicePageMsg serviceCmd )
+
                 Route.NotFound _ ->
                     ( NotFound, Cmd.none )
 
@@ -53,11 +65,46 @@ type Msg
     = NoOp
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
+    | ServicePageMsg ServicePage.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model, Cmd.none )
+update msg model =
+    case ( model.page, msg ) of
+        ( _, LinkClicked urlRequest ) ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.env.navKey (Url.toString url) )
+
+                -- External links are handled via target blank and never end up
+                -- here
+                Browser.External _ ->
+                    ( model, Cmd.none )
+
+        ( _, UrlChanged url ) ->
+            let
+                route =
+                    Route.fromUrl model.env.basePath url
+
+                ( m, c ) =
+                    case route of
+                        Route.Overview ->
+                            ( { model | page = Overview }, Cmd.none )
+
+                        Route.Service serviceHash ->
+                            let
+                                ( service, serviceCmd ) =
+                                    ServicePage.init model.env serviceHash
+                            in
+                            ( { model | page = Service serviceHash service }, Cmd.map ServicePageMsg serviceCmd )
+
+                        Route.NotFound _ ->
+                            ( { model | page = NotFound }, Cmd.none )
+            in
+            ( m, c )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
@@ -74,9 +121,17 @@ subscriptions _ =
 
 
 view : Model -> Browser.Document Msg
-view _ =
+view model =
     let
         appDocument =
-            OverviewPage.view
+            case model.page of
+                Overview ->
+                    OverviewPage.view
+
+                Service serviceHash service ->
+                    AppDocument.map ServicePageMsg (ServicePage.view serviceHash service)
+
+                NotFound ->
+                    NotFoundPage.view
     in
     AppDocument.view appDocument

@@ -11,14 +11,16 @@ module UnisonCloud.Route exposing
 import Browser.Navigation as Nav
 import Code.Definition.Reference exposing (Reference(..))
 import Code.HashQualified exposing (HashQualified(..))
-import Code.UrlParsers exposing (b, slash)
+import Code.UrlParsers exposing (b, s, slash)
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
+import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
 import Url.Builder exposing (relative)
 
 
 type Route
     = Overview
+    | Service ServiceHash
     | NotFound String
 
 
@@ -39,12 +41,35 @@ toRoute : Maybe String -> Parser Route
 toRoute _ =
     oneOf
         [ b overviewParser
+        , b serviceParser
         ]
 
 
 overviewParser : Parser Route
 overviewParser =
     succeed Overview |. slash |. end
+
+
+serviceHashParser : Parser ServiceHash
+serviceHashParser =
+    let
+        parseMaybe mhash =
+            case mhash of
+                Just s_ ->
+                    Parser.succeed s_
+
+                Nothing ->
+                    Parser.problem "Invalid ServiceHash"
+    in
+    Parser.chompUntilEndOr "/"
+        |> Parser.getChompedString
+        |> Parser.map ServiceHash.fromUrlString
+        |> Parser.andThen parseMaybe
+
+
+serviceParser : Parser Route
+serviceParser =
+    succeed Service |. slash |. s "services" |. slash |= serviceHashParser |. end
 
 
 {-| In environments like Unison Local, the UI is served with a base path
@@ -109,6 +134,9 @@ toUrlPattern r =
         Overview ->
             "overview"
 
+        Service _ ->
+            "services/:service-hash"
+
         NotFound _ ->
             "404"
 
@@ -120,6 +148,9 @@ toUrlString route =
             case route of
                 Overview ->
                     ( [], [] )
+
+                Service sh ->
+                    ( [ "services", ServiceHash.toUrlString sh ], [] )
 
                 NotFound _ ->
                     ( [], [] )
