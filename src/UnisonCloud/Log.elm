@@ -2,7 +2,7 @@ module UnisonCloud.Log exposing (..)
 
 import Dict
 import Html exposing (Html, div, table, tbody, td, text, th, tr)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (on)
 import Json.Decode as Decode
 import Set exposing (Set)
@@ -179,15 +179,17 @@ viewEntry model entry =
             else
                 Icon.caretRight
 
-        caret =
+        ( caret, expandable ) =
             if LogEntry.hasData entry then
-                Button.icon (ToggleLogEntry entry) icon
+                ( Button.icon (ToggleLogEntry entry) icon
                     |> Button.small
                     |> Button.subdued
                     |> Button.view
+                , True
+                )
 
             else
-                UI.nothing
+                ( UI.nothing, False )
 
         expanded =
             if isExpanded then
@@ -196,7 +198,7 @@ viewEntry model entry =
             else
                 UI.nothing
     in
-    div [ class "log-entry" ]
+    div [ class "log-entry", classList [ ( "log-entry_expandable", expandable ) ] ]
         [ div [ class "log-entry_collapsed" ]
             [ caret
             , LogLevel.view entry.level
@@ -210,19 +212,19 @@ viewEntry model entry =
 fauxEntries : List LogEntry
 fauxEntries =
     [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Nothing, level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12324), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12344), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123324), message = Nothing, level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234534), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123434), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 124), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123344), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12334), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 15234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 188234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 129934), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 127734), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
     ]
 
 

@@ -23,6 +23,10 @@
   align-items: flex-start;
 }
 
+.log-entry:not(.log-entry_expandable) {
+  padding-left: 2rem;
+}
+
 .log-entry .log-entry_collapsed {
   height: 1.5rem;
   display: flex;
