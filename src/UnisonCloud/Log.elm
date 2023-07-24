@@ -1,17 +1,16 @@
 module UnisonCloud.Log exposing (..)
 
 import Dict
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class)
 import Html.Events exposing (on)
 import Http
 import Json.Decode as Decode
 import Time
 import UI.DateTime as DateTime exposing (DateTime)
-import UI.Icon as Icon
 import UI.Sizing as Sizing
-import UnisonCloud.Env as Env exposing (Env)
-import UnisonCloud.LogEntry exposing (LogEntry)
+import UnisonCloud.Env exposing (Env)
+import UnisonCloud.LogEntry as LogEntry exposing (LogEntry)
 import UnisonCloud.LogLevel as LogLevel
 
 
@@ -108,7 +107,7 @@ logEntryHeight =
 
 
 fetchLogEntries : Env -> LogEntry -> Direction -> Cmd Msg
-fetchLogEntries env bookmark direction =
+fetchLogEntries _ _ _ =
     Cmd.none
 
 
@@ -125,13 +124,13 @@ TODO: Add various highlights
 viewLogMessage : LogEntry -> Html Msg
 viewLogMessage entry =
     let
-        viewRawData data =
-            if Dict.isEmpty data then
+        viewRawData =
+            if LogEntry.hasData entry then
                 div [ class "log-entry_log-message_no-data" ] [ text "NO DATA" ]
 
             else
-                data
-                    |> Dict.toList
+                entry
+                    |> LogEntry.dataToList
                     |> List.map (\( k, v ) -> "\"" ++ k ++ "\": " ++ "\"" ++ v)
                     |> String.join ", "
                     |> (\d -> text ("{ " ++ d ++ " }"))
@@ -139,13 +138,21 @@ viewLogMessage entry =
     in
     case entry.message of
         Nothing ->
-            viewRawData entry.data
+            viewRawData
 
         Just "" ->
-            viewRawData entry.data
+            viewRawData
 
         Just m ->
             div [ class "log-entry_log-message_message" ] [ text m ]
+
+
+viewDataTable : LogEntry.LogEntryData -> Html Msg
+viewDataTable data =
+    data
+        |> Dict.toList
+        |> List.map (\( k, v ) -> tr [] [ th [] [ text k ], td [] [ text v ] ])
+        |> (\d -> table [ class "log-entry_log-message_data-table" ] [ tbody [] d ])
 
 
 viewLoggedAt : DateTime -> Html Msg
@@ -156,9 +163,11 @@ viewLoggedAt dateTime =
 viewEntry : LogEntry -> Html Msg
 viewEntry entry =
     div [ class "log-entry" ]
-        [ LogLevel.view entry.level
-        , viewLoggedAt entry.loggedAt
-        , viewLogMessage entry
+        [ div [ class "log-entry_collapsed" ]
+            [ LogLevel.view entry.level
+            , viewLoggedAt entry.loggedAt
+            , viewLogMessage entry
+            ]
         ]
 
 

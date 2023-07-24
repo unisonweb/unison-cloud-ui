@@ -16,7 +16,7 @@ type alias Model =
 
 
 init : Env -> ServiceHash -> ( Model, Cmd Msg )
-init env serviceHash =
+init env _ =
     let
         ( log, logCmd ) =
             Log.init env
@@ -29,7 +29,7 @@ type Msg
 
 
 update : Env -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
-update env serviceHash msg model =
+update env _ msg model =
     case msg of
         LogMsg logMsg ->
             let
@@ -40,7 +40,7 @@ update env serviceHash msg model =
 
 
 view : ServiceHash -> Model -> AppDocument Msg
-view serviceHash model =
+view _ model =
     let
         log =
             Log.view model.log

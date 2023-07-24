@@ -14,15 +14,20 @@
 }
 
 .log-entry {
-  height: 1.5rem;
   border-radius: var(--border-radius-base);
   font-family: var(--font-monospace);
   display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-small);
+}
+
+.log-entry .log-entry_collapsed {
+  height: 1.5rem;
+  display: flex;
   flex-direction: row;
+  align-items: center;
   flex-shrink: 0;
   gap: 0.5rem;
-  align-items: center;
-  font-size: var(--font-size-small);
 }
 
 .log-entry .log-entry_logged-at {

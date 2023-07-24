@@ -43,12 +43,13 @@ init flags url navKey =
         route =
             Route.fromUrl flags.basePath url
 
-        preEnv =
-            { flags = flags
-            , route = route
-            , navKey = navKey
-            }
-
+        {-
+           preEnv =
+               { flags = flags
+               , route = route
+               , navKey = navKey
+               }
+        -}
         ( app, _ ) =
             App.init
                 (Env.init flags

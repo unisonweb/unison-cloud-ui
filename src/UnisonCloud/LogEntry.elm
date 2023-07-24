@@ -7,12 +7,30 @@ import UI.DateTime as DateTime exposing (DateTime)
 import UnisonCloud.LogLevel as LogLevel exposing (LogLevel)
 
 
+type alias LogEntryData =
+    Dict String String
+
+
 type alias LogEntry =
     { loggedAt : DateTime
     , message : Maybe String
     , level : LogLevel
-    , data : Dict String String
+    , data : LogEntryData
     }
+
+
+
+-- HELPERS
+
+
+hasData : LogEntry -> Bool
+hasData entry =
+    not (Dict.isEmpty entry.data)
+
+
+dataToList : LogEntry -> List ( String, String )
+dataToList entry =
+    Dict.toList entry.data
 
 
 
