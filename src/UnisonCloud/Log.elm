@@ -4,7 +4,6 @@ import Dict
 import Html exposing (Html, div, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class)
 import Html.Events exposing (on)
-import Http
 import Json.Decode as Decode
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -15,7 +14,7 @@ import UI.DateTime as DateTime exposing (DateTime)
 import UI.Icon as Icon
 import UI.Sizing as Sizing
 import UnisonCloud.Env exposing (Env)
-import UnisonCloud.LogEntry as LogEntry exposing (LogEntry, LogEntryId)
+import UnisonCloud.LogEntry as LogEntry exposing (LogEntry)
 import UnisonCloud.LogLevel as LogLevel
 
 
