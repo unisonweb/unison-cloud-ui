@@ -1,8 +1,9 @@
 import "ui-core/css/ui.css";
 import "ui-core/css/themes/unison-light.css";
 import "ui-core/css/code.css";
-import "ui-core/UI/CopyOnClick"; // Include web components
-import "ui-core/Lib/OnClickOutside"; // Include web components
+import "ui-core/UI/CopyOnClick"; // Web components
+import "ui-core/UI/FormatDateTime"; // Web component
+import "ui-core/Lib/OnClickOutside"; // Web components
 import detectOs from "ui-core/Lib/detectOs";
 import preventDefaultGlobalKeyboardEvents from "ui-core/Lib/preventDefaultGlobalKeyboardEvents";
 import * as Sentry from "@sentry/browser";

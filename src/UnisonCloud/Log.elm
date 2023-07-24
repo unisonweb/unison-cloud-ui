@@ -1,14 +1,18 @@
 module UnisonCloud.Log exposing (..)
 
-import Html exposing (Html, div)
+import Dict
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (on)
 import Http
 import Json.Decode as Decode
-import UI.DateTime exposing (DateTime)
+import Time
+import UI.DateTime as DateTime exposing (DateTime)
+import UI.Icon as Icon
 import UI.Sizing as Sizing
 import UnisonCloud.Env as Env exposing (Env)
 import UnisonCloud.LogEntry exposing (LogEntry)
+import UnisonCloud.LogLevel as LogLevel
 
 
 
@@ -112,6 +116,76 @@ fetchLogEntries env bookmark direction =
 -- VIEW
 
 
+{-| If there's no message, print out the entry data instead of it is present,
+finally, if there's no data, render an empty entry.
+
+TODO: Add various highlights
+
+-}
+viewLogMessage : LogEntry -> Html Msg
+viewLogMessage entry =
+    let
+        viewRawData data =
+            if Dict.isEmpty data then
+                div [ class "log-entry_log-message_no-data" ] [ text "NO DATA" ]
+
+            else
+                data
+                    |> Dict.toList
+                    |> List.map (\( k, v ) -> "\"" ++ k ++ "\": " ++ "\"" ++ v)
+                    |> String.join ", "
+                    |> (\d -> text ("{ " ++ d ++ " }"))
+                    |> (\d -> div [ class "log-entry_log-message_raw-data" ] [ d ])
+    in
+    case entry.message of
+        Nothing ->
+            viewRawData entry.data
+
+        Just "" ->
+            viewRawData entry.data
+
+        Just m ->
+            div [ class "log-entry_log-message_message" ] [ text m ]
+
+
+viewLoggedAt : DateTime -> Html Msg
+viewLoggedAt dateTime =
+    div [ class "log-entry_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
+
+
+viewEntry : LogEntry -> Html Msg
+viewEntry entry =
+    div [ class "log-entry" ]
+        [ LogLevel.view entry.level
+        , viewLoggedAt entry.loggedAt
+        , viewLogMessage entry
+        ]
+
+
+fauxEntries : List LogEntry
+fauxEntries =
+    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Nothing, level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    ]
+
+
 view : Model -> Html Msg
 view _ =
-    div [ on "scroll" (Decode.succeed Scroll), class "log" ] []
+    let
+        entries =
+            fauxEntries
+                |> List.map viewEntry
+    in
+    div [ on "scroll" (Decode.succeed Scroll), class "log" ] entries
