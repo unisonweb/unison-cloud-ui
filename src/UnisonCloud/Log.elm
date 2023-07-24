@@ -127,7 +127,6 @@ viewLogMessage entry =
         viewRawData =
             if LogEntry.hasData entry then
                 entry
-                    |> Debug.log "hi"
                     |> LogEntry.dataToList
                     |> List.map (\( k, v ) -> "\"" ++ k ++ "\": " ++ "\"" ++ v)
                     |> String.join ", "
