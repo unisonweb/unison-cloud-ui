@@ -140,7 +140,7 @@ viewLogMessage entry =
                     |> (\d -> div [ class "log-entry_log-message_raw-data" ] [ d ])
 
             else
-                div [ class "log-entry_log-message_no-data" ] [ text "NO DATA" ]
+                div [ class "log-entry_log-message_no-data" ] [ Icon.view Icon.dash ]
     in
     case entry.message of
         Nothing ->
@@ -198,7 +198,11 @@ viewEntry model entry =
             else
                 UI.nothing
     in
-    div [ class "log-entry", classList [ ( "log-entry_expandable", expandable ) ] ]
+    div
+        [ class "log-entry"
+        , class ("log-entry_" ++ LogLevel.toClassName_ entry.level)
+        , classList [ ( "log-entry_expandable", expandable ) ]
+        ]
         [ div [ class "log-entry_collapsed" ]
             [ caret
             , LogLevel.view entry.level
@@ -211,19 +215,19 @@ viewEntry model entry =
 
 fauxEntries : List LogEntry
 fauxEntries =
-    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12324), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12344), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "GET /products?featured", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12324), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "msg", "totally unstructured message" ), ( "with another", "message" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12344), message = Just "DB.getProducts returned 16 items in 59ms", level = LogLevel.Info, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123324), message = Nothing, level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234534), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123434), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 124), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123344), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12334), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 15234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 188234), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 129934), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234534), message = Just "16 times: DB.getProductDetails returned 1 item in 1240ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123434), message = Just "POST /orders", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 124), message = Just "DB.getUser returned 0 item in 35ms", level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 129934), message = Just "Request failed because, couldn't find user", level = LogLevel.Error, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123344), message = Just "Add to cart", level = LogLevel.Warn, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12334), message = Just "Service Call", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12), message = Just "DB.getUser returned 1 item in 41ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 15234), message = Just "Order and User connected", level = LogLevel.Info, data = Dict.fromList [ ( "userId", "asd4swx1asd4swx1asd4swx1" ), ( "organization", "Apple Inc." ), ( "orderSize", "7" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 188234), message = Just "log line", level = LogLevel.Warn, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 127734), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
     ]
 

@@ -44,30 +44,47 @@ toString level =
             r
 
 
+toClassName : LogLevel -> String
+toClassName level =
+    "log-level_" ++ toClassName_ level
+
+
+toClassName_ : LogLevel -> String
+toClassName_ level =
+    case level of
+        Info ->
+            "info"
+
+        Warn ->
+            "warn"
+
+        Error ->
+            "error"
+
+        Custom _ ->
+            "custom"
+
+
 view : LogLevel -> Html msg
 view level =
     let
-        ( className, icon ) =
+        icon =
             case level of
                 Info ->
-                    ( "info", Icon.view Icon.info )
+                    Icon.view Icon.info
 
                 Warn ->
-                    ( "warn", Icon.view Icon.warn )
+                    Icon.view Icon.warn
 
                 Error ->
-                    ( "error", Icon.view Icon.bug )
+                    Icon.view Icon.bug
 
                 Custom custom ->
                     case String.uncons custom of
                         Just ( a, _ ) ->
-                            ( "custom", a |> String.fromChar |> String.toUpper |> text )
+                            a |> String.fromChar |> String.toUpper |> text
 
                         _ ->
-                            ( "custom", Icon.view Icon.writingPad )
+                            Icon.view Icon.writingPad
     in
-    div
-        [ class "log-level"
-        , class ("log-level_" ++ className)
-        ]
-        [ icon ]
+    div [ class "log-level", class (toClassName level) ] [ icon ]

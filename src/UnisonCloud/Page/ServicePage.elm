@@ -1,13 +1,14 @@
 module UnisonCloud.Page.ServicePage exposing (..)
 
-import Html exposing (text)
+import Html
 import UI.AppDocument exposing (AppDocument)
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
+import UI.PageTitle as PageTitle
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Log as Log
-import UnisonCloud.ServiceHash exposing (ServiceHash)
+import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
 type alias Model =
@@ -40,14 +41,16 @@ update env _ msg model =
 
 
 view : ServiceHash -> Model -> AppDocument Msg
-view _ model =
+view sh model =
     let
         log =
             Log.view model.log
 
         page =
             PageLayout.centeredLayout
-                (PageContent.oneColumn [ text "service page", Html.map LogMsg log ])
+                (PageContent.oneColumn [ Html.map LogMsg log ]
+                    |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ ServiceHash.toString sh))
+                )
                 (PageLayout.PageFooter [])
     in
     { pageId = "service-page"
