@@ -124,7 +124,7 @@ fetchLogEntries _ _ _ =
 {-| If there's no message, print out the entry data instead of it is present,
 finally, if there's no data, render an empty entry.
 
-TODO: Add various highlights
+TODO: Add various highlights, like bolding of GET and POST.
 
 -}
 viewLogMessage : LogEntry -> Html Msg
@@ -180,7 +180,7 @@ viewEntry model entry =
                 Icon.caretRight
 
         ( caret, expandable ) =
-            if LogEntry.hasData entry then
+            if LogEntry.hasData entry && entry.message /= Nothing then
                 ( Button.icon (ToggleLogEntry entry) icon
                     |> Button.small
                     |> Button.subdued
