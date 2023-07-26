@@ -1,9 +1,15 @@
 .log {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.log .log-entries {
   height: 300px;
   border: 1px solid var(--u-color_border);
   padding: 0.75rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 0.5rem;
   border-radius: var(--border-radius-base);
   overflow-x: hidden;
@@ -84,8 +90,8 @@
   width: 1px;
 }
 
-.log-entry_log-line:last-child:after,
-.log-entry_date-boundary:last-child:after {
+.log-entry_log-line:first-child:after,
+.log-entry_date-boundary:first-child:after {
   display: none;
 }
 
@@ -229,4 +235,10 @@
   font-size: 0.5rem;
   font-weight: bold;
   color: var(--color-blue-2);
+}
+
+.log .log_controls {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
 }

@@ -4,6 +4,7 @@ import Dict
 import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (on)
+import Html.Keyed
 import Json.Decode as Decode
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -71,12 +72,16 @@ type Direction
 
 
 type alias Model =
-    { expandedLines : Set String }
+    { expandedLines : Set String, logLines : List LogLine }
 
 
 init : Env -> ( Model, Cmd Msg )
 init _ =
-    ( { expandedLines = Set.empty }, Cmd.none )
+    ( { expandedLines = Set.empty
+      , logLines = fauxLines
+      }
+    , Cmd.none
+    )
 
 
 
@@ -86,7 +91,8 @@ init _ =
 type Msg
     = LogLinesFetchFinished
     | Scroll
-    | FetchMore
+    | FetchNew
+    | FetchOld
     | ToggleLogLine LogLine
 
 
@@ -99,6 +105,12 @@ update _ msg model =
                     DateTime.toISO8601 line.loggedAt
             in
             ( { model | expandedLines = SetE.toggle loggedAt model.expandedLines }, Cmd.none )
+
+        FetchNew ->
+            ( { model | logLines = newLines ++ model.logLines }, Cmd.none )
+
+        FetchOld ->
+            ( { model | logLines = model.logLines ++ oldLines }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -228,32 +240,51 @@ viewDateBoundary date =
         ]
 
 
-viewEntry : Model -> LogEntry -> Html Msg
-viewEntry model entry =
+viewKeyedEntry : Model -> LogEntry -> ( String, Html Msg )
+viewKeyedEntry model entry =
+    let
+        key d suffix =
+            (d |> DateTime.toPosix |> Time.posixToMillis |> String.fromInt) ++ "_" ++ suffix
+    in
     case entry of
         Line line ->
-            viewLine model line
+            ( key line.loggedAt "line", viewLine model line )
 
         DateBoundary date ->
-            viewDateBoundary date
+            ( key date "boundary", viewDateBoundary date )
+
+
+newLines : List LogLine
+newLines =
+    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393751598), message = Just "New line 1", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393747598), message = Just "New line 2", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393744598), message = Just "New line 3", level = LogLevel.Info, data = Dict.empty }
+    ]
+
+
+oldLines : List LogLine
+oldLines =
+    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393751598), message = Just "Old line 1", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393747598), message = Just "Old line 2", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393744598), message = Just "Old line 3", level = LogLevel.Info, data = Dict.empty }
+    ]
 
 
 fauxLines : List LogLine
 fauxLines =
-    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690305387109), message = Just "GET /products?featured", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12324), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "msg", "totally unstructured message" ), ( "with another", "message" ) ] }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12344), message = Just "DB.getProducts returned 16 items in 59ms", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123324), message = Nothing, level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234534), message = Just "16 times: DB.getProductDetails returned 1 item in 1240ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123434), message = Just "POST /orders", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 124), message = Just "DB.getUser returned 0 item in 35ms", level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 129934), message = Just "Request failed, couldn't find user", level = LogLevel.Error, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123344), message = Just "Add to cart", level = LogLevel.Warn, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12334), message = Just "Service Call", level = LogLevel.Info, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12), message = Just "DB.getUser returned 1 item in 41ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 15234), message = Just "Order and User connected", level = LogLevel.Info, data = Dict.fromList [ ( "userId", "asd4swx1asd4swx1asd4swx1" ), ( "organization", "Apple Inc." ), ( "orderSize", "7" ) ] }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 188234), message = Just "log line", level = LogLevel.Warn, data = Dict.empty }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 127734), message = Just "log line", level = LogLevel.Info, data = Dict.empty }
+    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392906913), message = Just "GET /products?featured", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392902913), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "msg", "totally unstructured message" ), ( "with another", "message" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392899916), message = Just "DB.getProducts returned 16 items in 59ms", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392606916), message = Nothing, level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392546916), message = Just "16 times: DB.getProductDetails returned 1 item in 1240ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392426916), message = Just "POST /orders", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392394916), message = Just "DB.getUser returned 0 item in 35ms", level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392378916), message = Just "Request failed, couldn't find user", level = LogLevel.Error, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392186916), message = Just "Add to cart", level = LogLevel.Warn, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690306506916), message = Just "Service Call", level = LogLevel.Info, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690306326916), message = Just "DB.getUser returned 1 item in 41ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690306324916), message = Just "Order and User connected", level = LogLevel.Info, data = Dict.fromList [ ( "userId", "asd4swx1asd4swx1asd4swx1" ), ( "organization", "Apple Inc." ), ( "orderSize", "7" ) ] }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690299306916), message = Just "log line", level = LogLevel.Warn, data = Dict.empty }
     ]
 
 
@@ -263,14 +294,18 @@ toEntries timeZone lines =
         f l ( entries, currentDate ) =
             case currentDate of
                 Nothing ->
-                    ( [ Line l ], Just l.loggedAt )
+                    ( [ Line l, DateBoundary l.loggedAt ]
+                    , Just l.loggedAt
+                    )
 
                 Just d ->
                     if DateTime.isSameDay timeZone l.loggedAt d then
                         ( entries ++ [ Line l ], Just l.loggedAt )
 
                     else
-                        ( entries ++ [ DateBoundary l.loggedAt, Line l ], Just l.loggedAt )
+                        ( entries ++ [ Line l, DateBoundary l.loggedAt ]
+                        , Just l.loggedAt
+                        )
     in
     lines
         |> List.foldl f ( [], Nothing )
@@ -281,8 +316,14 @@ view : Env -> Model -> Html Msg
 view env model =
     let
         lines =
-            fauxLines
+            model.logLines
                 |> toEntries env.timeZone
-                |> List.map (viewEntry model)
+                |> List.map (viewKeyedEntry model)
     in
-    div [ on "scroll" (Decode.succeed Scroll), class "log" ] lines
+    div [ class "log" ]
+        [ Html.Keyed.node "div" [ on "scroll" (Decode.succeed Scroll), class "log-entries" ] lines
+        , div [ class "log_controls" ]
+            [ Button.button FetchNew "Fetch New" |> Button.view
+            , Button.button FetchOld "Fetch Old" |> Button.view
+            ]
+        ]
