@@ -40,11 +40,11 @@ update env _ msg model =
             ( { model | log = log }, Cmd.map LogMsg logCmd )
 
 
-view : ServiceHash -> Model -> AppDocument Msg
-view sh model =
+view : Env -> ServiceHash -> Model -> AppDocument Msg
+view env sh model =
     let
         log =
-            Log.view model.log
+            Log.view env model.log
 
         page =
             PageLayout.centeredLayout

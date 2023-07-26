@@ -136,7 +136,9 @@ view model =
                     OverviewPage.view
 
                 Service serviceHash service ->
-                    AppDocument.map ServicePageMsg (ServicePage.view serviceHash service)
+                    AppDocument.map
+                        ServicePageMsg
+                        (ServicePage.view model.env serviceHash service)
 
                 NotFound ->
                     NotFoundPage.view

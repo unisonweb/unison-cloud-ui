@@ -1,7 +1,7 @@
 module UnisonCloud.Log exposing (..)
 
 import Dict
-import Html exposing (Html, div, table, tbody, td, text, th, tr)
+import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (on)
 import Json.Decode as Decode
@@ -204,7 +204,7 @@ viewLine model line =
                 UI.nothing
     in
     div
-        [ class "log-line"
+        [ class "log-entry_log-line"
         , class ("log-line_" ++ LogLevel.toClassName_ line.level)
         , classList [ ( "log-line_expandable", expandable ) ]
         ]
@@ -220,7 +220,12 @@ viewLine model line =
 
 viewDateBoundary : DateTime -> Html Msg
 viewDateBoundary date =
-    UI.nothing
+    div [ class "log-entry_date-boundary" ]
+        [ hr [ class "log-entry_date-boundary_date-divider" ] []
+        , div [ class "log-entry_icon" ] [ Icon.view Icon.calendar ]
+        , DateTime.view DateTime.ShortDate date
+        , hr [ class "log-entry_date-boundary_date-divider" ] []
+        ]
 
 
 viewEntry : Model -> LogEntry -> Html Msg
@@ -252,17 +257,32 @@ fauxLines =
     ]
 
 
-toEntries : List LogLine -> List LogEntry
-toEntries lines =
-    List.map Line lines
+toEntries : Time.Zone -> List LogLine -> List LogEntry
+toEntries timeZone lines =
+    let
+        f l ( entries, currentDate ) =
+            case currentDate of
+                Nothing ->
+                    ( [ Line l ], Just l.loggedAt )
+
+                Just d ->
+                    if DateTime.isSameDay timeZone l.loggedAt d then
+                        ( entries ++ [ Line l ], Just l.loggedAt )
+
+                    else
+                        ( entries ++ [ DateBoundary l.loggedAt, Line l ], Just l.loggedAt )
+    in
+    lines
+        |> List.foldl f ( [], Nothing )
+        |> Tuple.first
 
 
-view : Model -> Html Msg
-view model =
+view : Env -> Model -> Html Msg
+view env model =
     let
         lines =
             fauxLines
-                |> toEntries
+                |> toEntries env.timeZone
                 |> List.map (viewEntry model)
     in
     div [ on "scroll" (Decode.succeed Scroll), class "log" ] lines
