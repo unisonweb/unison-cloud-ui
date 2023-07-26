@@ -18,10 +18,31 @@ fromString raw =
         "info" ->
             Info
 
+        "log" ->
+            Info
+
         "warn" ->
             Warn
 
+        "warning" ->
+            Warn
+
         "error" ->
+            Error
+
+        "err" ->
+            Error
+
+        "fail" ->
+            Error
+
+        "failure" ->
+            Error
+
+        "bug" ->
+            Error
+
+        "fatal" ->
             Error
 
         _ ->

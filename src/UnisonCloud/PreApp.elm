@@ -3,12 +3,14 @@ module UnisonCloud.PreApp exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html, div, p, text)
-import Html.Attributes exposing (class, id, title)
+import Html.Attributes exposing (class, id)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
 import Lib.UserHandle as UserHandle
-import Lib.Util as Util
+import Task exposing (Task)
+import Time
 import UI.Button as Button
+import UI.DateTime as DateTime
 import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
@@ -23,9 +25,14 @@ import UnisonCloud.Session as Session exposing (Session)
 import Url exposing (Url)
 
 
+type AppError
+    = InvalidFlags
+    | NetworkError Http.Error
+
+
 type Model
     = Initializing PreEnv
-    | InitializationError PreEnv Http.Error
+    | InitializationError PreEnv AppError
     | NotSignedIn PreEnv
     | Initialized App.Model
 
@@ -43,56 +50,64 @@ init flags url navKey =
         route =
             Route.fromUrl flags.basePath url
 
-        {-
-           preEnv =
-               { flags = flags
-               , route = route
-               , navKey = navKey
-               }
-        -}
-        ( app, _ ) =
-            App.init
-                (Env.init flags
-                    navKey
-                    { handle = UserHandle.unsafeFromString "hojberg"
-                    , name = Nothing
-                    , avatarUrl = Nothing
-                    }
-                )
-                route
+        preEnv =
+            { flags = flags
+            , route = route
+            , navKey = navKey
+            }
     in
-    -- ( Initializing preEnv, fetchSession preEnv )
-    ( Initialized app, Cmd.none )
+    ( Initializing preEnv, Task.perform FetchTimeAndZoneFinished fetchTimeAndZone )
 
 
 type Msg
     = AppMsg App.Msg
+    | FetchTimeAndZoneFinished ( Time.Posix, Time.Zone )
     | FetchSessionFinished (HttpResult Session)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( model, msg ) of
-        ( Initializing preEnv, FetchSessionFinished sessionResult ) ->
-            case sessionResult of
-                Ok session ->
-                    let
-                        env =
-                            Env.init preEnv.flags preEnv.navKey session
+        ( Initializing preEnv, FetchTimeAndZoneFinished ( now, timeZone ) ) ->
+            let
+                env =
+                    Env.init preEnv.flags
+                        preEnv.navKey
+                        (DateTime.fromPosix now)
+                        timeZone
+                        { handle = UserHandle.unsafeFromString "hojberg"
+                        , name = Nothing
+                        , avatarUrl = Nothing
+                        }
 
-                        ( app, cmd ) =
-                            App.init env preEnv.route
-                    in
-                    ( Initialized app, Cmd.map AppMsg cmd )
+                ( app, cmd ) =
+                    App.init env preEnv.route
+            in
+            ( Initialized app, Cmd.map AppMsg cmd )
 
-                Err e ->
-                    case e of
-                        Http.BadStatus 401 ->
-                            ( NotSignedIn preEnv, Cmd.none )
+        {-
+           ( Initializing preEnv, FetchSessionFinished sessionResult ) ->
+               case sessionResult of
+                   Ok session ->
+                       case Env.init preEnv.flags preEnv.navKey session of
+                           Just e ->
+                               let
+                                   ( app, cmd ) =
+                                       App.init e preEnv.route
+                               in
+                               ( Initialized app, Cmd.map AppMsg cmd )
 
-                        _ ->
-                            ( InitializationError preEnv e, Cmd.none )
+                           Nothing ->
+                               ( InitializationError preEnv InvalidFlags, Cmd.none )
 
+                   Err e ->
+                       case e of
+                           Http.BadStatus 401 ->
+                               ( NotSignedIn preEnv, Cmd.none )
+
+                           _ ->
+                               ( InitializationError preEnv (NetworkError e), Cmd.none )
+        -}
         ( _, AppMsg appMsg ) ->
             case model of
                 Initialized a ->
@@ -107,6 +122,15 @@ update msg model =
 
         _ ->
             ( model, Cmd.none )
+
+
+
+-- EFFECTS
+
+
+fetchTimeAndZone : Task Never ( Time.Posix, Time.Zone )
+fetchTimeAndZone =
+    Task.map2 (\n z -> ( n, z )) Time.now Time.here
 
 
 fetchSession : PreEnv -> Cmd Msg
@@ -142,8 +166,8 @@ viewAppLoading =
         ]
 
 
-viewAppError : Http.Error -> Html msg
-viewAppError error =
+viewAppError : AppError -> Html msg
+viewAppError _ =
     div [ id "app" ]
         [ AppHeader.viewBlank
         , PageLayout.view
@@ -151,8 +175,7 @@ viewAppError error =
                 (PageContent.oneColumn
                     [ div [ class "app-error" ]
                         [ Icon.view Icon.warn
-                        , p [ title (Util.httpErrorToString error) ]
-                            [ text "Unison Cloud could not be started." ]
+                        , p [] [ text "Unison Cloud could not be started." ]
                         ]
                     ]
                 )

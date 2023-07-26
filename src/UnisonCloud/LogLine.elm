@@ -1,4 +1,4 @@
-module UnisonCloud.LogEntry exposing (..)
+module UnisonCloud.LogLine exposing (..)
 
 import Dict exposing (Dict)
 import Json.Decode as Decode
@@ -7,15 +7,15 @@ import UI.DateTime as DateTime exposing (DateTime)
 import UnisonCloud.LogLevel as LogLevel exposing (LogLevel)
 
 
-type alias LogEntryData =
+type alias LogLineData =
     Dict String String
 
 
-type alias LogEntry =
+type alias LogLine =
     { loggedAt : DateTime
     , message : Maybe String
     , level : LogLevel
-    , data : LogEntryData
+    , data : LogLineData
     }
 
 
@@ -23,36 +23,36 @@ type alias LogEntry =
 -- HELPERS
 
 
-hasData : LogEntry -> Bool
-hasData entry =
-    not (Dict.isEmpty entry.data)
+hasData : LogLine -> Bool
+hasData line =
+    not (Dict.isEmpty line.data)
 
 
-dataToList : LogEntry -> List ( String, String )
-dataToList entry =
-    Dict.toList entry.data
+dataToList : LogLine -> List ( String, String )
+dataToList line =
+    Dict.toList line.data
 
 
 
 -- DECODE
 
 
-decode : Decode.Decoder LogEntry
+decode : Decode.Decoder LogLine
 decode =
     let
-        makeEntry loggedAt entry =
+        makeLine loggedAt line =
             let
                 message =
-                    Dict.get "message" entry
+                    Dict.get "message" line
 
                 level =
-                    entry
+                    line
                         |> Dict.get "level"
                         |> Maybe.map LogLevel.fromString
                         |> Maybe.withDefault LogLevel.Info
 
                 data =
-                    entry
+                    line
                         |> Dict.remove "message"
                         |> Dict.remove "level"
             in
@@ -62,6 +62,6 @@ decode =
             , data = data
             }
     in
-    Decode.succeed makeEntry
+    Decode.succeed makeLine
         |> required "time" DateTime.decode
         |> required "userMsg" (Decode.dict Decode.string)

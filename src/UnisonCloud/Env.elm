@@ -3,6 +3,8 @@ module UnisonCloud.Env exposing (..)
 import Browser.Navigation as Nav
 import Lib.HttpApi as HttpApi exposing (HttpApi)
 import Lib.OperatingSystem as OS exposing (OperatingSystem)
+import Time
+import UI.DateTime exposing (DateTime)
 import UnisonCloud.Session exposing (Session)
 
 
@@ -13,6 +15,8 @@ type alias Env =
     , api : HttpApi
     , websiteApi : HttpApi
     , navKey : Nav.Key
+    , now : DateTime
+    , timeZone : Time.Zone
     }
 
 
@@ -26,8 +30,8 @@ type alias Flags =
     }
 
 
-init : Flags -> Nav.Key -> Session -> Env
-init flags navKey session =
+init : Flags -> Nav.Key -> DateTime -> Time.Zone -> Session -> Env
+init flags navKey now timeZone session =
     let
         api =
             HttpApi.httpApi True flags.apiUrl flags.xsrfToken
@@ -38,4 +42,6 @@ init flags navKey session =
     , api = api
     , websiteApi = HttpApi.httpApi False flags.websiteUrl Nothing
     , navKey = navKey
+    , now = now
+    , timeZone = timeZone
     }

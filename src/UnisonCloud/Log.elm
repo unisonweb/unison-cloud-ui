@@ -14,8 +14,8 @@ import UI.DateTime as DateTime exposing (DateTime)
 import UI.Icon as Icon
 import UI.Sizing as Sizing
 import UnisonCloud.Env exposing (Env)
-import UnisonCloud.LogEntry as LogEntry exposing (LogEntry)
 import UnisonCloud.LogLevel as LogLevel
+import UnisonCloud.LogLine as LogLine exposing (LogLine)
 
 
 
@@ -37,8 +37,8 @@ import UnisonCloud.LogLevel as LogLevel
    * https://addyosmani.com/blog/infinite-scroll-without-layout-shifts/
 
    One solution could be to pre-render a large empty area outside of the
-   viewport, but this requires you to know the total number of entries and the
-   height of an entry (the latter not being a big deal).
+   viewport, but this requires you to know the total number of lines and the
+   height of an line (the latter not being a big deal).
 
    Instagram doesn't seem to work that way. By looking at the scroll bar when
    scroll you can see that it jumps, but the page itself remains smooth, this
@@ -50,6 +50,11 @@ import UnisonCloud.LogLevel as LogLevel
    scroll position perfectly and make the switch without the user knowing.
 
 -}
+
+
+type LogEntry
+    = Line LogLine
+    | DateBoundary DateTime
 
 
 type alias LogEntries =
@@ -66,12 +71,12 @@ type Direction
 
 
 type alias Model =
-    { expandedEntries : Set String }
+    { expandedLines : Set String }
 
 
 init : Env -> ( Model, Cmd Msg )
 init _ =
-    ( { expandedEntries = Set.empty }, Cmd.none )
+    ( { expandedLines = Set.empty }, Cmd.none )
 
 
 
@@ -79,21 +84,21 @@ init _ =
 
 
 type Msg
-    = LogEntriesFetchFinished
+    = LogLinesFetchFinished
     | Scroll
     | FetchMore
-    | ToggleLogEntry LogEntry
+    | ToggleLogLine LogLine
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg )
 update _ msg model =
     case msg of
-        ToggleLogEntry entry ->
+        ToggleLogLine line ->
             let
                 loggedAt =
-                    DateTime.toISO8601 entry.loggedAt
+                    DateTime.toISO8601 line.loggedAt
             in
-            ( { model | expandedEntries = SetE.toggle loggedAt model.expandedEntries }, Cmd.none )
+            ( { model | expandedLines = SetE.toggle loggedAt model.expandedLines }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -103,8 +108,8 @@ update _ msg model =
 -- HELPERS
 
 
-logEntryHeight : Sizing.Rem
-logEntryHeight =
+logLineHeight : Sizing.Rem
+logLineHeight =
     Sizing.Rem 2
 
 
@@ -112,8 +117,8 @@ logEntryHeight =
 -- EFFECTS
 
 
-fetchLogEntries : Env -> LogEntry -> Direction -> Cmd Msg
-fetchLogEntries _ _ _ =
+fetchLogLines : Env -> LogLine -> Direction -> Cmd Msg
+fetchLogLines _ _ _ =
     Cmd.none
 
 
@@ -121,28 +126,28 @@ fetchLogEntries _ _ _ =
 -- VIEW
 
 
-{-| If there's no message, print out the entry data instead of it is present,
-finally, if there's no data, render an empty entry.
+{-| If there's no message, print out the line data instead of it is present,
+finally, if there's no data, render an empty line.
 
 TODO: Add various highlights, like bolding of GET and POST.
 
 -}
-viewLogMessage : LogEntry -> Html Msg
-viewLogMessage entry =
+viewLogMessage : LogLine -> Html Msg
+viewLogMessage line =
     let
         viewRawData =
-            if LogEntry.hasData entry then
-                entry
-                    |> LogEntry.dataToList
+            if LogLine.hasData line then
+                line
+                    |> LogLine.dataToList
                     |> List.map (\( k, v ) -> "\"" ++ k ++ "\": " ++ "\"" ++ v)
                     |> String.join ", "
                     |> (\d -> text ("{ " ++ d ++ " }"))
-                    |> (\d -> div [ class "log-entry_log-message_raw-data" ] [ d ])
+                    |> (\d -> div [ class "log-line_log-message_raw-data" ] [ d ])
 
             else
-                div [ class "log-entry_log-message_no-data" ] [ Icon.view Icon.dash ]
+                div [ class "log-line_log-message_no-data" ] [ Icon.view Icon.dash ]
     in
-    case entry.message of
+    case line.message of
         Nothing ->
             viewRawData
 
@@ -150,27 +155,27 @@ viewLogMessage entry =
             viewRawData
 
         Just m ->
-            div [ class "log-entry_log-message_message" ] [ text m ]
+            div [ class "log-line_log-message_message" ] [ text m ]
 
 
-viewDataTable : LogEntry.LogEntryData -> Html Msg
+viewDataTable : LogLine.LogLineData -> Html Msg
 viewDataTable data =
     data
         |> Dict.toList
         |> List.map (\( k, v ) -> tr [] [ th [] [ text k ], td [] [ text v ] ])
-        |> (\d -> table [ class "log-entry_log-message_data-table" ] [ tbody [] d ])
+        |> (\d -> table [ class "log-line_log-message_data-table" ] [ tbody [] d ])
 
 
 viewLoggedAt : DateTime -> Html Msg
 viewLoggedAt dateTime =
-    div [ class "log-entry_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
+    div [ class "log-line_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
 
 
-viewEntry : Model -> LogEntry -> Html Msg
-viewEntry model entry =
+viewLine : Model -> LogLine -> Html Msg
+viewLine model line =
     let
         isExpanded =
-            Set.member (DateTime.toISO8601 entry.loggedAt) model.expandedEntries
+            Set.member (DateTime.toISO8601 line.loggedAt) model.expandedLines
 
         icon =
             if isExpanded then
@@ -180,8 +185,8 @@ viewEntry model entry =
                 Icon.caretRight
 
         ( caret, expandable ) =
-            if LogEntry.hasData entry && entry.message /= Nothing then
-                ( Button.icon (ToggleLogEntry entry) icon
+            if LogLine.hasData line && line.message /= Nothing then
+                ( Button.icon (ToggleLogLine line) icon
                     |> Button.small
                     |> Button.subdued
                     |> Button.view
@@ -193,36 +198,51 @@ viewEntry model entry =
 
         expanded =
             if isExpanded then
-                div [ class "log-entry_expanded" ] [ viewDataTable entry.data ]
+                div [ class "log-line_expanded" ] [ viewDataTable line.data ]
 
             else
                 UI.nothing
     in
     div
-        [ class "log-entry"
-        , class ("log-entry_" ++ LogLevel.toClassName_ entry.level)
-        , classList [ ( "log-entry_expandable", expandable ) ]
+        [ class "log-line"
+        , class ("log-line_" ++ LogLevel.toClassName_ line.level)
+        , classList [ ( "log-line_expandable", expandable ) ]
         ]
-        [ div [ class "log-entry_collapsed" ]
+        [ div [ class "log-line_collapsed" ]
             [ caret
-            , LogLevel.view entry.level
-            , viewLoggedAt entry.loggedAt
-            , viewLogMessage entry
+            , LogLevel.view line.level
+            , viewLoggedAt line.loggedAt
+            , viewLogMessage line
             ]
         , expanded
         ]
 
 
-fauxEntries : List LogEntry
-fauxEntries =
-    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234), message = Just "GET /products?featured", level = LogLevel.Info, data = Dict.empty }
+viewDateBoundary : DateTime -> Html Msg
+viewDateBoundary date =
+    UI.nothing
+
+
+viewEntry : Model -> LogEntry -> Html Msg
+viewEntry model entry =
+    case entry of
+        Line line ->
+            viewLine model line
+
+        DateBoundary date ->
+            viewDateBoundary date
+
+
+fauxLines : List LogLine
+fauxLines =
+    [ { loggedAt = DateTime.fromPosix (Time.millisToPosix 1690305387109), message = Just "GET /products?featured", level = LogLevel.Info, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12324), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "msg", "totally unstructured message" ), ( "with another", "message" ) ] }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12344), message = Just "DB.getProducts returned 16 items in 59ms", level = LogLevel.Info, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123324), message = Nothing, level = LogLevel.Info, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 1234534), message = Just "16 times: DB.getProductDetails returned 1 item in 1240ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123434), message = Just "POST /orders", level = LogLevel.Info, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 124), message = Just "DB.getUser returned 0 item in 35ms", level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
-    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 129934), message = Just "Request failed because, couldn't find user", level = LogLevel.Error, data = Dict.empty }
+    , { loggedAt = DateTime.fromPosix (Time.millisToPosix 129934), message = Just "Request failed, couldn't find user", level = LogLevel.Error, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 123344), message = Just "Add to cart", level = LogLevel.Warn, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12334), message = Just "Service Call", level = LogLevel.Info, data = Dict.empty }
     , { loggedAt = DateTime.fromPosix (Time.millisToPosix 12), message = Just "DB.getUser returned 1 item in 41ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
@@ -232,11 +252,17 @@ fauxEntries =
     ]
 
 
+toEntries : List LogLine -> List LogEntry
+toEntries lines =
+    List.map Line lines
+
+
 view : Model -> Html Msg
 view model =
     let
-        entries =
-            fauxEntries
+        lines =
+            fauxLines
+                |> toEntries
                 |> List.map (viewEntry model)
     in
-    div [ on "scroll" (Decode.succeed Scroll), class "log" ] entries
+    div [ on "scroll" (Decode.succeed Scroll), class "log" ] lines
