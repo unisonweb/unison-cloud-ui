@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, classList)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
+import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 import Time
 import UI
 import UI.Button as Button
@@ -17,7 +18,6 @@ import UUID.Set as Set exposing (Set)
 import UnisonCloud.Env exposing (Env)
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
-import UnisonCloud.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 
 
 
@@ -142,8 +142,14 @@ update _ msg model =
                 topOffset =
                     abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
 
+                closenessOffset =
+                    0
+
+                isCloseToTop =
+                    topOffset <= closenessOffset
+
                 log_ =
-                    if topOffset == 0 then
+                    if isCloseToTop then
                         { log | logLines = log.logLines ++ oldLines }
 
                     else
@@ -159,9 +165,9 @@ update _ msg model =
 -- HELPERS
 
 
-logLineHeight : Sizing.Rem
-logLineHeight =
-    Sizing.Rem 2
+logEntryHeight : Sizing.Rem
+logEntryHeight =
+    Sizing.Rem 1.5
 
 
 
@@ -255,7 +261,7 @@ viewLine model line =
                 UI.nothing
     in
     div
-        [ class "log-entry_log-line"
+        [ class "log-entry log-entry_log-line"
         , class ("log-line_" ++ LogLevel.toClassName_ line.level)
         , classList [ ( "log-line_expandable", expandable ) ]
         ]
@@ -271,7 +277,7 @@ viewLine model line =
 
 viewDateBoundary : DateTime -> Html Msg
 viewDateBoundary date =
-    div [ class "log-entry_date-boundary" ]
+    div [ class "log-entry log-entry_date-boundary" ]
         [ hr [ class "log-entry_date-boundary_date-divider" ] []
         , div [ class "log-entry_icon" ] [ Icon.view Icon.calendar ]
         , DateTime.view DateTime.ShortDate date

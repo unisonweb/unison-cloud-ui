@@ -5,7 +5,7 @@
 }
 
 .log .log-entries {
-  height: 300px;
+  height: 200px;
   border: 1px solid var(--u-color_border);
   padding: 0.75rem;
   display: flex;
@@ -28,6 +28,7 @@
   gap: 0.5rem;
   align-items: center;
   line-height: 1;
+  height: 1.5rem;
 }
 
 .log-entry_date-boundary .log-entry_date-boundary_date-divider {
