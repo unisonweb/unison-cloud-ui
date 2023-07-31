@@ -8,6 +8,11 @@ type ServiceHash
     = ServiceHash Hash
 
 
+unsafeFromString : String -> ServiceHash
+unsafeFromString s =
+    ServiceHash (Hash.unsafeFromString s)
+
+
 fromString : String -> Maybe ServiceHash
 fromString =
     Hash.fromString >> Maybe.map ServiceHash
@@ -26,6 +31,10 @@ toString (ServiceHash h) =
 toUrlString : ServiceHash -> String
 toUrlString (ServiceHash h) =
     Hash.toUrlString h
+
+
+
+-- DECODE
 
 
 decode : Decode.Decoder ServiceHash

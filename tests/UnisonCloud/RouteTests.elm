@@ -8,14 +8,14 @@ import Url exposing (Url)
 
 overviewRoute : Test
 overviewRoute =
-    describe "Route.fromUrl : overview route"
-        [ test "Matches root to Overview" <|
+    describe "Route.fromUrl : services route"
+        [ test "Matches root to Services" <|
             \_ ->
                 let
                     url =
                         mkUrl "/"
                 in
-                Expect.equal Overview (Route.fromUrl "" url)
+                Expect.equal Services (Route.fromUrl "" url)
         ]
 
 

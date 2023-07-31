@@ -4,8 +4,10 @@ import Html exposing (Html, text)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
+import Time
 import UI.AppDocument exposing (AppDocument)
 import UI.Card as Card
+import UI.DateTime as DateTime
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
@@ -27,10 +29,21 @@ type alias Model =
 
 init : Env -> ( Model, Cmd Msg )
 init env =
-    ( Loading, fetchServices env )
+    let
+        services =
+            [ { id = Service.ServiceId "asdf"
+              , hash = ServiceHash.unsafeFromString "1234"
+              , type_ = Service.Native
+              , deployedAt = DateTime.fromPosix (Time.millisToPosix 1690306324916)
+              , undeployedAt = Nothing
+              }
+            ]
+    in
+    ( Success services, Cmd.none )
 
 
 
+-- fetchServices env )
 -- UPDATE
 
 
@@ -65,6 +78,7 @@ fetchServices env =
 viewService : Service -> Html msg
 viewService service =
     Card.card [ Link.view (ServiceHash.toString service.hash) (Link.service service.hash) ]
+        |> Card.asContained
         |> Card.view
 
 
@@ -93,7 +107,7 @@ view model =
         page =
             PageLayout.centeredLayout
                 (PageContent.oneColumn content
-                    |> PageContent.withPageTitle (PageTitle.title "services")
+                    |> PageContent.withPageTitle (PageTitle.title "Services")
                 )
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground

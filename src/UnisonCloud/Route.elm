@@ -31,6 +31,9 @@ type Route
 -- CREATE ---------------------------------------------------------------------
 
 
+{-| Overview would normally be the home page, but since we only have Services
+right now, the service list page is the home page.
+-}
 overview : Route
 overview =
     Overview
@@ -53,20 +56,27 @@ service sh =
 toRoute : Maybe String -> Parser Route
 toRoute _ =
     oneOf
-        [ b overviewParser
-        , b servicesParser
+        [ -- b overviewParser,
+          b servicesParser
         , b serviceParser
         ]
 
 
-overviewParser : Parser Route
-overviewParser =
-    succeed Overview |. slash |. end
+
+{-
+   overviewParser : Parser Route
+   overviewParser =
+       succeed Overview |. slash |. end
+-}
 
 
+{-| Taking over from Overview as the home page until we can do more stuff in
+the cloud than services
+-}
 servicesParser : Parser Route
 servicesParser =
-    succeed Services |. slash |. s "services" |. end
+    -- succeed Services |. slash |. s "services" |. end
+    succeed Services |. slash |. end
 
 
 serviceHashParser : Parser ServiceHash
