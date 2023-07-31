@@ -3,6 +3,7 @@ module UnisonCloud.Link exposing (..)
 import Html exposing (Html, text)
 import UI.Click as Click exposing (Click)
 import UnisonCloud.Route as Route exposing (Route)
+import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 
@@ -106,6 +107,11 @@ logout =
 overview : Click msg
 overview =
     toClick Route.overview
+
+
+service : ServiceHash -> Click msg
+service sh =
+    toClick (Route.service sh)
 
 
 

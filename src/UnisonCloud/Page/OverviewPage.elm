@@ -16,7 +16,7 @@ view =
                 (PageLayout.PageFooter [])
     in
     { pageId = "overview-page"
-    , title = "Unison Cloud | Overview"
+    , title = "Overview | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing

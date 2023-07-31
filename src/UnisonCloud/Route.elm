@@ -3,6 +3,8 @@ module UnisonCloud.Route exposing
     , fromUrl
     , navigate
     , overview
+    , service
+    , services
     , toRoute
     , toUrlPattern
     , toUrlString
@@ -20,6 +22,7 @@ import Url.Builder exposing (relative)
 
 type Route
     = Overview
+    | Services
     | Service ServiceHash
     | NotFound String
 
@@ -33,6 +36,16 @@ overview =
     Overview
 
 
+services : Route
+services =
+    Services
+
+
+service : ServiceHash -> Route
+service sh =
+    Service sh
+
+
 
 -- PARSE ----------------------------------------------------------------------
 
@@ -41,6 +54,7 @@ toRoute : Maybe String -> Parser Route
 toRoute _ =
     oneOf
         [ b overviewParser
+        , b servicesParser
         , b serviceParser
         ]
 
@@ -48,6 +62,11 @@ toRoute _ =
 overviewParser : Parser Route
 overviewParser =
     succeed Overview |. slash |. end
+
+
+servicesParser : Parser Route
+servicesParser =
+    succeed Services |. slash |. s "services" |. end
 
 
 serviceHashParser : Parser ServiceHash
@@ -134,6 +153,9 @@ toUrlPattern r =
         Overview ->
             "overview"
 
+        Services ->
+            "services"
+
         Service _ ->
             "services/:service-hash"
 
@@ -148,6 +170,9 @@ toUrlString route =
             case route of
                 Overview ->
                     ( [], [] )
+
+                Services ->
+                    ( [ "services" ], [] )
 
                 Service sh ->
                     ( [ "services", ServiceHash.toUrlString sh ], [] )

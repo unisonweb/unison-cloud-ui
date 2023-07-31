@@ -7,6 +7,7 @@ import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Page.NotFoundPage as NotFoundPage
 import UnisonCloud.Page.OverviewPage as OverviewPage
 import UnisonCloud.Page.ServicePage as ServicePage
+import UnisonCloud.Page.ServicesPage as ServicesPage
 import UnisonCloud.Route as Route exposing (Route)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
@@ -18,6 +19,7 @@ import Url exposing (Url)
 
 type Page
     = Overview
+    | Services ServicesPage.Model
     | Service ServiceHash ServicePage.Model
     | NotFound
 
@@ -40,6 +42,13 @@ init env route =
             case route of
                 Route.Overview ->
                     ( Overview, Cmd.none )
+
+                Route.Services ->
+                    let
+                        ( services, servicesCmd ) =
+                            ServicesPage.init env
+                    in
+                    ( Services services, Cmd.map ServicesPageMsg servicesCmd )
 
                 Route.Service sh ->
                     let
@@ -66,6 +75,7 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | ServicePageMsg ServicePage.Msg
+    | ServicesPageMsg ServicesPage.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -91,6 +101,13 @@ update msg model =
                         Route.Overview ->
                             ( { model | page = Overview }, Cmd.none )
 
+                        Route.Services ->
+                            let
+                                ( services, servicesCmd ) =
+                                    ServicesPage.init model.env
+                            in
+                            ( { model | page = Services services }, Cmd.map ServicesPageMsg servicesCmd )
+
                         Route.Service serviceHash ->
                             let
                                 ( service, serviceCmd ) =
@@ -102,6 +119,13 @@ update msg model =
                             ( { model | page = NotFound }, Cmd.none )
             in
             ( m, c )
+
+        ( Services services, ServicesPageMsg spMsg ) ->
+            let
+                ( services_, servicesCmd ) =
+                    ServicesPage.update model.env spMsg services
+            in
+            ( { model | page = Services services_ }, Cmd.map ServicesPageMsg servicesCmd )
 
         ( Service sh service, ServicePageMsg spMsg ) ->
             let
@@ -134,6 +158,9 @@ view model =
             case model.page of
                 Overview ->
                     OverviewPage.view
+
+                Services services ->
+                    ServicesPage.view services
 
                 Service serviceHash service ->
                     AppDocument.map

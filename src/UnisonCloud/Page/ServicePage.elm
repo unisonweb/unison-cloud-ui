@@ -54,7 +54,7 @@ view env sh model =
                 (PageLayout.PageFooter [])
     in
     { pageId = "service-page"
-    , title = "Unison Cloud | Service"
+    , title = "Service " ++ ServiceHash.toString sh ++ " | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing

@@ -126,14 +126,20 @@ update _ msg model =
         FetchNew ->
             let
                 log_ =
-                    { log | logLines = newLines ++ log.logLines }
+                    { log
+                        | logLines = log.freshNewLines ++ log.logLines
+                        , freshNewLines = newLines
+                    }
             in
             ( { model | log = log_ }, Cmd.none )
 
         FetchOld ->
             let
                 log_ =
-                    { log | logLines = log.logLines ++ oldLines }
+                    { log
+                        | logLines = log.logLines ++ log.freshOldLines
+                        , freshOldLines = oldLines
+                    }
             in
             ( { model | log = log_ }, Cmd.none )
 

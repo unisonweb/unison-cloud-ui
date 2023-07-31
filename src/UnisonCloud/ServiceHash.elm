@@ -1,6 +1,7 @@
 module UnisonCloud.ServiceHash exposing (..)
 
 import Code.Hash as Hash exposing (Hash)
+import Json.Decode as Decode
 
 
 type ServiceHash
@@ -25,3 +26,8 @@ toString (ServiceHash h) =
 toUrlString : ServiceHash -> String
 toUrlString (ServiceHash h) =
     Hash.toUrlString h
+
+
+decode : Decode.Decoder ServiceHash
+decode =
+    Decode.map ServiceHash Hash.decode
