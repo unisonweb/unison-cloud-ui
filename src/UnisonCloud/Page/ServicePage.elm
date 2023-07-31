@@ -52,6 +52,7 @@ view env sh model =
                     |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ ServiceHash.toString sh))
                 )
                 (PageLayout.PageFooter [])
+                |> PageLayout.withSubduedBackground
     in
     { pageId = "service-page"
     , title = "Service " ++ ServiceHash.toString sh ++ " | Unison Cloud"

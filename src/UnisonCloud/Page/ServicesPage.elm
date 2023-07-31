@@ -96,6 +96,7 @@ view model =
                     |> PageContent.withPageTitle (PageTitle.title "services")
                 )
                 (PageLayout.PageFooter [])
+                |> PageLayout.withSubduedBackground
     in
     { pageId = "services-page"
     , title = "Services | Unison Cloud"
