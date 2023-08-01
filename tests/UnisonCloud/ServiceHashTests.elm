@@ -2,7 +2,7 @@ module UnisonCloud.ServiceHashTests exposing (..)
 
 import Expect
 import Test exposing (..)
-import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash(..))
+import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
 fromUrlString : Test

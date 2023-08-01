@@ -28,7 +28,7 @@ type alias Model =
 
 
 init : Env -> ( Model, Cmd Msg )
-init env =
+init _ =
     let
         services =
             [ { id = Service.ServiceId "asdf"
