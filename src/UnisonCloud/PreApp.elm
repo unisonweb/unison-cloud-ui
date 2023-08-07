@@ -6,7 +6,6 @@ import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class, id)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
-import Lib.UserHandle as UserHandle
 import Task exposing (Task)
 import Time
 import UI.Button as Button
@@ -26,8 +25,7 @@ import Url exposing (Url)
 
 
 type AppError
-    = InvalidFlags
-    | NetworkError Http.Error
+    = NetworkError Http.Error
 
 
 type Model
@@ -56,58 +54,39 @@ init flags url navKey =
             , navKey = navKey
             }
     in
-    ( Initializing preEnv, Task.perform FetchTimeAndZoneFinished fetchTimeAndZone )
+    ( Initializing preEnv, Task.attempt FetchTimeAndZoneFinished (fetchTimeAndZone preEnv) )
 
 
 type Msg
     = AppMsg App.Msg
-    | FetchTimeAndZoneFinished ( Time.Posix, Time.Zone )
-    | FetchSessionFinished (HttpResult Session)
+    | FetchTimeAndZoneFinished (HttpResult ( Time.Posix, Time.Zone, Session ))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( model, msg ) of
-        ( Initializing preEnv, FetchTimeAndZoneFinished ( now, timeZone ) ) ->
+        ( Initializing preEnv, FetchTimeAndZoneFinished (Ok ( now, timeZone, session )) ) ->
             let
                 env =
                     Env.init preEnv.flags
                         preEnv.navKey
                         (DateTime.fromPosix now)
                         timeZone
-                        { handle = UserHandle.unsafeFromString "hojberg"
-                        , name = Nothing
-                        , avatarUrl = Nothing
-                        }
+                        session
 
                 ( app, cmd ) =
                     App.init env preEnv.route
             in
             ( Initialized app, Cmd.map AppMsg cmd )
 
-        {-
-           ( Initializing preEnv, FetchSessionFinished sessionResult ) ->
-               case sessionResult of
-                   Ok session ->
-                       case Env.init preEnv.flags preEnv.navKey session of
-                           Just e ->
-                               let
-                                   ( app, cmd ) =
-                                       App.init e preEnv.route
-                               in
-                               ( Initialized app, Cmd.map AppMsg cmd )
+        ( Initializing preEnv, FetchTimeAndZoneFinished (Err e) ) ->
+            case e of
+                Http.BadStatus 401 ->
+                    ( NotSignedIn preEnv, Cmd.none )
 
-                           Nothing ->
-                               ( InitializationError preEnv InvalidFlags, Cmd.none )
+                _ ->
+                    ( InitializationError preEnv (NetworkError e), Cmd.none )
 
-                   Err e ->
-                       case e of
-                           Http.BadStatus 401 ->
-                               ( NotSignedIn preEnv, Cmd.none )
-
-                           _ ->
-                               ( InitializationError preEnv (NetworkError e), Cmd.none )
-        -}
         ( _, AppMsg appMsg ) ->
             case model of
                 Initialized a ->
@@ -128,20 +107,18 @@ update msg model =
 -- EFFECTS
 
 
-fetchTimeAndZone : Task Never ( Time.Posix, Time.Zone )
-fetchTimeAndZone =
-    Task.map2 (\n z -> ( n, z )) Time.now Time.here
+fetchTimeAndZone : PreEnv -> Task Http.Error ( Time.Posix, Time.Zone, Session )
+fetchTimeAndZone preEnv =
+    Task.map3 (\n z s -> ( n, z, s )) Time.now Time.here (fetchSession preEnv)
 
 
-fetchSession : PreEnv -> Cmd Msg
+fetchSession : PreEnv -> Task Http.Error Session
 fetchSession preEnv =
     let
-        api =
-            HttpApi.httpApi True preEnv.flags.apiUrl preEnv.flags.xsrfToken
+        apiUrl =
+            HttpApi.apiUrlFromString True preEnv.flags.apiUrl
     in
-    CloudApi.session
-        |> HttpApi.toRequest Session.decode FetchSessionFinished
-        |> HttpApi.perform api
+    HttpApi.toTask apiUrl Session.decode CloudApi.session
 
 
 subscriptions : Model -> Sub Msg
