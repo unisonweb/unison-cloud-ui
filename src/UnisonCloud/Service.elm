@@ -2,27 +2,31 @@ module UnisonCloud.Service exposing (..)
 
 import Json.Decode as Decode exposing (nullable)
 import Json.Decode.Pipeline exposing (required)
-import UI.DateTime as DateTime exposing (DateTime)
-import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
-import Url exposing (Url)
+import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 
 
 type ServiceId
     = ServiceId String
 
 
-type ServiceType
-    = Native
-    | Web Url
-
-
 type alias Service =
     { id : ServiceId
-    , hash : ServiceHash
-    , type_ : ServiceType
-    , deployedAt : DateTime
-    , undeployedAt : Maybe DateTime
+    , name : Maybe String
+    , latestDeploy : Maybe ServiceDeploy
     }
+
+
+
+-- HELPERS
+
+
+label : Service -> String
+label { id, name } =
+    let
+        (ServiceId id_) =
+            id
+    in
+    Maybe.withDefault id_ name
 
 
 
@@ -32,16 +36,13 @@ type alias Service =
 decode : Decode.Decoder Service
 decode =
     let
-        makeService rawId hash deployedAt undeployedAt =
+        makeService rawId name latestDeploy =
             { id = ServiceId rawId
-            , hash = hash
-            , type_ = Native
-            , deployedAt = deployedAt
-            , undeployedAt = undeployedAt
+            , name = name
+            , latestDeploy = latestDeploy
             }
     in
     Decode.succeed makeService
         |> required "serviceId" Decode.string
-        |> required "serviceHash" ServiceHash.decode
-        |> required "serviceDeployedAt" DateTime.decode
-        |> required "serviceUndeployedAt" (nullable DateTime.decode)
+        |> required "serviceName" (nullable Decode.string)
+        |> required "latestDeploy" (nullable ServiceDeploy.decode)
