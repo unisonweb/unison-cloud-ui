@@ -3,7 +3,9 @@ module UnisonCloud.App exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import UI.AppDocument as AppDocument
+import UnisonCloud.AppError exposing (AppError)
 import UnisonCloud.Env exposing (Env)
+import UnisonCloud.Page.ErrorPage as ErrorPage
 import UnisonCloud.Page.NotFoundPage as NotFoundPage
 import UnisonCloud.Page.OverviewPage as OverviewPage
 import UnisonCloud.Page.ServicePage as ServicePage
@@ -21,6 +23,7 @@ type Page
     = Overview
     | Services ServicesPage.Model
     | Service ServiceHash ServicePage.Model
+    | Error AppError
     | NotFound
 
 
@@ -56,6 +59,9 @@ init env route =
                             ServicePage.init env sh
                     in
                     ( Service sh service, Cmd.map ServicePageMsg serviceCmd )
+
+                Route.Error e ->
+                    ( Error e, Cmd.none )
 
                 Route.NotFound _ ->
                     ( NotFound, Cmd.none )
@@ -115,6 +121,9 @@ update msg model =
                             in
                             ( { model | page = Service serviceHash service }, Cmd.map ServicePageMsg serviceCmd )
 
+                        Route.Error e ->
+                            ( { model | page = Error e }, Cmd.none )
+
                         Route.NotFound _ ->
                             ( { model | page = NotFound }, Cmd.none )
             in
@@ -166,6 +175,9 @@ view model =
                     AppDocument.map
                         ServicePageMsg
                         (ServicePage.view model.env serviceHash service)
+
+                Error err ->
+                    ErrorPage.view err
 
                 NotFound ->
                     NotFoundPage.view

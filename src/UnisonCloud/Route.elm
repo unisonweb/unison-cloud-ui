@@ -15,15 +15,17 @@ import Code.Definition.Reference exposing (Reference(..))
 import Code.HashQualified exposing (HashQualified(..))
 import Code.UrlParsers exposing (b, s, slash)
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
+import UnisonCloud.AppError as AppError exposing (AppError)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
-import Url.Builder exposing (relative)
+import Url.Builder exposing (relative, string)
 
 
 type Route
     = Overview
     | Services
     | Service ServiceHash
+    | Error AppError
     | NotFound String
 
 
@@ -54,11 +56,12 @@ service sh =
 
 
 toRoute : Maybe String -> Parser Route
-toRoute _ =
+toRoute queryString =
     oneOf
         [ -- b overviewParser,
           b servicesParser
         , b serviceParser
+        , b (errorParser queryString)
         ]
 
 
@@ -99,6 +102,27 @@ serviceHashParser =
 serviceParser : Parser Route
 serviceParser =
     succeed Service |. slash |. s "services" |. slash |= serviceHashParser |. end
+
+
+errorParser : Maybe String -> Parser Route
+errorParser queryString =
+    let
+        appErrorQueryParamParser : Parser AppError
+        appErrorQueryParamParser =
+            oneOf
+                [ b (succeed AppError.SignInNoCloudAccount |. s "appError=SignInNoCloudAccount")
+                , b (succeed AppError.UnspecifiedError |. s "appError=UnspecifiedError")
+                , b (succeed AppError.UnspecifiedError)
+                ]
+
+        appError : AppError
+        appError =
+            queryString
+                |> Maybe.withDefault ""
+                |> Parser.run appErrorQueryParamParser
+                |> Result.withDefault AppError.UnspecifiedError
+    in
+    succeed (Error appError) |. slash |. s "error"
 
 
 {-| In environments like Unison Local, the UI is served with a base path
@@ -169,6 +193,9 @@ toUrlPattern r =
         Service _ ->
             "services/:service-hash"
 
+        Error _ ->
+            "error"
+
         NotFound _ ->
             "404"
 
@@ -186,6 +213,9 @@ toUrlString route =
 
                 Service sh ->
                     ( [ "services", ServiceHash.toUrlString sh ], [] )
+
+                Error e ->
+                    ( [ "error" ], [ string "appError" (AppError.toString e) ] )
 
                 NotFound _ ->
                     ( [], [] )
