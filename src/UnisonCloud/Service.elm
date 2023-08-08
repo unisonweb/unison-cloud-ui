@@ -11,7 +11,7 @@ type ServiceId
 
 type alias Service =
     { id : ServiceId
-    , name : Maybe String
+    , name : String
     , latestDeploy : Maybe ServiceDeploy
     }
 
@@ -20,13 +20,9 @@ type alias Service =
 -- HELPERS
 
 
-label : Service -> String
-label { id, name } =
-    let
-        (ServiceId id_) =
-            id
-    in
-    Maybe.withDefault id_ name
+serviceIdToString : ServiceId -> String
+serviceIdToString (ServiceId id_) =
+    id_
 
 
 
@@ -44,5 +40,5 @@ decode =
     in
     Decode.succeed makeService
         |> required "serviceId" Decode.string
-        |> required "serviceName" (nullable Decode.string)
+        |> required "serviceName" Decode.string
         |> required "latestDeploy" (nullable ServiceDeploy.decode)

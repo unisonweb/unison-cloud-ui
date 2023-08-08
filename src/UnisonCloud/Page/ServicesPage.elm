@@ -72,7 +72,7 @@ viewService service =
         ( heading, latestDeploy ) =
             case service.latestDeploy of
                 Just d ->
-                    ( Link.view (Service.label service) (Link.serviceDeploy d.hash)
+                    ( Link.view service.name (Link.serviceDeploy d.hash)
                     , div [ class "latest-deploy" ]
                         [ StatusBanner.good (ServiceHash.toString d.hash)
                         , DateTime.view DateTime.Distance d.deployedAt
@@ -80,7 +80,7 @@ viewService service =
                     )
 
                 Nothing ->
-                    ( text (Service.label service), UI.nothing )
+                    ( text service.name, UI.nothing )
     in
     Card.card [ h2 [] [ heading ], latestDeploy ]
         |> Card.asContained
