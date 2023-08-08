@@ -3,7 +3,7 @@ module UnisonCloud.Route exposing
     , fromUrl
     , navigate
     , overview
-    , service
+    , serviceDeploy
     , services
     , toRoute
     , toUrlPattern
@@ -24,7 +24,7 @@ import Url.Builder exposing (relative, string)
 type Route
     = Overview
     | Services
-    | Service ServiceHash
+    | ServiceDeploy ServiceHash
     | Error AppError
     | NotFound String
 
@@ -46,9 +46,9 @@ services =
     Services
 
 
-service : ServiceHash -> Route
-service sh =
-    Service sh
+serviceDeploy : ServiceHash -> Route
+serviceDeploy sh =
+    ServiceDeploy sh
 
 
 
@@ -58,28 +58,23 @@ service sh =
 toRoute : Maybe String -> Parser Route
 toRoute queryString =
     oneOf
-        [ -- b overviewParser,
-          b servicesParser
-        , b serviceParser
+        [ b overviewParser
+        , b servicesParser
+        , b serviceDeployParser
         , b (errorParser queryString)
         ]
 
 
+overviewParser : Parser Route
+overviewParser =
+    -- Taking over from Overview as the home page until we can do more stuff in
+    -- the cloud than services
+    succeed Services |. slash |. end
 
-{-
-   overviewParser : Parser Route
-   overviewParser =
-       succeed Overview |. slash |. end
--}
 
-
-{-| Taking over from Overview as the home page until we can do more stuff in
-the cloud than services
--}
 servicesParser : Parser Route
 servicesParser =
-    -- succeed Services |. slash |. s "services" |. end
-    succeed Services |. slash |. end
+    succeed Services |. slash |. s "services" |. end
 
 
 serviceHashParser : Parser ServiceHash
@@ -99,9 +94,9 @@ serviceHashParser =
         |> Parser.andThen parseMaybe
 
 
-serviceParser : Parser Route
-serviceParser =
-    succeed Service |. slash |. s "services" |. slash |= serviceHashParser |. end
+serviceDeployParser : Parser Route
+serviceDeployParser =
+    succeed ServiceDeploy |. slash |. s "service-deploys" |. slash |= serviceHashParser |. end
 
 
 errorParser : Maybe String -> Parser Route
@@ -166,7 +161,9 @@ fromUrl basePath url =
                 "/" ++ path
 
         parse queryString path =
-            Result.withDefault (NotFound path) (Parser.run (toRoute queryString) path)
+            path
+                |> Parser.run (toRoute queryString)
+                |> Result.withDefault (NotFound path)
     in
     url
         |> .path
@@ -190,8 +187,8 @@ toUrlPattern r =
         Services ->
             "services"
 
-        Service _ ->
-            "services/:service-hash"
+        ServiceDeploy _ ->
+            "service-deploys/:service-hash"
 
         Error _ ->
             "error"
@@ -211,8 +208,8 @@ toUrlString route =
                 Services ->
                     ( [ "services" ], [] )
 
-                Service sh ->
-                    ( [ "services", ServiceHash.toUrlString sh ], [] )
+                ServiceDeploy sh ->
+                    ( [ "service-deploys", ServiceHash.toUrlString sh ], [] )
 
                 Error e ->
                     ( [ "error" ], [ string "appError" (AppError.toString e) ] )

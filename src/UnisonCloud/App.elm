@@ -8,7 +8,7 @@ import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Page.ErrorPage as ErrorPage
 import UnisonCloud.Page.NotFoundPage as NotFoundPage
 import UnisonCloud.Page.OverviewPage as OverviewPage
-import UnisonCloud.Page.ServicePage as ServicePage
+import UnisonCloud.Page.ServiceDeployPage as ServiceDeployPage
 import UnisonCloud.Page.ServicesPage as ServicesPage
 import UnisonCloud.Route as Route exposing (Route)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
@@ -22,7 +22,7 @@ import Url exposing (Url)
 type Page
     = Overview
     | Services ServicesPage.Model
-    | Service ServiceHash ServicePage.Model
+    | ServiceDeploy ServiceHash ServiceDeployPage.Model
     | Error AppError
     | NotFound
 
@@ -53,12 +53,12 @@ init env route =
                     in
                     ( Services services, Cmd.map ServicesPageMsg servicesCmd )
 
-                Route.Service sh ->
+                Route.ServiceDeploy sh ->
                     let
                         ( service, serviceCmd ) =
-                            ServicePage.init env sh
+                            ServiceDeployPage.init env sh
                     in
-                    ( Service sh service, Cmd.map ServicePageMsg serviceCmd )
+                    ( ServiceDeploy sh service, Cmd.map ServicePageMsg serviceCmd )
 
                 Route.Error e ->
                     ( Error e, Cmd.none )
@@ -80,7 +80,7 @@ type Msg
     = NoOp
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
-    | ServicePageMsg ServicePage.Msg
+    | ServicePageMsg ServiceDeployPage.Msg
     | ServicesPageMsg ServicesPage.Msg
 
 
@@ -114,12 +114,12 @@ update msg model =
                             in
                             ( { model | page = Services services }, Cmd.map ServicesPageMsg servicesCmd )
 
-                        Route.Service serviceHash ->
+                        Route.ServiceDeploy serviceHash ->
                             let
                                 ( service, serviceCmd ) =
-                                    ServicePage.init model.env serviceHash
+                                    ServiceDeployPage.init model.env serviceHash
                             in
-                            ( { model | page = Service serviceHash service }, Cmd.map ServicePageMsg serviceCmd )
+                            ( { model | page = ServiceDeploy serviceHash service }, Cmd.map ServicePageMsg serviceCmd )
 
                         Route.Error e ->
                             ( { model | page = Error e }, Cmd.none )
@@ -136,12 +136,12 @@ update msg model =
             in
             ( { model | page = Services services_ }, Cmd.map ServicesPageMsg servicesCmd )
 
-        ( Service sh service, ServicePageMsg spMsg ) ->
+        ( ServiceDeploy sh service, ServicePageMsg spMsg ) ->
             let
                 ( service_, serviceCmd ) =
-                    ServicePage.update model.env sh spMsg service
+                    ServiceDeployPage.update model.env sh spMsg service
             in
-            ( { model | page = Service sh service_ }, Cmd.map ServicePageMsg serviceCmd )
+            ( { model | page = ServiceDeploy sh service_ }, Cmd.map ServicePageMsg serviceCmd )
 
         _ ->
             ( model, Cmd.none )
@@ -171,10 +171,10 @@ view model =
                 Services services ->
                     ServicesPage.view services
 
-                Service serviceHash service ->
+                ServiceDeploy serviceHash service ->
                     AppDocument.map
                         ServicePageMsg
-                        (ServicePage.view model.env serviceHash service)
+                        (ServiceDeployPage.view model.env serviceHash service)
 
                 Error err ->
                     ErrorPage.view err

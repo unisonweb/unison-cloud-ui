@@ -77,7 +77,7 @@ fetchServices env =
 
 viewService : Service -> Html msg
 viewService service =
-    Card.card [ Link.view (ServiceHash.toString service.hash) (Link.service service.hash) ]
+    Card.card [ Link.view (ServiceHash.toString service.hash) (Link.serviceDeploy service.hash) ]
         |> Card.asContained
         |> Card.view
 

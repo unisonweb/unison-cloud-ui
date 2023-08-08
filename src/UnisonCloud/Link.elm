@@ -109,9 +109,9 @@ overview =
     toClick Route.overview
 
 
-service : ServiceHash -> Click msg
-service sh =
-    toClick (Route.service sh)
+serviceDeploy : ServiceHash -> Click msg
+serviceDeploy sh =
+    toClick (Route.serviceDeploy sh)
 
 
 

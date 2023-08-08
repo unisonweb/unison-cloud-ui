@@ -5,7 +5,7 @@ const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
 const webpack = require("webpack");
 const postcssPresetEnv = require("postcss-preset-env");
 
-const API_URL = "https://api.unison-lang.org";
+const API_URL = "https://api.unison.cloud";
 const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
 const WEBSITE_URL = process.env.WEBSITE_URL || "https://www.unison-lang.org";
 

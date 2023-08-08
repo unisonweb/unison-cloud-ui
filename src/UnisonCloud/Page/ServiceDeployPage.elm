@@ -1,4 +1,4 @@
-module UnisonCloud.Page.ServicePage exposing (..)
+module UnisonCloud.Page.ServiceDeployPage exposing (..)
 
 import Html
 import UI.AppDocument exposing (AppDocument)
