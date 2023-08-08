@@ -1,19 +1,24 @@
 module UnisonCloud.Page.ServicesPage exposing (..)
 
-import Html exposing (Html, text)
+import Html exposing (Html, div, h2, text)
+import Html.Attributes exposing (class)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
+import UI
 import UI.AppDocument exposing (AppDocument)
 import UI.Card as Card
+import UI.DateTime as DateTime
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
+import UI.StatusBanner as StatusBanner
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
+import UnisonCloud.ServiceHash as ServiceHash
 
 
 
@@ -64,15 +69,20 @@ fetchServices env =
 viewService : Service -> Html msg
 viewService service =
     let
-        heading =
+        ( heading, latestDeploy ) =
             case service.latestDeploy of
                 Just d ->
-                    Link.view (Service.label service) (Link.serviceDeploy d.hash)
+                    ( Link.view (Service.label service) (Link.serviceDeploy d.hash)
+                    , div [ class "latest-deploy" ]
+                        [ StatusBanner.good (ServiceHash.toString d.hash)
+                        , DateTime.view DateTime.Distance d.deployedAt
+                        ]
+                    )
 
                 Nothing ->
-                    text (Service.label service)
+                    ( text (Service.label service), UI.nothing )
     in
-    Card.card [ heading ]
+    Card.card [ h2 [] [ heading ], latestDeploy ]
         |> Card.asContained
         |> Card.view
 
