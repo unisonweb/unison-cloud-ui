@@ -1,4 +1,12 @@
-module UnisonCloud.Api exposing (service, serviceDeploy, serviceDeployLogs, serviceDeploys, services, session)
+module UnisonCloud.Api exposing
+    ( service
+    , serviceDeploy
+    , serviceDeployLogs
+    , serviceDeploys
+    , serviceLogs
+    , services
+    , session
+    )
 
 import Lib.HttpApi exposing (Endpoint(..))
 import UnisonCloud.Service as Service exposing (ServiceId)
@@ -13,33 +21,38 @@ session =
 
 services : Endpoint
 services =
-    GET { path = [ "services" ], queryParams = [] }
+    GET { path = [ "service" ], queryParams = [] }
 
 
 service : ServiceId -> Endpoint
-service id_ =
-    GET { path = [ "services", Service.serviceIdToString id_ ], queryParams = [] }
+service sid =
+    GET { path = [ "service", Service.serviceIdToString sid ], queryParams = [] }
 
 
 serviceDeploy : ServiceHash -> Endpoint
 serviceDeploy sh =
-    GET { path = [ "service-deploys", ServiceHash.toString sh ], queryParams = [] }
+    GET { path = [ "deployment", ServiceHash.toString sh ], queryParams = [] }
 
 
 serviceDeploys : Maybe ServiceId -> Endpoint
-serviceDeploys id_ =
+serviceDeploys sid =
     let
         queryParams =
-            case id_ of
-                Just i ->
-                    [ string "serviceId" (Service.serviceIdToString i) ]
+            case sid of
+                Just sid_ ->
+                    [ string "serviceId" (Service.serviceIdToString sid_) ]
 
                 Nothing ->
                     []
     in
-    GET { path = [ "service-deploys" ], queryParams = queryParams }
+    GET { path = [ "deployment" ], queryParams = queryParams }
+
+
+serviceLogs : ServiceId -> Endpoint
+serviceLogs sid =
+    GET { path = [ "logs", "service", Service.serviceIdToString sid ], queryParams = [] }
 
 
 serviceDeployLogs : ServiceHash -> Endpoint
 serviceDeployLogs sh =
-    GET { path = [ "logs", ServiceHash.toString sh ], queryParams = [] }
+    GET { path = [ "logs", "deployment", ServiceHash.toString sh ], queryParams = [] }
