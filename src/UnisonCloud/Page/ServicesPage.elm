@@ -14,8 +14,8 @@ import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
 import UI.StatusBanner as StatusBanner
 import UnisonCloud.Api as CloudApi
+import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
-import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.ServiceHash as ServiceHash
@@ -29,9 +29,9 @@ type alias Model =
     WebData (List Service)
 
 
-init : Env -> ( Model, Cmd Msg )
-init env =
-    ( Loading, fetchServices env )
+init : AppContext -> ( Model, Cmd Msg )
+init appContext =
+    ( Loading, fetchServices appContext )
 
 
 
@@ -42,7 +42,7 @@ type Msg
     = FetchServicesFinished (WebData (List Service))
 
 
-update : Env -> Msg -> Model -> ( Model, Cmd Msg )
+update : AppContext -> Msg -> Model -> ( Model, Cmd Msg )
 update _ msg _ =
     case msg of
         FetchServicesFinished services ->
@@ -53,13 +53,13 @@ update _ msg _ =
 -- EFFECTS
 
 
-fetchServices : Env -> Cmd Msg
-fetchServices env =
+fetchServices : AppContext -> Cmd Msg
+fetchServices appContext =
     CloudApi.services
         |> HttpApi.toRequest
             (Decode.list Service.decode)
             (RemoteData.fromResult >> FetchServicesFinished)
-        |> HttpApi.perform env.api
+        |> HttpApi.perform appContext.api
 
 
 

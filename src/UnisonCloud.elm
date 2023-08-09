@@ -2,7 +2,7 @@ module UnisonCloud exposing (..)
 
 import Browser
 import UnisonCloud.App as App
-import UnisonCloud.Env exposing (Flags)
+import UnisonCloud.AppContext exposing (Flags)
 import UnisonCloud.PreApp as PreApp
 
 

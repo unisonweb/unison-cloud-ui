@@ -15,8 +15,8 @@ import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.App as App
+import UnisonCloud.AppContext as AppContext exposing (Flags)
 import UnisonCloud.AppHeader as AppHeader
-import UnisonCloud.Env as Env exposing (Flags)
 import UnisonCloud.Link as Link
 import UnisonCloud.PageFooter as PageFooter
 import UnisonCloud.Route as Route exposing (Route)
@@ -29,13 +29,13 @@ type AppError
 
 
 type Model
-    = Initializing PreEnv
-    | InitializationError PreEnv AppError
-    | NotSignedIn PreEnv
+    = Initializing PreAppContext
+    | InitializationError PreAppContext AppError
+    | NotSignedIn PreAppContext
     | Initialized App.Model
 
 
-type alias PreEnv =
+type alias PreAppContext =
     { flags : Flags
     , route : Route
     , navKey : Nav.Key
@@ -48,13 +48,13 @@ init flags url navKey =
         route =
             Route.fromUrl flags.basePath url
 
-        preEnv =
+        preAppContext =
             { flags = flags
             , route = route
             , navKey = navKey
             }
     in
-    ( Initializing preEnv, Task.attempt FetchTimeAndZoneFinished (fetchTimeAndZone preEnv) )
+    ( Initializing preAppContext, Task.attempt FetchTimeAndZoneFinished (fetchTimeAndZone preAppContext) )
 
 
 type Msg
@@ -65,27 +65,27 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( model, msg ) of
-        ( Initializing preEnv, FetchTimeAndZoneFinished (Ok ( now, timeZone, session )) ) ->
+        ( Initializing preAppContext, FetchTimeAndZoneFinished (Ok ( now, timeZone, session )) ) ->
             let
-                env =
-                    Env.init preEnv.flags
-                        preEnv.navKey
+                appContext =
+                    AppContext.init preAppContext.flags
+                        preAppContext.navKey
                         (DateTime.fromPosix now)
                         timeZone
                         session
 
                 ( app, cmd ) =
-                    App.init env preEnv.route
+                    App.init appContext preAppContext.route
             in
             ( Initialized app, Cmd.map AppMsg cmd )
 
-        ( Initializing preEnv, FetchTimeAndZoneFinished (Err e) ) ->
+        ( Initializing preAppContext, FetchTimeAndZoneFinished (Err e) ) ->
             case e of
                 Http.BadStatus 401 ->
-                    ( NotSignedIn preEnv, Cmd.none )
+                    ( NotSignedIn preAppContext, Cmd.none )
 
                 _ ->
-                    ( InitializationError preEnv (NetworkError e), Cmd.none )
+                    ( InitializationError preAppContext (NetworkError e), Cmd.none )
 
         ( _, AppMsg appMsg ) ->
             case model of
@@ -107,16 +107,16 @@ update msg model =
 -- EFFECTS
 
 
-fetchTimeAndZone : PreEnv -> Task Http.Error ( Time.Posix, Time.Zone, Session )
-fetchTimeAndZone preEnv =
-    Task.map3 (\n z s -> ( n, z, s )) Time.now Time.here (fetchSession preEnv)
+fetchTimeAndZone : PreAppContext -> Task Http.Error ( Time.Posix, Time.Zone, Session )
+fetchTimeAndZone preAppContext =
+    Task.map3 (\n z s -> ( n, z, s )) Time.now Time.here (fetchSession preAppContext)
 
 
-fetchSession : PreEnv -> Task Http.Error Session
-fetchSession preEnv =
+fetchSession : PreAppContext -> Task Http.Error Session
+fetchSession preAppContext =
     let
         apiUrl =
-            HttpApi.apiUrlFromString True preEnv.flags.apiUrl
+            HttpApi.apiUrlFromString True preAppContext.flags.apiUrl
     in
     HttpApi.toTask apiUrl Session.decode CloudApi.session
 

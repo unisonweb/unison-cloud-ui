@@ -1,4 +1,4 @@
-module UnisonCloud.Env exposing (..)
+module UnisonCloud.AppContext exposing (..)
 
 import Browser.Navigation as Nav
 import Lib.HttpApi as HttpApi exposing (HttpApi)
@@ -8,7 +8,7 @@ import UI.DateTime exposing (DateTime)
 import UnisonCloud.Session exposing (Session)
 
 
-type alias Env =
+type alias AppContext =
     { session : Session
     , operatingSystem : OperatingSystem
     , basePath : String
@@ -30,7 +30,7 @@ type alias Flags =
     }
 
 
-init : Flags -> Nav.Key -> DateTime -> Time.Zone -> Session -> Env
+init : Flags -> Nav.Key -> DateTime -> Time.Zone -> Session -> AppContext
 init flags navKey now timeZone session =
     let
         api =

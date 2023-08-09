@@ -3,8 +3,8 @@ module UnisonCloud.App exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import UI.AppDocument as AppDocument
+import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppError exposing (AppError)
-import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Page.ErrorPage as ErrorPage
 import UnisonCloud.Page.NotFoundPage as NotFoundPage
 import UnisonCloud.Page.OverviewPage as OverviewPage
@@ -33,13 +33,13 @@ type AppModal
 
 type alias Model =
     { page : Page
-    , env : Env
+    , appContext : AppContext
     , appModal : AppModal
     }
 
 
-init : Env -> Route -> ( Model, Cmd Msg )
-init env route =
+init : AppContext -> Route -> ( Model, Cmd Msg )
+init appContext route =
     let
         ( page, cmd ) =
             case route of
@@ -49,14 +49,14 @@ init env route =
                 Route.Services ->
                     let
                         ( services, servicesCmd ) =
-                            ServicesPage.init env
+                            ServicesPage.init appContext
                     in
                     ( Services services, Cmd.map ServicesPageMsg servicesCmd )
 
                 Route.ServiceDeploy sh ->
                     let
                         ( service, serviceCmd ) =
-                            ServiceDeployPage.init env sh
+                            ServiceDeployPage.init appContext sh
                     in
                     ( ServiceDeploy sh service, Cmd.map ServicePageMsg serviceCmd )
 
@@ -67,7 +67,7 @@ init env route =
                     ( NotFound, Cmd.none )
 
         model =
-            { page = page, env = env, appModal = NoModal }
+            { page = page, appContext = appContext, appModal = NoModal }
     in
     ( model, cmd )
 
@@ -90,7 +90,7 @@ update msg model =
         ( _, LinkClicked urlRequest ) ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.env.navKey (Url.toString url) )
+                    ( model, Nav.pushUrl model.appContext.navKey (Url.toString url) )
 
                 -- External links are handled via target blank and never end up
                 -- here
@@ -100,7 +100,7 @@ update msg model =
         ( _, UrlChanged url ) ->
             let
                 route =
-                    Route.fromUrl model.env.basePath url
+                    Route.fromUrl model.appContext.basePath url
 
                 ( m, c ) =
                     case route of
@@ -110,14 +110,14 @@ update msg model =
                         Route.Services ->
                             let
                                 ( services, servicesCmd ) =
-                                    ServicesPage.init model.env
+                                    ServicesPage.init model.appContext
                             in
                             ( { model | page = Services services }, Cmd.map ServicesPageMsg servicesCmd )
 
                         Route.ServiceDeploy serviceHash ->
                             let
                                 ( service, serviceCmd ) =
-                                    ServiceDeployPage.init model.env serviceHash
+                                    ServiceDeployPage.init model.appContext serviceHash
                             in
                             ( { model | page = ServiceDeploy serviceHash service }, Cmd.map ServicePageMsg serviceCmd )
 
@@ -132,14 +132,14 @@ update msg model =
         ( Services services, ServicesPageMsg spMsg ) ->
             let
                 ( services_, servicesCmd ) =
-                    ServicesPage.update model.env spMsg services
+                    ServicesPage.update model.appContext spMsg services
             in
             ( { model | page = Services services_ }, Cmd.map ServicesPageMsg servicesCmd )
 
         ( ServiceDeploy sh service, ServicePageMsg spMsg ) ->
             let
                 ( service_, serviceCmd ) =
-                    ServiceDeployPage.update model.env sh spMsg service
+                    ServiceDeployPage.update model.appContext sh spMsg service
             in
             ( { model | page = ServiceDeploy sh service_ }, Cmd.map ServicePageMsg serviceCmd )
 
@@ -174,7 +174,7 @@ view model =
                 ServiceDeploy serviceHash service ->
                     AppDocument.map
                         ServicePageMsg
-                        (ServiceDeployPage.view model.env serviceHash service)
+                        (ServiceDeployPage.view model.appContext serviceHash service)
 
                 Error err ->
                     ErrorPage.view err

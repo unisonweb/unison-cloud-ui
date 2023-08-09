@@ -5,8 +5,8 @@ import UI.AppDocument exposing (AppDocument)
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
+import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
-import UnisonCloud.Env exposing (Env)
 import UnisonCloud.Log as Log
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
@@ -16,11 +16,11 @@ type alias Model =
     }
 
 
-init : Env -> ServiceHash -> ( Model, Cmd Msg )
-init env _ =
+init : AppContext -> ServiceHash -> ( Model, Cmd Msg )
+init appContext _ =
     let
         ( log, logCmd ) =
-            Log.init env
+            Log.init appContext
     in
     ( { log = log }, Cmd.map LogMsg logCmd )
 
@@ -29,22 +29,22 @@ type Msg
     = LogMsg Log.Msg
 
 
-update : Env -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
-update env _ msg model =
+update : AppContext -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
+update appContext _ msg model =
     case msg of
         LogMsg logMsg ->
             let
                 ( log, logCmd ) =
-                    Log.update env logMsg model.log
+                    Log.update appContext logMsg model.log
             in
             ( { model | log = log }, Cmd.map LogMsg logCmd )
 
 
-view : Env -> ServiceHash -> Model -> AppDocument Msg
-view env sh model =
+view : AppContext -> ServiceHash -> Model -> AppDocument Msg
+view appContext sh model =
     let
         log =
-            Log.view env model.log
+            Log.view appContext model.log
 
         page =
             PageLayout.centeredLayout

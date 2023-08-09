@@ -15,7 +15,7 @@ import UI.Icon as Icon
 import UI.Sizing as Sizing
 import UUID
 import UUID.Set as Set exposing (Set)
-import UnisonCloud.Env exposing (Env)
+import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
 
@@ -84,7 +84,7 @@ type alias Model =
     { log : Log }
 
 
-init : Env -> ( Model, Cmd Msg )
+init : AppContext -> ( Model, Cmd Msg )
 init _ =
     ( { log =
             { expandedLines = Set.empty
@@ -109,7 +109,7 @@ type Msg
     | ToggleLogLine LogLine
 
 
-update : Env -> Msg -> Model -> ( Model, Cmd Msg )
+update : AppContext -> Msg -> Model -> ( Model, Cmd Msg )
 update _ msg model =
     let
         log =
@@ -180,7 +180,7 @@ logEntryHeight =
 -- EFFECTS
 
 
-fetchLogLines : Env -> LogLine -> Direction -> Cmd Msg
+fetchLogLines : AppContext -> LogLine -> Direction -> Cmd Msg
 fetchLogLines _ _ _ =
     Cmd.none
 
@@ -373,12 +373,12 @@ toEntries timeZone lines =
         |> Tuple.first
 
 
-view : Env -> Model -> Html Msg
-view env model =
+view : AppContext -> Model -> Html Msg
+view appContext model =
     let
         lines =
             model.log.logLines
-                |> toEntries env.timeZone
+                |> toEntries appContext.timeZone
                 |> List.indexedMap (viewKeyedEntry model)
     in
     div [ class "log" ]
