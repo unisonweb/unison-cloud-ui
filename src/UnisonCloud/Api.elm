@@ -21,17 +21,17 @@ session =
 
 services : Endpoint
 services =
-    GET { path = [ "service" ], queryParams = [] }
+    GET { path = [ "services" ], queryParams = [] }
 
 
 service : ServiceId -> Endpoint
 service sid =
-    GET { path = [ "service", Service.serviceIdToString sid ], queryParams = [] }
+    GET { path = [ "services", Service.serviceIdToString sid ], queryParams = [] }
 
 
 serviceDeploy : ServiceHash -> Endpoint
 serviceDeploy sh =
-    GET { path = [ "deployment", ServiceHash.toString sh ], queryParams = [] }
+    GET { path = [ "deployments", ServiceHash.toString sh ], queryParams = [] }
 
 
 serviceDeploys : Maybe ServiceId -> Endpoint
@@ -45,14 +45,14 @@ serviceDeploys sid =
                 Nothing ->
                     []
     in
-    GET { path = [ "deployment" ], queryParams = queryParams }
+    GET { path = [ "deployments" ], queryParams = queryParams }
 
 
 serviceLogs : ServiceId -> Endpoint
 serviceLogs sid =
-    GET { path = [ "logs", "service", Service.serviceIdToString sid ], queryParams = [] }
+    GET { path = [ "logs", "services", Service.serviceIdToString sid ], queryParams = [] }
 
 
 serviceDeployLogs : ServiceHash -> Endpoint
 serviceDeployLogs sh =
-    GET { path = [ "logs", "deployment", ServiceHash.toString sh ], queryParams = [] }
+    GET { path = [ "logs", "deployments", ServiceHash.toString sh ], queryParams = [] }
