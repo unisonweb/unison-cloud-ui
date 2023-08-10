@@ -140,10 +140,10 @@ main = do
             "run main"
 
         content =
-            div []
-                [ div [] [ text installDependencies ]
-                , div [] [ text program ]
-                , div [] [ text runCmd ]
+            div [ class "get-started-modal" ]
+                [ UI.codeBlock [] (text installDependencies)
+                , UI.codeBlock [] (text program)
+                , UI.codeBlock [] (text runCmd)
                 ]
     in
     content
