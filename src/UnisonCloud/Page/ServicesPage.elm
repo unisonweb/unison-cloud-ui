@@ -111,14 +111,11 @@ viewGetStartedModal : Html Msg
 viewGetStartedModal =
     let
         installDependencies =
-            """
-.> project.create helloWorld
-.> pull @unison/cloud/latest lib.cloud
-            """
+            """.> project.create helloWorld
+.> pull @unison/cloud/latest lib.cloud"""
 
         program =
-            """
-helloWorld : '{IO, Exception} ServiceHash HttpRequest HttpResponse
+            """helloWorld : '{IO, Exception} ServiceHash HttpRequest HttpResponse
 helloWorld = do
   server : '{Route, Remote} ()
   server =
@@ -130,8 +127,7 @@ helloWorld = do
 
   Cloud.run do
     env = Environment.create "hello-world-production"
-    deployHttp env (pool.wrap (Route.run server) )
-          """
+    deployHttp env (pool.wrap (Route.run server) )"""
 
         runCmd =
             "helloWorld/main> run helloWorld"

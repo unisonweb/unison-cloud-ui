@@ -5,7 +5,7 @@
 }
 
 .get-started-modal code {
-  background: var(--u-color_element);
+  background: var(--u-color_element_emphasized);
   border-radius: var(--border-radius-base);
   padding: 1rem;
 }
