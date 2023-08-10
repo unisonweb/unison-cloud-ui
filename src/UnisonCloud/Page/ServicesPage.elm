@@ -10,6 +10,8 @@ import UI.AppDocument exposing (AppDocument)
 import UI.Button as Button
 import UI.Card as Card
 import UI.DateTime as DateTime
+import UI.EmptyState as EmptyState
+import UI.EmptyStateCard as EmptyStateCard
 import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
@@ -116,12 +118,15 @@ viewError =
 
 viewEmptyState : Html Msg
 viewEmptyState =
-    div []
-        [ text "🌤️ Sunny, with a chance of clouds"
-        , Button.iconThenLabel ShowGetStartedModal Icon.graduationCap "Get started with a \"Hello World\" Cloud service"
-            |> Button.decorativeBlue
-            |> Button.view
-        ]
+    EmptyState.iconCloud
+        (EmptyState.CircleCenterPiece (text "🌤️"))
+        |> EmptyState.withContent
+            [ text "Sunny, with a chance of clouds"
+            , Button.iconThenLabel ShowGetStartedModal Icon.graduationCap "Get started with a \"Hello World\" Cloud service"
+                |> Button.decorativeBlue
+                |> Button.view
+            ]
+        |> EmptyStateCard.view
 
 
 view : Model -> AppDocument Msg
