@@ -17,6 +17,7 @@ import UI.Modal as Modal
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
+import UI.Placeholder as Placeholder
 import UI.StatusBanner as StatusBanner
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
@@ -150,9 +151,25 @@ helloWorld = do
         |> Modal.view
 
 
-viewLoading : Html msg
+viewLoading : List (Html msg)
 viewLoading =
-    text "Loading"
+    let
+        placeholder_ length intensity =
+            Placeholder.text |> Placeholder.withLength length |> Placeholder.withIntensity intensity |> Placeholder.view
+
+        placeholders =
+            [ placeholder_ Placeholder.Medium Placeholder.Normal
+            , placeholder_ Placeholder.Small Placeholder.Subdued
+            , placeholder_ Placeholder.Large Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Subdued
+            ]
+
+        viewCard_ =
+            Card.card placeholders
+                |> Card.asContained
+                |> Card.view
+    in
+    [ viewCard_, viewCard_, viewCard_ ]
 
 
 viewError : Html msg
@@ -179,10 +196,10 @@ view model =
         content =
             case model.services of
                 NotAsked ->
-                    [ viewLoading ]
+                    viewLoading
 
                 Loading ->
-                    [ viewLoading ]
+                    viewLoading
 
                 Success services ->
                     case services of
