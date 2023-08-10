@@ -13,6 +13,7 @@ import UI.DateTime as DateTime
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
 import UI.Icon as Icon
+import UI.Modal as Modal
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
@@ -106,6 +107,51 @@ viewService service =
         |> Card.view
 
 
+
+{-
+
+-}
+
+
+viewGetStartedModal : Html Msg
+viewGetStartedModal =
+    let
+        installDependencies =
+            ""
+
+        program =
+            """
+main : '{IO, Exception} ServiceHash HttpRequest HttpResponse
+main = do
+  server : '{Route, Remote} ()
+  server =
+    getHello = do
+      _ = noCapture GET (s "" )
+      ok.text ("Hello World!")
+
+    getHello
+
+  Cloud.run do
+    env = Environment.create "hello-world-production"
+    deployHttp env (pool.wrap (Route.run server) )
+          """
+
+        runCmd =
+            "run main"
+
+        content =
+            div []
+                [ div [] [ text installDependencies ]
+                , div [] [ text program ]
+                , div [] [ text runCmd ]
+                ]
+    in
+    content
+        |> Modal.Content
+        |> Modal.modal "get-started-modal" CloseModal
+        |> Modal.view
+
+
 viewLoading : Html msg
 viewLoading =
     text "Loading"
@@ -121,7 +167,7 @@ viewEmptyState =
     EmptyState.iconCloud
         (EmptyState.CircleCenterPiece (text "🌤️"))
         |> EmptyState.withContent
-            [ text "Sunny, with a chance of clouds"
+            [ h2 [] [ text "Sunny, with a chance of clouds" ]
             , Button.iconThenLabel ShowGetStartedModal Icon.graduationCap "Get started with a \"Hello World\" Cloud service"
                 |> Button.decorativeBlue
                 |> Button.view
@@ -151,6 +197,14 @@ view model =
                 Failure _ ->
                     [ viewError ]
 
+        modal =
+            case model.modal of
+                NoModal ->
+                    Nothing
+
+                GetStartedModal ->
+                    Just viewGetStartedModal
+
         page =
             PageLayout.centeredLayout
                 (PageContent.oneColumn content
@@ -165,5 +219,5 @@ view model =
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing
     , page = PageLayout.view page
-    , modal = Nothing
+    , modal = modal
     }
