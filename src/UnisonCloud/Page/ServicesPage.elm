@@ -2,6 +2,7 @@ module UnisonCloud.Page.ServicesPage exposing (..)
 
 import Html exposing (Html, div, h2, text)
 import Html.Attributes exposing (class)
+import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
@@ -12,6 +13,7 @@ import UI.Card as Card
 import UI.DateTime as DateTime
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
+import UI.ErrorCard as ErrorCard
 import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.PageContent as PageContent
@@ -172,9 +174,12 @@ viewLoading =
     [ viewCard_, viewCard_, viewCard_ ]
 
 
-viewError : Html msg
-viewError =
-    text "Could not load services"
+viewError : Http.Error -> Html msg
+viewError _ =
+    ErrorCard.errorCard
+        "Couldn't load services"
+        "Something unexpected happened on our end when loading services and we can't display them."
+        |> ErrorCard.view
 
 
 viewEmptyState : Html Msg
@@ -209,8 +214,8 @@ view model =
                         _ ->
                             List.map viewService services
 
-                Failure _ ->
-                    [ viewError ]
+                Failure e ->
+                    [ viewError e ]
 
         modal =
             case model.modal of
