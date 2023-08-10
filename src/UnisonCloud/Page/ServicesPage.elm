@@ -107,12 +107,6 @@ viewService service =
         |> Card.view
 
 
-
-{-
-
--}
-
-
 viewGetStartedModal : Html Msg
 viewGetStartedModal =
     let
@@ -147,8 +141,10 @@ main = do
                 ]
     in
     content
-        |> Modal.Content
+        |> Modal.content
         |> Modal.modal "get-started-modal" CloseModal
+        |> Modal.withHeader "Get started with Unison Cloud services"
+        |> Modal.withActions [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It" ]
         |> Modal.view
 
 
