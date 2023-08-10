@@ -4,7 +4,7 @@
   gap: 0.5rem;
 }
 
-.get-started-modal .code {
+.get-started-modal code {
   background: var(--u-color_element);
   border-radius: var(--border-radius-base);
   padding: 1rem;
