@@ -111,12 +111,15 @@ viewGetStartedModal : Html Msg
 viewGetStartedModal =
     let
         installDependencies =
-            ""
+            """
+.> project.create helloWorld
+.> pull @unison/cloud/latest lib.cloud
+            """
 
         program =
             """
-main : '{IO, Exception} ServiceHash HttpRequest HttpResponse
-main = do
+helloWorld : '{IO, Exception} ServiceHash HttpRequest HttpResponse
+helloWorld = do
   server : '{Route, Remote} ()
   server =
     getHello = do
@@ -131,7 +134,7 @@ main = do
           """
 
         runCmd =
-            "run main"
+            "helloWorld/main> run helloWorld"
 
         content =
             div [ class "get-started-modal" ]
