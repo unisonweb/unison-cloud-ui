@@ -144,7 +144,10 @@ main = do
         |> Modal.content
         |> Modal.modal "get-started-modal" CloseModal
         |> Modal.withHeader "Get started with Unison Cloud services"
-        |> Modal.withActions [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It" ]
+        |> Modal.withActions
+            [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It"
+                |> Button.emphasized
+            ]
         |> Modal.view
 
 
