@@ -112,7 +112,7 @@ viewGetStartedModal =
     let
         installDependencies =
             """.> project.create helloWorld
-.> pull @unison/cloud/latest lib.cloud"""
+helloWorld/main> pull @unison/cloud/latest lib.cloud"""
 
         program =
             """helloWorld : '{IO, Exception} ServiceHash HttpRequest HttpResponse
