@@ -169,7 +169,9 @@ view model =
                     OverviewPage.view
 
                 Services services ->
-                    ServicesPage.view services
+                    AppDocument.map
+                        ServicesPageMsg
+                        (ServicesPage.view services)
 
                 ServiceDeploy serviceHash service ->
                     AppDocument.map

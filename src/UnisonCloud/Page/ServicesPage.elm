@@ -7,8 +7,10 @@ import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.AppDocument exposing (AppDocument)
+import UI.Button as Button
 import UI.Card as Card
 import UI.DateTime as DateTime
+import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
@@ -25,13 +27,20 @@ import UnisonCloud.ServiceHash as ServiceHash
 -- MODEL
 
 
+type ServicesModal
+    = NoModal
+    | GetStartedModal
+
+
 type alias Model =
-    WebData (List Service)
+    { services : WebData (List Service)
+    , modal : ServicesModal
+    }
 
 
 init : AppContext -> ( Model, Cmd Msg )
 init appContext =
-    ( Loading, fetchServices appContext )
+    ( { services = Loading, modal = NoModal }, fetchServices appContext )
 
 
 
@@ -40,13 +49,21 @@ init appContext =
 
 type Msg
     = FetchServicesFinished (WebData (List Service))
+    | ShowGetStartedModal
+    | CloseModal
 
 
 update : AppContext -> Msg -> Model -> ( Model, Cmd Msg )
-update _ msg _ =
+update _ msg model =
     case msg of
         FetchServicesFinished services ->
-            ( services, Cmd.none )
+            ( { model | services = services }, Cmd.none )
+
+        ShowGetStartedModal ->
+            ( { model | modal = GetStartedModal }, Cmd.none )
+
+        CloseModal ->
+            ( { model | modal = NoModal }, Cmd.none )
 
 
 
@@ -92,11 +109,26 @@ viewLoading =
     text "Loading"
 
 
-view : Model -> AppDocument msg
+viewError : Html msg
+viewError =
+    text "Could not load services"
+
+
+viewEmptyState : Html Msg
+viewEmptyState =
+    div []
+        [ text "🌤️ Sunny, with a chance of clouds"
+        , Button.iconThenLabel ShowGetStartedModal Icon.graduationCap "Get started with a \"Hello World\" Cloud service"
+            |> Button.decorativeBlue
+            |> Button.view
+        ]
+
+
+view : Model -> AppDocument Msg
 view model =
     let
         content =
-            case model of
+            case model.services of
                 NotAsked ->
                     [ viewLoading ]
 
@@ -104,10 +136,15 @@ view model =
                     [ viewLoading ]
 
                 Success services ->
-                    List.map viewService services
+                    case services of
+                        [] ->
+                            [ viewEmptyState ]
+
+                        _ ->
+                            List.map viewService services
 
                 Failure _ ->
-                    [ text "Could not load services" ]
+                    [ viewError ]
 
         page =
             PageLayout.centeredLayout
