@@ -160,7 +160,7 @@ update _ msg model =
            in
            ( { model | log = log_ }, Cmd.none )
         -}
-        Scroll ev ->
+        Scroll _ ->
             {-
                let
                    topOffset =
