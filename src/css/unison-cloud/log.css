@@ -1,11 +1,11 @@
 .log {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 1.5rem;
 }
 
 .log .log-entries {
-  height: 200px;
   border: 1px solid var(--u-color_border);
   padding: 0.75rem;
   display: flex;
