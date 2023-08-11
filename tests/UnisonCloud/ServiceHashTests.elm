@@ -8,10 +8,25 @@ import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 fromUrlString : Test
 fromUrlString =
     describe "ServiceHash.fromUrlString"
-        [ test "parse a url string into a hash" <|
+        [ test "parse a URL string into a ServiceHash" <|
             \_ ->
                 Expect.equal
-                    ("@asdf"
+                    ("asdf"
+                        |> ServiceHash.fromUrlString
+                        |> Maybe.map ServiceHash.toString
+                        |> Maybe.withDefault "FAIL!"
+                    )
+                    (ServiceHash.toString testHash)
+        ]
+
+
+fromApiString : Test
+fromApiString =
+    describe "ServiceHash.fromApiString"
+        [ test "parse an API string into a ServiceHash" <|
+            \_ ->
+                Expect.equal
+                    ("asdf"
                         |> ServiceHash.fromUrlString
                         |> Maybe.map ServiceHash.toString
                         |> Maybe.withDefault "FAIL!"
@@ -23,7 +38,7 @@ fromUrlString =
 fromString : Test
 fromString =
     describe "ServiceHash.fromString"
-        [ test "String version of the log level" <|
+        [ test "parse a # prefixed string into a ServiceHash" <|
             \_ ->
                 Expect.equal
                     ("#asdf"
@@ -38,7 +53,7 @@ fromString =
 toString : Test
 toString =
     describe "ServiceHash.toString"
-        [ test "String version of the log level" <|
+        [ test "render the hash as a string with a prefix" <|
             \_ ->
                 Expect.equal "#asdf" (ServiceHash.toString testHash)
         ]
@@ -47,9 +62,18 @@ toString =
 toUrlString : Test
 toUrlString =
     describe "ServiceHash.toUrlString"
-        [ test "String version of the log level" <|
+        [ test "render the hash as a string without a prefix" <|
             \_ ->
-                Expect.equal "@asdf" (ServiceHash.toUrlString testHash)
+                Expect.equal "asdf" (ServiceHash.toUrlString testHash)
+        ]
+
+
+toApiString : Test
+toApiString =
+    describe "ServiceHash.toApiString"
+        [ test "render the hash as a string without a prefix" <|
+            \_ ->
+                Expect.equal "asdf" (ServiceHash.toUrlString testHash)
         ]
 
 

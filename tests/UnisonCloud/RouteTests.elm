@@ -38,7 +38,7 @@ serviceDeployRoute =
             \_ ->
                 let
                     url =
-                        mkUrl "/service-deploys/@abc"
+                        mkUrl "/service-deploys/abc"
                 in
                 Expect.equal
                     (ServiceDeploy (ServiceHash.unsafeFromString "abc"))
