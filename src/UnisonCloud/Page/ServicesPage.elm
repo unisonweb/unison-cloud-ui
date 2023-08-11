@@ -179,7 +179,9 @@ viewError _ =
     ErrorCard.errorCard
         "Couldn't load services"
         "Something unexpected happened on our end when loading services and we can't display them."
-        |> ErrorCard.view
+        |> ErrorCard.toCard
+        |> Card.asContainedWithFade
+        |> Card.view
 
 
 viewEmptyState : Html Msg

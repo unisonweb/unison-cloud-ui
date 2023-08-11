@@ -17,10 +17,10 @@ type alias Model =
 
 
 init : AppContext -> ServiceHash -> ( Model, Cmd Msg )
-init appContext _ =
+init appContext sh =
     let
         ( log, logCmd ) =
-            Log.init appContext
+            Log.init appContext (Log.ServiceDeployContext sh)
     in
     ( { log = log }, Cmd.map LogMsg logCmd )
 

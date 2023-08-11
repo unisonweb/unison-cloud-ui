@@ -42,3 +42,14 @@ decode =
         |> required "serviceId" Decode.string
         |> required "serviceName" Decode.string
         |> required "latestDeploy" (nullable ServiceDeploy.decode)
+
+
+
+{-
+
+   serviceHash : "BqVhDrNgHddFrNsEDRuxTUkeJUrnAGY8bFTNpe_r24Q"
+   serviceHistory :
+   [{serviceAssignmentHash: "BqVhDrNgHddFrNsEDRuxTUkeJUrnAGY8bFTNpe_r24Q",…}]
+   serviceUserId : "U-141c4ddf-2423-4f10-a4de-465939951354"
+
+-}

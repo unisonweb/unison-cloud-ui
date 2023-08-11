@@ -6,7 +6,10 @@ import Html.Attributes exposing (class, classList)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
+import Json.Decode as Decode
+import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
+import RemoteData exposing (RemoteData(..), WebData)
 import Time
 import UI
 import UI.Button as Button
@@ -15,9 +18,12 @@ import UI.Icon as Icon
 import UI.Sizing as Sizing
 import UUID
 import UUID.Set as Set exposing (Set)
+import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
+import UnisonCloud.Service exposing (ServiceId)
+import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 
@@ -68,15 +74,20 @@ type Direction
     | After
 
 
+type LogBrowsingContext
+    = ServiceContext ServiceId
+    | ServiceDeployContext ServiceHash
+
+
 
 -- WHERE IS BOOKMARK?
 
 
 type alias Log =
     { expandedLines : Set
-    , freshOldLines : List LogLine
-    , logLines : List LogLine
-    , freshNewLines : List LogLine
+    , freshOldLines : WebData (List LogLine)
+    , logLines : WebData (List LogLine)
+    , freshNewLines : WebData (List LogLine)
     }
 
 
@@ -84,16 +95,16 @@ type alias Model =
     { log : Log }
 
 
-init : AppContext -> ( Model, Cmd Msg )
-init _ =
+init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
+init appContext logBrowsingContext =
     ( { log =
             { expandedLines = Set.empty
-            , freshOldLines = []
-            , logLines = fauxLines
-            , freshNewLines = []
+            , freshOldLines = NotAsked
+            , logLines = Loading
+            , freshNewLines = NotAsked
             }
       }
-    , Cmd.none
+    , fetchLogLines appContext logBrowsingContext
     )
 
 
@@ -102,7 +113,7 @@ init _ =
 
 
 type Msg
-    = LogLinesFetchFinished
+    = FetchLogLinesFinished (WebData (List LogLine))
     | Scroll ScrollEvent
     | FetchNew
     | FetchOld
@@ -124,44 +135,53 @@ update _ msg model =
             ( { model | log = log_ }, Cmd.none )
 
         FetchNew ->
-            let
-                log_ =
-                    { log
-                        | logLines = log.freshNewLines ++ log.logLines
-                        , freshNewLines = newLines
-                    }
-            in
-            ( { model | log = log_ }, Cmd.none )
+            ( model, Cmd.none )
 
+        {-
+           let
+               log_ =
+                   { log
+                       | logLines = log.freshNewLines ++ log.logLines
+                       , freshNewLines = newLines
+                   }
+           in
+           ( { model | log = log_ }, Cmd.none )
+        -}
         FetchOld ->
-            let
-                log_ =
-                    { log
-                        | logLines = log.logLines ++ log.freshOldLines
-                        , freshOldLines = oldLines
-                    }
-            in
-            ( { model | log = log_ }, Cmd.none )
+            ( model, Cmd.none )
 
+        {-
+           let
+               log_ =
+                   { log
+                       | logLines = log.logLines ++ log.freshOldLines
+                       , freshOldLines = oldLines
+                   }
+           in
+           ( { model | log = log_ }, Cmd.none )
+        -}
         Scroll ev ->
-            let
-                topOffset =
-                    abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
+            {-
+               let
+                   topOffset =
+                       abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
 
-                closenessOffset =
-                    0
+                   closenessOffset =
+                       0
 
-                isCloseToTop =
-                    topOffset <= closenessOffset
+                   isCloseToTop =
+                       topOffset <= closenessOffset
 
-                log_ =
-                    if isCloseToTop then
-                        { log | logLines = log.logLines ++ oldLines }
+                   log_ =
+                       if isCloseToTop then
+                           { log | logLines = log.logLines ++ oldLines }
 
-                    else
-                        log
-            in
-            ( { model | log = log_ }, Cmd.none )
+                       else
+                           log
+               in
+               ( { model | log = log_ }, Cmd.none )
+            -}
+            ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -180,9 +200,21 @@ logEntryHeight =
 -- EFFECTS
 
 
-fetchLogLines : AppContext -> LogLine -> Direction -> Cmd Msg
-fetchLogLines _ _ _ =
-    Cmd.none
+fetchLogLines : AppContext -> LogBrowsingContext -> Cmd Msg
+fetchLogLines appContext logBrowsingContext =
+    let
+        endpoint =
+            case logBrowsingContext of
+                ServiceContext sid ->
+                    CloudApi.serviceLogs sid
+
+                ServiceDeployContext sh ->
+                    CloudApi.serviceDeployLogs sh
+    in
+    endpoint
+        |> HttpApi.toRequest (Decode.list LogLine.decode)
+            (RemoteData.fromResult >> FetchLogLinesFinished)
+        |> HttpApi.perform appContext.api
 
 
 
@@ -192,7 +224,7 @@ fetchLogLines _ _ _ =
 {-| If there's no message, print out the line data instead of it is present,
 finally, if there's no data, render an empty line.
 
-TODO: Add various highlights, like bolding of GET and POST.
+TODO:Add various highlights, like bolding of GET and POST.
 
 -}
 viewLogMessage : LogLine -> Html Msg
@@ -378,6 +410,7 @@ view appContext model =
     let
         lines =
             model.log.logLines
+                |> RemoteData.withDefault []
                 |> toEntries appContext.timeZone
                 |> List.indexedMap (viewKeyedEntry model)
     in

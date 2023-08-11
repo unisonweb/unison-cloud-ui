@@ -55,4 +55,7 @@ serviceLogs sid =
 
 serviceDeployLogs : ServiceHash -> Endpoint
 serviceDeployLogs sh =
-    GET { path = [ "logs", "deployments", ServiceHash.toString sh ], queryParams = [] }
+    GET
+        { path = [ "logs", "deployment", ServiceHash.toUnprefixedString sh ]
+        , queryParams = []
+        }
