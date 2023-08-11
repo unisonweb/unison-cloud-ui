@@ -101,5 +101,5 @@ toApiString (ServiceHash h) =
 
 decode : Decode.Decoder ServiceHash
 decode =
-    Decode.map fromString Decode.string
+    Decode.map fromApiString Decode.string
         |> Decode.andThen (Util.decodeFailInvalid "Invalid ServiceHash")
