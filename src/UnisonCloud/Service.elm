@@ -1,7 +1,7 @@
 module UnisonCloud.Service exposing (..)
 
-import Json.Decode as Decode exposing (nullable)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (optional, required)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 
 
@@ -39,9 +39,9 @@ decode =
             }
     in
     Decode.succeed makeService
-        |> required "serviceId" Decode.string
-        |> required "serviceName" Decode.string
-        |> required "latestDeploy" (nullable ServiceDeploy.decode)
+        |> required "id" Decode.string
+        |> required "name" Decode.string
+        |> optional "latestServiceDeploy" (Decode.map Just ServiceDeploy.decode) Nothing
 
 
 
