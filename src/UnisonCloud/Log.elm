@@ -217,7 +217,7 @@ fetchLogLines appContext logBrowsingContext =
                     CloudApi.serviceDeployLogs sh
     in
     endpoint
-        |> HttpApi.toRequest (Decode.list LogLine.decode)
+        |> HttpApi.toRequest (Decode.field "logs" (Decode.list LogLine.decode))
             (RemoteData.fromResult >> FetchLogLinesFinished)
         |> HttpApi.perform appContext.api
 
