@@ -21,6 +21,7 @@ import UI.Icon as Icon
 import UI.Sizing as Sizing
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
+import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
 import UnisonCloud.Service exposing (ServiceId)
@@ -59,15 +60,6 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
    scroll position perfectly and make the switch without the user knowing.
 
 -}
-
-
-type LogEntry
-    = Line LogLine
-    | DateBoundary DateTime
-
-
-type alias LogEntries =
-    List LogEntry
 
 
 type Direction
@@ -347,37 +339,6 @@ viewKeyedEntry model idx entry =
             ( key date "boundary", lazy viewDateBoundary date )
 
 
-{-| LogLines are ordered (from the backend) with the newest last in the list, which is how we want to
-render them, however, we use css to reverse the rendering of the list (which
-gives us some better scrolling behavior and control), so while we're adding
-date markers, by running through the list, we're also flipping its order, so
-that when css again flips it, it will be rendered with the newest entry in the
-bottom of the screen, like you'd see with `tail`.
--}
-toEntries : Time.Zone -> List LogLine -> List LogEntry
-toEntries timeZone lines =
-    let
-        f l ( entries, currentDate ) =
-            case currentDate of
-                Nothing ->
-                    ( [ Line l, DateBoundary l.loggedAt ]
-                    , Just l.loggedAt
-                    )
-
-                Just d ->
-                    if DateTime.isSameDay timeZone l.loggedAt d then
-                        ( entries ++ [ Line l ], Just l.loggedAt )
-
-                    else
-                        ( entries ++ [ Line l, DateBoundary l.loggedAt ]
-                        , Just l.loggedAt
-                        )
-    in
-    lines
-        |> List.foldr f ( [], Nothing )
-        |> Tuple.first
-
-
 view : AppContext -> Model -> Html Msg
 view appContext model =
     let
@@ -392,7 +353,7 @@ view appContext model =
         lines =
             model.log.logLines
                 |> RemoteData.withDefault []
-                |> toEntries appContext.timeZone
+                |> LogEntries.fromLines appContext.timeZone
                 |> List.indexedMap (viewKeyedEntry model)
     in
     div [ class "log" ]
