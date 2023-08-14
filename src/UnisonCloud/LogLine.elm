@@ -2,6 +2,7 @@ module UnisonCloud.LogLine exposing (..)
 
 import Dict exposing (Dict)
 import Json.Decode as Decode
+import Json.Decode.Extra exposing (doubleEncoded)
 import Json.Decode.Pipeline exposing (required)
 import UI.DateTime as DateTime exposing (DateTime)
 import UUID exposing (UUID)
@@ -39,8 +40,8 @@ dataToList line =
 -- DECODE
 
 
-decode : Decode.Decoder LogLine
-decode =
+decode_ : Decode.Decoder LogLine
+decode_ =
     let
         makeLine id loggedAt line =
             let
@@ -69,3 +70,8 @@ decode =
         |> required "id" UUID.jsonDecoder
         |> required "time" DateTime.decode
         |> required "userMsg" (Decode.dict Decode.string)
+
+
+decode : Decode.Decoder LogLine
+decode =
+    doubleEncoded decode_
