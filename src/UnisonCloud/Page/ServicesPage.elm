@@ -12,6 +12,7 @@ import UI.AppDocument exposing (AppDocument)
 import UI.Button as Button
 import UI.ByAt as ByAt
 import UI.Card as Card
+import UI.Click as Click
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
 import UI.ErrorCard as ErrorCard
@@ -147,7 +148,9 @@ viewUnassignedDeploys deploys =
     let
         viewUnassignedDeploy d =
             Card.card
-                [ h2 [] [ text (ServiceHash.toString d.hash) ]
+                [ Click.view []
+                    [ h2 [] [ text (ServiceHash.toString d.hash) ] ]
+                    (Link.serviceDeploy d.hash)
                 , StatusBanner.good (ServiceHash.toShortString d.hash)
                 , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
