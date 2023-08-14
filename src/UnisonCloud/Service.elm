@@ -45,4 +45,4 @@ decode =
         |> required "id" Decode.string
         |> required "name" Decode.string
         |> optional "latestServiceDeploy" (Decode.map Just ServiceDeploy.decode) Nothing
-        |> required "tags" (Decode.list string)
+        |> optional "tags" (Decode.list string) []

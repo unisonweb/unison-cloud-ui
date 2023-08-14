@@ -1,7 +1,7 @@
 module UnisonCloud.ServiceDeploy exposing (..)
 
 import Json.Decode as Decode exposing (string)
-import Json.Decode.Pipeline exposing (required, requiredAt)
+import Json.Decode.Pipeline exposing (optional, required, requiredAt)
 import Lib.UserHandle as UserHandle exposing (UserHandle)
 import Set exposing (Set)
 import UI.DateTime as DateTime exposing (DateTime)
@@ -36,4 +36,4 @@ decode =
         |> required "hash" ServiceHash.decode
         |> requiredAt [ "deployedBy", "handle" ] UserHandle.decodeUnprefixed
         |> required "deployedAt" DateTime.decode
-        |> required "tags" (Decode.list string)
+        |> optional "tags" (Decode.list string) []
