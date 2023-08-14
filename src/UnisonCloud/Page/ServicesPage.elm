@@ -9,8 +9,8 @@ import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.AppDocument exposing (AppDocument)
 import UI.Button as Button
+import UI.ByAt as ByAt
 import UI.Card as Card
-import UI.DateTime as DateTime
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
 import UI.ErrorCard as ErrorCard
@@ -48,10 +48,11 @@ type alias Model =
 
 init : AppContext -> ( Model, Cmd Msg )
 init appContext =
-    ( { services = Loading, unassignedDeploys = Loading, modal = NoModal }
+    ( { services = Loading, unassignedDeploys = Success [], modal = NoModal }
     , Cmd.batch
         [ fetchServices appContext
-        , fetchUnassignedDeploys appContext
+
+        -- , fetchUnassignedDeploys appContext
         ]
     )
 
@@ -118,7 +119,7 @@ viewService service =
                     ( Link.view service.name (Link.serviceDeploy d.hash)
                     , div [ class "latest-deploy" ]
                         [ StatusBanner.good (ServiceHash.toString d.hash)
-                        , DateTime.view DateTime.Distance d.deployedAt
+                        , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
                     )
 
@@ -135,13 +136,9 @@ viewUnassignedDeploys deploys =
     let
         viewUnassignedDeploy d =
             Card.card
-                [ h2 []
-                    [ text (ServiceHash.toString d.hash)
-                    ]
-                , div [ class "latest-deploy" ]
-                    [ StatusBanner.good (ServiceHash.toString d.hash)
-                    , DateTime.view DateTime.Distance d.deployedAt
-                    ]
+                [ h2 [] [ text (ServiceHash.toString d.hash) ]
+                , StatusBanner.good (ServiceHash.toString d.hash)
+                , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
                 |> Card.asContained
                 |> Card.view
