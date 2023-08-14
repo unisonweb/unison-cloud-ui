@@ -131,7 +131,7 @@ update _ msg model =
         FetchLogLinesFinished logLines ->
             let
                 log_ =
-                    { log | logLines = logLines }
+                    { log | logLines = RemoteData.map List.reverse logLines }
             in
             ( { model | log = log_ }, Cmd.none )
 
