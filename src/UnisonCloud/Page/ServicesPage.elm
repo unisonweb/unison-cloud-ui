@@ -50,11 +50,10 @@ type alias Model =
 
 init : AppContext -> ( Model, Cmd Msg )
 init appContext =
-    ( { services = Loading, unassignedDeploys = Success [], modal = NoModal }
+    ( { services = Loading, unassignedDeploys = Loading, modal = NoModal }
     , Cmd.batch
         [ fetchServices appContext
-
-        -- , fetchUnassignedDeploys appContext
+        , fetchUnassignedDeploys appContext
         ]
     )
 

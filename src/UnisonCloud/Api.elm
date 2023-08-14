@@ -35,7 +35,7 @@ serviceDeploy sh =
 
 unassignedServiceDeploys : Endpoint
 unassignedServiceDeploys =
-    GET { path = [ "deployments", "unassigned" ], queryParams = [] }
+    GET { path = [ "unassigned" ], queryParams = [] }
 
 
 serviceLogs : ServiceId -> Endpoint
