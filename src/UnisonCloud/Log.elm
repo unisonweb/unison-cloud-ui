@@ -127,10 +127,10 @@ update _ msg model =
             model.log
     in
     case msg of
-        ToggleLogLine line ->
+        FetchLogLinesFinished logLines ->
             let
                 log_ =
-                    { log | expandedLines = Set.toggle line.id log.expandedLines }
+                    { log | logLines = logLines }
             in
             ( { model | log = log_ }, Cmd.none )
 
@@ -183,8 +183,12 @@ update _ msg model =
             -}
             ( model, Cmd.none )
 
-        _ ->
-            ( model, Cmd.none )
+        ToggleLogLine line ->
+            let
+                log_ =
+                    { log | expandedLines = Set.toggle line.id log.expandedLines }
+            in
+            ( { model | log = log_ }, Cmd.none )
 
 
 
@@ -345,40 +349,6 @@ viewKeyedEntry model idx entry =
 id_ : String -> UUID.UUID
 id_ s =
     UUID.forName s UUID.urlNamespace
-
-
-newLines : List LogLine
-newLines =
-    [ { id = id_ "1690393751598", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393751598), message = Just "Newest", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690393747598", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393747598), message = Just "Newer", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690393744598", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690393744598), message = Just "New", level = LogLevel.Info, data = Dict.empty }
-    ]
-
-
-oldLines : List LogLine
-oldLines =
-    [ { id = id_ "1690207705511", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690207705511), message = Just "Old", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690207703512", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690207703512), message = Just "Older", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690200685512", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690200685512), message = Just "Oldest", level = LogLevel.Info, data = Dict.empty }
-    ]
-
-
-fauxLines : List LogLine
-fauxLines =
-    [ { id = id_ "1690392906913", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392906913), message = Just "GET /products?featured", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690392902913", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392902913), message = Nothing, level = LogLevel.Info, data = Dict.fromList [ ( "msg", "totally unstructured message" ), ( "with another", "message" ) ] }
-    , { id = id_ "1690392899916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392899916), message = Just "DB.getProducts returned 16 items in 59ms", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690392606916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392606916), message = Nothing, level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690392546916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392546916), message = Just "16 times: DB.getProductDetails returned 1 item in 1240ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
-    , { id = id_ "1690392426916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392426916), message = Just "POST /orders", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690392394916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392394916), message = Just "DB.getUser returned 0 item in 35ms", level = LogLevel.Info, data = Dict.fromList [ ( "something", "hi" ), ( "and", "bye" ) ] }
-    , { id = id_ "1690392378916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392378916), message = Just "Request failed, couldn't find user", level = LogLevel.Error, data = Dict.empty }
-    , { id = id_ "1690392186916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690392186916), message = Just "Add to cart", level = LogLevel.Warn, data = Dict.empty }
-    , { id = id_ "1690306506916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690306506916), message = Just "Service Call", level = LogLevel.Info, data = Dict.empty }
-    , { id = id_ "1690306326916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690306326916), message = Just "DB.getUser returned 1 item in 41ms", level = LogLevel.Custom "TIMING", data = Dict.empty }
-    , { id = id_ "1690306324916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690306324916), message = Just "Order and User connected", level = LogLevel.Info, data = Dict.fromList [ ( "userId", "asd4swx1asd4swx1asd4swx1" ), ( "organization", "Apple Inc." ), ( "orderSize", "7" ) ] }
-    , { id = id_ "1690299306916", loggedAt = DateTime.fromPosix (Time.millisToPosix 1690299306916), message = Just "log line", level = LogLevel.Warn, data = Dict.empty }
-    ]
 
 
 toEntries : Time.Zone -> List LogLine -> List LogEntry

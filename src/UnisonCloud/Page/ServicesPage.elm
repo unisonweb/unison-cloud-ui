@@ -13,6 +13,7 @@ import UI.Button as Button
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.Click as Click
+import UI.Divider as Divider
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
 import UI.ErrorCard as ErrorCard
@@ -158,11 +159,12 @@ viewUnassignedDeploys deploys =
                 |> Card.view
     in
     div [ class "unassigned-deploys" ]
-        [ UI.divider
-        , h2 []
+        ([ Divider.divider |> Divider.small |> Divider.withoutMargin |> Divider.view
+         , h2 []
             [ text "Unassigned Service Deploys" ]
-        , div [] (List.map viewUnassignedDeploy deploys)
-        ]
+         ]
+            ++ List.map viewUnassignedDeploy deploys
+        )
 
 
 viewGetStartedModal : Html Msg
