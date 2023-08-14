@@ -131,7 +131,7 @@ update _ msg model =
         FetchLogLinesFinished logLines ->
             let
                 log_ =
-                    { log | logLines = RemoteData.map List.reverse logLines }
+                    { log | logLines = logLines }
             in
             ( { model | log = log_ }, Cmd.none )
 
@@ -347,6 +347,13 @@ viewKeyedEntry model idx entry =
             ( key date "boundary", lazy viewDateBoundary date )
 
 
+{-| LogLines are ordered (from the backend) with the newest last in the list, which is how we want to
+render them, however, we use css to reverse the rendering of the list (which
+gives us some better scrolling behavior and control), so while we're adding
+date markers, by running through the list, we're also flipping its order, so
+that when css again flips it, it will be rendered with the newest entry in the
+bottom of the screen, like you'd see with `tail`.
+-}
 toEntries : Time.Zone -> List LogLine -> List LogEntry
 toEntries timeZone lines =
     let
@@ -367,7 +374,7 @@ toEntries timeZone lines =
                         )
     in
     lines
-        |> List.foldl f ( [], Nothing )
+        |> List.foldr f ( [], Nothing )
         |> Tuple.first
 
 
