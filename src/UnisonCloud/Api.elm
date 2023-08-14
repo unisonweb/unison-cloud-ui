@@ -2,16 +2,15 @@ module UnisonCloud.Api exposing
     ( service
     , serviceDeploy
     , serviceDeployLogs
-    , serviceDeploys
     , serviceLogs
     , services
     , session
+    , unassignedServiceDeploys
     )
 
 import Lib.HttpApi exposing (Endpoint(..))
 import UnisonCloud.Service as Service exposing (ServiceId)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
-import Url.Builder exposing (string)
 
 
 session : Endpoint
@@ -34,18 +33,9 @@ serviceDeploy sh =
     GET { path = [ "deployments", ServiceHash.toString sh ], queryParams = [] }
 
 
-serviceDeploys : Maybe ServiceId -> Endpoint
-serviceDeploys sid =
-    let
-        queryParams =
-            case sid of
-                Just sid_ ->
-                    [ string "serviceId" (Service.serviceIdToString sid_) ]
-
-                Nothing ->
-                    []
-    in
-    GET { path = [ "deployments" ], queryParams = queryParams }
+unassignedServiceDeploys : Endpoint
+unassignedServiceDeploys =
+    GET { path = [ "deployments", "unassigned" ], queryParams = [] }
 
 
 serviceLogs : ServiceId -> Endpoint

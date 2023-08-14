@@ -26,6 +26,7 @@ import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
+import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 import UnisonCloud.ServiceHash as ServiceHash
 
 
@@ -40,13 +41,19 @@ type ServicesModal
 
 type alias Model =
     { services : WebData (List Service)
+    , unassignedDeploys : WebData (List ServiceDeploy)
     , modal : ServicesModal
     }
 
 
 init : AppContext -> ( Model, Cmd Msg )
 init appContext =
-    ( { services = Loading, modal = NoModal }, fetchServices appContext )
+    ( { services = Loading, unassignedDeploys = Loading, modal = NoModal }
+    , Cmd.batch
+        [ fetchServices appContext
+        , fetchUnassignedDeploys appContext
+        ]
+    )
 
 
 
@@ -55,6 +62,7 @@ init appContext =
 
 type Msg
     = FetchServicesFinished (WebData (List Service))
+    | FetchUnassignedDeploysFinished (WebData (List ServiceDeploy))
     | ShowGetStartedModal
     | CloseModal
 
@@ -64,6 +72,9 @@ update _ msg model =
     case msg of
         FetchServicesFinished services ->
             ( { model | services = services }, Cmd.none )
+
+        FetchUnassignedDeploysFinished deploys ->
+            ( { model | unassignedDeploys = deploys }, Cmd.none )
 
         ShowGetStartedModal ->
             ( { model | modal = GetStartedModal }, Cmd.none )
@@ -82,6 +93,15 @@ fetchServices appContext =
         |> HttpApi.toRequest
             (Decode.list Service.decode)
             (RemoteData.fromResult >> FetchServicesFinished)
+        |> HttpApi.perform appContext.api
+
+
+fetchUnassignedDeploys : AppContext -> Cmd Msg
+fetchUnassignedDeploys appContext =
+    CloudApi.unassignedServiceDeploys
+        |> HttpApi.toRequest
+            (Decode.list ServiceDeploy.decode)
+            (RemoteData.fromResult >> FetchUnassignedDeploysFinished)
         |> HttpApi.perform appContext.api
 
 
@@ -108,6 +128,30 @@ viewService service =
     Card.card [ h2 [] [ heading ], latestDeploy ]
         |> Card.asContained
         |> Card.view
+
+
+viewUnassignedDeploys : List ServiceDeploy -> Html msg
+viewUnassignedDeploys deploys =
+    let
+        viewUnassignedDeploy d =
+            Card.card
+                [ h2 []
+                    [ text (ServiceHash.toString d.hash)
+                    ]
+                , div [ class "latest-deploy" ]
+                    [ StatusBanner.good (ServiceHash.toString d.hash)
+                    , DateTime.view DateTime.Distance d.deployedAt
+                    ]
+                ]
+                |> Card.asContained
+                |> Card.view
+    in
+    div [ class "unassigned-deploys" ]
+        [ UI.divider
+        , h2 []
+            [ text "Unassigned Service Deploys" ]
+        , div [] (List.map viewUnassignedDeploy deploys)
+        ]
 
 
 viewGetStartedModal : Html Msg
@@ -200,21 +244,34 @@ viewEmptyState =
 view : Model -> AppDocument Msg
 view model =
     let
+        data =
+            RemoteData.map2
+                Tuple.pair
+                model.services
+                model.unassignedDeploys
+
         content =
-            case model.services of
+            case data of
                 NotAsked ->
                     viewLoading
 
                 Loading ->
                     viewLoading
 
-                Success services ->
-                    case services of
-                        [] ->
+                Success ( services, deploys ) ->
+                    case ( services, deploys ) of
+                        ( [], [] ) ->
                             [ viewEmptyState ]
+
+                        ( [], _ ) ->
+                            [ viewUnassignedDeploys deploys ]
+
+                        ( _, [] ) ->
+                            List.map viewService services
 
                         _ ->
                             List.map viewService services
+                                ++ [ viewUnassignedDeploys deploys ]
 
                 Failure e ->
                     [ viewError e ]
