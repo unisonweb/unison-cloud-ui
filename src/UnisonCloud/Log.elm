@@ -380,6 +380,7 @@ view appContext model =
     let
         lines =
             model.log.logLines
+                |> Debug.log "loglines"
                 |> RemoteData.withDefault []
                 |> toEntries appContext.timeZone
                 |> List.indexedMap (viewKeyedEntry model)
