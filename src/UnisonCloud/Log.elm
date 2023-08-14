@@ -9,6 +9,7 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
+import Lib.Util
 import RemoteData exposing (RemoteData(..), WebData)
 import Time
 import UI
@@ -378,9 +379,16 @@ toEntries timeZone lines =
 view : AppContext -> Model -> Html Msg
 view appContext model =
     let
+        err =
+            case model.log.logLines of
+                Failure e ->
+                    div [] [ text (Lib.Util.httpErrorToString e) ]
+
+                _ ->
+                    UI.nothing
+
         lines =
             model.log.logLines
-                |> Debug.log "loglines"
                 |> RemoteData.withDefault []
                 |> toEntries appContext.timeZone
                 |> List.indexedMap (viewKeyedEntry model)
@@ -388,7 +396,8 @@ view appContext model =
     div [ class "log" ]
         [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
         , div [ class "log_controls" ]
-            [ Button.button FetchNew "Fetch New" |> Button.view
+            [ err
+            , Button.button FetchNew "Fetch New" |> Button.view
             , Button.button FetchOld "Fetch Old" |> Button.view
             ]
         ]
