@@ -227,11 +227,7 @@ viewLoading =
 
 
 viewError : Http.Error -> Html msg
-viewError e =
-    let
-        x =
-            Debug.log "err" e
-    in
+viewError _ =
     ErrorCard.errorCard
         "Couldn't load services"
         "Something unexpected happened on our end when loading services and we can't display them."
