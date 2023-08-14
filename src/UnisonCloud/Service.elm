@@ -1,7 +1,8 @@
 module UnisonCloud.Service exposing (..)
 
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (string)
 import Json.Decode.Pipeline exposing (optional, required)
+import Set exposing (Set)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 
 
@@ -13,6 +14,7 @@ type alias Service =
     { id : ServiceId
     , name : String
     , latestDeploy : Maybe ServiceDeploy
+    , tags : Set String
     }
 
 
@@ -32,24 +34,15 @@ serviceIdToString (ServiceId id_) =
 decode : Decode.Decoder Service
 decode =
     let
-        makeService rawId name latestDeploy =
+        makeService rawId name latestDeploy tags =
             { id = ServiceId rawId
             , name = name
             , latestDeploy = latestDeploy
+            , tags = Set.fromList tags
             }
     in
     Decode.succeed makeService
         |> required "id" Decode.string
         |> required "name" Decode.string
         |> optional "latestServiceDeploy" (Decode.map Just ServiceDeploy.decode) Nothing
-
-
-
-{-
-
-   serviceHash : "BqVhDrNgHddFrNsEDRuxTUkeJUrnAGY8bFTNpe_r24Q"
-   serviceHistory :
-   [{serviceAssignmentHash: "BqVhDrNgHddFrNsEDRuxTUkeJUrnAGY8bFTNpe_r24Q",…}]
-   serviceUserId : "U-141c4ddf-2423-4f10-a4de-465939951354"
-
--}
+        |> required "tags" (Decode.list string)

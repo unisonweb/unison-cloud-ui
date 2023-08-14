@@ -6,6 +6,7 @@ import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
+import Set
 import UI
 import UI.AppDocument exposing (AppDocument)
 import UI.Button as Button
@@ -21,6 +22,7 @@ import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
 import UI.Placeholder as Placeholder
 import UI.StatusBanner as StatusBanner
+import UI.Tag as Tag
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
@@ -124,9 +126,19 @@ viewService service =
                     )
 
                 Nothing ->
-                    ( text service.name, UI.nothing )
+                    ( text service.name, text "🐣 No deploys yet" )
+
+        tags =
+            if Set.isEmpty service.tags then
+                UI.nothing
+
+            else
+                service.tags
+                    |> Set.toList
+                    |> List.map Tag.tag
+                    |> Tag.viewTags
     in
-    Card.card [ h2 [] [ heading ], latestDeploy ]
+    Card.card [ h2 [] [ heading ], tags, latestDeploy ]
         |> Card.asContained
         |> Card.view
 
