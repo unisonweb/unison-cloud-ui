@@ -5,7 +5,6 @@ import Json.Decode as Decode
 import Json.Decode.Extra exposing (doubleEncoded)
 import Json.Decode.Pipeline exposing (required)
 import UI.DateTime as DateTime exposing (DateTime)
-import UUID exposing (UUID)
 import UnisonCloud.LogLevel as LogLevel exposing (LogLevel)
 
 
@@ -14,7 +13,7 @@ type alias LogLineData =
 
 
 type alias LogLine =
-    { id : UUID
+    { id : String
     , loggedAt : DateTime
     , message : Maybe String
     , level : LogLevel
@@ -67,7 +66,7 @@ decode_ =
             }
     in
     Decode.succeed makeLine
-        |> required "id" UUID.jsonDecoder
+        |> required "id" Decode.string
         |> required "time" DateTime.decode
         |> required "userMsg" (Decode.dict Decode.string)
 

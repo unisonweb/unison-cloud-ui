@@ -11,14 +11,14 @@ import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 import Lib.Util
 import RemoteData exposing (RemoteData(..), WebData)
+import Set exposing (Set)
+import Set.Extra as SetE
 import Time
 import UI
 import UI.Button as Button
 import UI.DateTime as DateTime exposing (DateTime)
 import UI.Icon as Icon
 import UI.Sizing as Sizing
-import UUID
-import UUID.Set as Set exposing (Set)
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.LogLevel as LogLevel
@@ -85,7 +85,7 @@ type LogBrowsingContext
 
 
 type alias Log =
-    { expandedLines : Set
+    { expandedLines : Set String -- Set (LogId)
     , freshOldLines : WebData (List LogLine)
     , logLines : WebData (List LogLine)
     , freshNewLines : WebData (List LogLine)
@@ -187,7 +187,7 @@ update _ msg model =
         ToggleLogLine line ->
             let
                 log_ =
-                    { log | expandedLines = Set.toggle line.id log.expandedLines }
+                    { log | expandedLines = SetE.toggle line.id log.expandedLines }
             in
             ( { model | log = log_ }, Cmd.none )
 
@@ -345,11 +345,6 @@ viewKeyedEntry model idx entry =
 
         DateBoundary date ->
             ( key date "boundary", lazy viewDateBoundary date )
-
-
-id_ : String -> UUID.UUID
-id_ s =
-    UUID.forName s UUID.urlNamespace
 
 
 toEntries : Time.Zone -> List LogLine -> List LogEntry

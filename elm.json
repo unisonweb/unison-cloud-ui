@@ -8,8 +8,6 @@
     "dependencies": {
         "direct": {
             "NoRedInk/elm-json-decode-pipeline": "1.0.1",
-            "PedroHLC/elm-uuid-dict": "1.0.0",
-            "TSFoster/elm-uuid": "4.2.0",
             "avh4/elm-color": "1.0.0",
             "danhandrea/elm-date-format": "2.0.2",
             "elm/browser": "1.0.2",
