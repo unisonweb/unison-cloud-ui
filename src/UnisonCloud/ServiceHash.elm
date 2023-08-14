@@ -81,8 +81,45 @@ isValidHash raw =
 
 
 toString : ServiceHash -> String
-toString (ServiceHash h) =
-    "#" ++ h
+toString serviceHash_ =
+    toString_ "#" serviceHash_
+
+
+toUnprefixedString : ServiceHash -> String
+toUnprefixedString serviceHash_ =
+    toString_ "" serviceHash_
+
+
+toString_ : String -> ServiceHash -> String
+toString_ prefix_ (ServiceHash h) =
+    prefix_ ++ h
+
+
+{-| Converts a Hash to a shortened (9 characters including the `#` character)
+of the raw hash value.
+
+Example:
+
+  - ServiceHash "cv93ajol371idlcd47do5g3nmj7...4s829ofv57mi19pls3l630" -> "#cv93ajol"
+
+-}
+toShortString : ServiceHash -> String
+toShortString h =
+    toShortString_ "#" h
+
+
+toUnprefixedShortString : ServiceHash -> String
+toUnprefixedShortString h =
+    toShortString_ "" h
+
+
+toShortString_ : String -> ServiceHash -> String
+toShortString_ p h =
+    let
+        shorten =
+            String.left 9
+    in
+    h |> toString_ p |> shorten
 
 
 toUrlString : ServiceHash -> String

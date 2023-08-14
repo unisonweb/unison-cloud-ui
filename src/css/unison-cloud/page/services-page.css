@@ -10,3 +10,17 @@
   border-radius: var(--border-radius-base);
   padding: 0.75rem 1rem;
 }
+
+.services-page .latest-deploy {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.services-page .latest-deploy .status-banner {
+  font-weight: bold;
+}
+.services-page .latest-deploy .status-banner.status-banner_good {
+  color: var(--u-color_positive_element);
+}

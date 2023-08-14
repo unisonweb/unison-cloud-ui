@@ -118,7 +118,7 @@ viewService service =
                 Just d ->
                     ( Link.view service.name (Link.serviceDeploy d.hash)
                     , div [ class "latest-deploy" ]
-                        [ StatusBanner.good (ServiceHash.toString d.hash)
+                        [ StatusBanner.good (ServiceHash.toShortString d.hash)
                         , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
                     )
@@ -137,7 +137,7 @@ viewUnassignedDeploys deploys =
         viewUnassignedDeploy d =
             Card.card
                 [ h2 [] [ text (ServiceHash.toString d.hash) ]
-                , StatusBanner.good (ServiceHash.toString d.hash)
+                , StatusBanner.good (ServiceHash.toShortString d.hash)
                 , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
                 |> Card.asContained
