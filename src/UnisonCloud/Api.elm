@@ -48,5 +48,5 @@ serviceDeployLogs : ServiceHash -> Endpoint
 serviceDeployLogs sh =
     GET
         { path = [ "logs", "deployment", ServiceHash.toApiString sh ]
-        , queryParams = [ int "start" 1691491887, int "end" 1691491887 ]
+        , queryParams = [ int "start" 1691492493000, int "end" 1692126093000 ]
         }
