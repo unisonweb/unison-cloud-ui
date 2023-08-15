@@ -97,7 +97,7 @@ view appContext sh model =
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground
     in
-    { pageId = "service-page"
+    { pageId = "service-deploy-page"
     , title = "Service Deploy: " ++ ServiceHash.toShortString sh ++ " | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader

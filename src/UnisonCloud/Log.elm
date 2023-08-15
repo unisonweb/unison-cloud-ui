@@ -9,7 +9,6 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
-import Lib.Util
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -342,14 +341,6 @@ viewKeyedEntry model idx entry =
 view : AppContext -> Model -> Html Msg
 view appContext model =
     let
-        err =
-            case model.log.logLines of
-                Failure e ->
-                    div [] [ text (Lib.Util.httpErrorToString e) ]
-
-                _ ->
-                    UI.nothing
-
         lines =
             model.log.logLines
                 |> RemoteData.withDefault []
@@ -358,9 +349,4 @@ view appContext model =
     in
     div [ class "log" ]
         [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
-        , div [ class "log_controls" ]
-            [ err
-            , Button.button FetchNew "Fetch New" |> Button.view
-            , Button.button FetchOld "Fetch Old" |> Button.view
-            ]
         ]

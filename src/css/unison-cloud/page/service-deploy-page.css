@@ -1,0 +1,5 @@
+.service-deploy-page .column {
+  display: grid;
+  height: 100%;
+  overflow: scroll;
+}
