@@ -27,7 +27,7 @@ fromLines timeZone lines =
         f l ( entries, currentDate ) =
             case currentDate of
                 Nothing ->
-                    ( [ Line l, DateBoundary l.loggedAt ]
+                    ( [ DateBoundary l.loggedAt, Line l ]
                     , Just l.loggedAt
                     )
 
@@ -36,10 +36,11 @@ fromLines timeZone lines =
                         ( entries ++ [ Line l ], Just l.loggedAt )
 
                     else
-                        ( entries ++ [ Line l, DateBoundary l.loggedAt ]
+                        ( entries ++ [ DateBoundary l.loggedAt, Line l ]
                         , Just l.loggedAt
                         )
     in
     lines
         |> List.foldl f ( [], Nothing )
         |> Tuple.first
+        |> List.reverse
