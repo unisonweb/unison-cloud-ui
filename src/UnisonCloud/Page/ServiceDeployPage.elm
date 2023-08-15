@@ -49,7 +49,7 @@ view appContext sh model =
         page =
             PageLayout.centeredLayout
                 (PageContent.oneColumn [ Html.map LogMsg log ]
-                    |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ ServiceHash.toString sh))
+                    |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ ServiceHash.toShortString sh))
                 )
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground
