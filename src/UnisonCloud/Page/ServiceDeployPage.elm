@@ -1,12 +1,16 @@
 module UnisonCloud.Page.ServiceDeployPage exposing (..)
 
-import Html exposing (text)
+import Html exposing (Html)
+import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
 import UI.AppDocument exposing (AppDocument)
+import UI.Card as Card
+import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
+import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
@@ -74,11 +78,52 @@ fetchServiceDeploy appContext sh =
 -- VIEW
 
 
+viewLoading : Html msg
+viewLoading =
+    let
+        placeholder_ length intensity =
+            Placeholder.text |> Placeholder.withLength length |> Placeholder.withIntensity intensity |> Placeholder.view
+
+        placeholders =
+            [ placeholder_ Placeholder.Medium Placeholder.Normal
+            , placeholder_ Placeholder.Small Placeholder.Subdued
+            , placeholder_ Placeholder.Large Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Normal
+            , placeholder_ Placeholder.Small Placeholder.Subdued
+            , placeholder_ Placeholder.Large Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Subdued
+            ]
+
+        viewCard_ =
+            Card.card placeholders
+                |> Card.asContained
+                |> Card.view
+    in
+    viewCard_
+
+
+viewError : Http.Error -> Html msg
+viewError _ =
+    ErrorCard.errorCard
+        "Couldn't load service deploy"
+        "Something unexpected happened on our end when loading the service deploy and we can't display it."
+        |> ErrorCard.toCard
+        |> Card.asContainedWithFade
+        |> Card.view
+
+
 view : AppContext -> ServiceHash -> Model -> AppDocument Msg
 view appContext sh model =
     let
         content =
             case model.deploy of
+                NotAsked ->
+                    [ viewLoading ]
+
+                Loading ->
+                    [ viewLoading ]
+
                 Success _ ->
                     let
                         log =
@@ -86,8 +131,8 @@ view appContext sh model =
                     in
                     [ Html.map LogMsg log ]
 
-                _ ->
-                    [ text "TODO" ]
+                Failure e ->
+                    [ viewError e ]
 
         page =
             PageLayout.centeredLayout
