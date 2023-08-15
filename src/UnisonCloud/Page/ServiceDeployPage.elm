@@ -58,7 +58,7 @@ update appContext _ msg model =
 
 
 
--- FFECT
+-- EFFECTS
 
 
 fetchServiceDeploy : AppContext -> ServiceHash -> Cmd Msg

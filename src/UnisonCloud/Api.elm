@@ -31,7 +31,7 @@ service sid =
 
 serviceDeploy : ServiceHash -> Endpoint
 serviceDeploy sh =
-    GET { path = [ "deployments", ServiceHash.toString sh ], queryParams = [] }
+    GET { path = [ "deployments", ServiceHash.toApiString sh ], queryParams = [] }
 
 
 unassignedServiceDeploys : Endpoint
