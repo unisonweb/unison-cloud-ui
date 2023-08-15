@@ -11,6 +11,7 @@ module UnisonCloud.Api exposing
 import Lib.HttpApi exposing (Endpoint(..))
 import UnisonCloud.Service as Service exposing (ServiceId)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
+import Url.Builder exposing (int)
 
 
 session : Endpoint
@@ -47,5 +48,5 @@ serviceDeployLogs : ServiceHash -> Endpoint
 serviceDeployLogs sh =
     GET
         { path = [ "logs", "deployment", ServiceHash.toApiString sh ]
-        , queryParams = []
+        , queryParams = [ int "start" 1691491887, int "end" 1691491887 ]
         }
