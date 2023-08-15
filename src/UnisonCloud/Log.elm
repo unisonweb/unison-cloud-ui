@@ -63,8 +63,8 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 type Direction
-    = Before
-    | After
+    = Backward
+    | Forward
 
 
 type LogBrowsingContext
