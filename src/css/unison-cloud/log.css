@@ -82,10 +82,6 @@
   --c-color_background_custom: var(--color-transparent);
 }
 
-.log-entry_log-line .log-line_fresh {
-  background: var(--color-orange-3);
-}
-
 .log-entry_log-line:after,
 .log-entry_date-boundary:after {
   position: absolute;
@@ -119,6 +115,14 @@
 .log-entry_log-line.log-line_custom {
   --c-color_background: var(--c-color_background_custom);
 }
+
+.log-entry_log-line.log-line_info.log-line_fresh,
+.log-entry_log-line.log-line_warn.log-line_fresh,
+.log-entry_log-line.log-line_error.log-line_fresh,
+.log-entry_log-line.log-line_custom.log-line_fresh {
+  --c-color_background: var(--color-orange-3);
+}
+
 
 .log-entry_log-line {
   background: var(--c-color_background);
