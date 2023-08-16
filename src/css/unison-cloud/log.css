@@ -82,6 +82,10 @@
   --c-color_background_custom: var(--color-transparent);
 }
 
+.log-entry_log-line .log-line_fresh {
+  background: var(--color-orange-3);
+}
+
 .log-entry_log-line:after,
 .log-entry_date-boundary:after {
   position: absolute;

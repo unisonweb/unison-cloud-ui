@@ -315,8 +315,8 @@ viewLoggedAt dateTime =
         |> Tooltip.view trigger
 
 
-viewLine : Model -> LogLine -> Html Msg
-viewLine model line =
+viewLine : Model -> Bool -> LogLine -> Html Msg
+viewLine model isFresh line =
     let
         isExpanded =
             Set.member line.id model.log.expandedLines
@@ -350,7 +350,7 @@ viewLine model line =
     div
         [ class "log-entry log-entry_log-line"
         , class ("log-line_" ++ LogLevel.toClassName_ line.level)
-        , classList [ ( "log-line_expandable", expandable ) ]
+        , classList [ ( "log-line_expandable", expandable ), ( "log-line_fresh", isFresh ) ]
         ]
         [ div [ class "log-line_collapsed" ]
             [ caret
@@ -387,7 +387,7 @@ viewKeyedEntry model idx entry =
     in
     case entry of
         Line line ->
-            ( key line.loggedAt "line", lazy (viewLine model) line )
+            ( key line.line.loggedAt "line", lazy (viewLine model line.justFetched) line.line )
 
         DateBoundary date ->
             ( key date "boundary", lazy viewDateBoundary date )
@@ -396,10 +396,17 @@ viewKeyedEntry model idx entry =
 view : AppContext -> Model -> Html Msg
 view appContext model =
     let
+        older =
+            RemoteData.withDefault [] model.log.olderLogLines |> List.map (\l -> { justFetched = True, line = l })
+
+        current =
+            RemoteData.withDefault [] model.log.logLines |> List.map (\l -> { justFetched = False, line = l })
+
+        newer =
+            RemoteData.withDefault [] model.log.newerLogLines |> List.map (\l -> { justFetched = True, line = l })
+
         allLogLines =
-            RemoteData.withDefault [] model.log.olderLogLines
-                ++ RemoteData.withDefault [] model.log.logLines
-                ++ RemoteData.withDefault [] model.log.newerLogLines
+            older ++ current ++ newer
 
         lines =
             allLogLines
