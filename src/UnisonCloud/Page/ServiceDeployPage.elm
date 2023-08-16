@@ -48,7 +48,7 @@ type Msg
 
 
 update : AppContext -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
-update appContext _ msg model =
+update appContext serviceHash msg model =
     case msg of
         FetchServiceDeployFinished deploy ->
             ( { model | deploy = deploy }, Cmd.none )
@@ -56,7 +56,10 @@ update appContext _ msg model =
         LogMsg logMsg ->
             let
                 ( log, logCmd ) =
-                    Log.update appContext logMsg model.log
+                    Log.update appContext
+                        (Log.ServiceDeployContext serviceHash)
+                        logMsg
+                        model.log
             in
             ( { model | log = log }, Cmd.map LogMsg logCmd )
 
