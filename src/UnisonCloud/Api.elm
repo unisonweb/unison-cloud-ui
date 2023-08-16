@@ -38,6 +38,13 @@ unassignedServiceDeploys =
     GET { path = [ "unassigned" ], queryParams = [] }
 
 
+type alias LogParams =
+    { start : Maybe DateTime
+    , end : Maybe DateTime
+    , direction : Direction
+    }
+
+
 serviceLogs : ServiceId -> Endpoint
 serviceLogs sid =
     GET { path = [ "logs", "services", Service.serviceIdToString sid ], queryParams = [] }
