@@ -11,7 +11,6 @@ module UnisonCloud.FetchLogParams exposing
     )
 
 import Maybe.Extra as MaybeE
-import Time
 import UI.DateTime as DateTime exposing (DateTime)
 import Url.Builder exposing (QueryParameter, int, string)
 

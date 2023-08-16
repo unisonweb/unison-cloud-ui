@@ -27,7 +27,12 @@ fromLines timeZone lines =
         f l ( entries, currentDate ) =
             case currentDate of
                 Nothing ->
-                    ( [ DateBoundary l.loggedAt, Line l ]
+                    {-
+                       ( [ DateBoundary l.loggedAt, Line l ]
+                       , Just l.loggedAt
+                       )
+                    -}
+                    ( [ Line l ]
                     , Just l.loggedAt
                     )
 

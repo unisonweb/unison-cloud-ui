@@ -206,7 +206,6 @@ fetchInitialLogLines appContext logBrowsingContext =
     let
         params =
             FetchLogParams.fetchLogParams
-                |> FetchLogParams.withLimit 15
     in
     fetchLogLines_ appContext logBrowsingContext params FetchInitialLogLinesFinished
 
@@ -242,7 +241,7 @@ fetchLogLines_ :
 fetchLogLines_ appContext logBrowsingContext params doneMsg =
     let
         params_ =
-            FetchLogParams.withLimit 25 params
+            FetchLogParams.withLimit 15 params
 
         endpoint =
             case logBrowsingContext of
