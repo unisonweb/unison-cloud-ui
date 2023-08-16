@@ -21,6 +21,7 @@ import UI.Sizing as Sizing
 import UI.Tooltip as Tooltip
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
+import UnisonCloud.FetchLogParams as FetchLogParams
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
@@ -60,11 +61,6 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
    scroll position perfectly and make the switch without the user knowing.
 
 -}
-
-
-type Direction
-    = Backward
-    | Forward
 
 
 type LogBrowsingContext
@@ -200,13 +196,17 @@ logEntryHeight =
 fetchLogLines : AppContext -> LogBrowsingContext -> Cmd Msg
 fetchLogLines appContext logBrowsingContext =
     let
+        params =
+            FetchLogParams.fetchLogParams
+                |> FetchLogParams.withLimit 25
+
         endpoint =
             case logBrowsingContext of
                 ServiceContext sid ->
-                    CloudApi.serviceLogs sid
+                    CloudApi.serviceLogs sid params
 
                 ServiceDeployContext sh ->
-                    CloudApi.serviceDeployLogs sh
+                    CloudApi.serviceDeployLogs sh params
     in
     endpoint
         |> HttpApi.toRequest (Decode.field "logs" (Decode.list LogLine.decode))
