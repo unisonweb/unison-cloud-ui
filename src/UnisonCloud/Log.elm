@@ -13,7 +13,6 @@ import Maybe.Extra as MaybeE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
-import Time
 import UI
 import UI.Button as Button
 import UI.DateTime as DateTime exposing (DateTime)
@@ -207,7 +206,7 @@ fetchInitialLogLines appContext logBrowsingContext =
     let
         params =
             FetchLogParams.fetchLogParams
-                |> FetchLogParams.withLimit 25
+                |> FetchLogParams.withLimit 15
     in
     fetchLogLines_ appContext logBrowsingContext params FetchInitialLogLinesFinished
 
@@ -357,6 +356,8 @@ viewLine model line =
         [ div [ class "log-line_collapsed" ]
             [ caret
             , LogLevel.view line.level
+            , text line.id
+            , DateTime.view DateTime.ShortDate line.loggedAt
             , viewLoggedAt line.loggedAt
             , viewLogMessage line
             ]

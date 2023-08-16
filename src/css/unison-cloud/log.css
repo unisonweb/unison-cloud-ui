@@ -16,7 +16,7 @@
   overflow-y: auto;
   background: var(--u-color_container);
   /* TODO: fix this so its dynamic */
-  height: 70vh;
+  height: 400px;
 }
 
 .log-entry_date-boundary {
