@@ -150,9 +150,8 @@ viewUnassignedDeploys deploys =
         viewUnassignedDeploy d =
             Card.card
                 [ Click.view []
-                    [ h2 [] [ text (ServiceHash.toString d.hash) ] ]
+                    [ h2 [] [ text (ServiceHash.toShortString d.hash) ] ]
                     (Link.serviceDeploy d.hash)
-                , StatusBanner.good (ServiceHash.toShortString d.hash)
                 , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
                 |> Card.asContained
@@ -161,7 +160,7 @@ viewUnassignedDeploys deploys =
     div [ class "unassigned-deploys" ]
         ([ Divider.divider |> Divider.small |> Divider.withoutMargin |> Divider.view
          , h2 []
-            [ text "Unassigned Service Deploys" ]
+            [ text "Ad-hoc Service Deploys" ]
          ]
             ++ List.map viewUnassignedDeploy deploys
         )
