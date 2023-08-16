@@ -85,13 +85,13 @@ toQueryParams p =
 
         start =
             p.start
-                |> Maybe.map DateTime.millisSinceEpoch
-                |> Maybe.map (int "start")
+                |> Maybe.map DateTime.toISO8601
+                |> Maybe.map (string "start")
 
         end =
             p.end
-                |> Maybe.map DateTime.millisSinceEpoch
-                |> Maybe.map (int "end")
+                |> Maybe.map DateTime.toISO8601
+                |> Maybe.map (string "end")
 
         direction =
             Just (string "direction" (directionToString p.direction))
