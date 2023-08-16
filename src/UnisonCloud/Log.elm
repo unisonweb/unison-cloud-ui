@@ -9,6 +9,7 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
+import Maybe.Extra as MaybeE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -21,7 +22,7 @@ import UI.Sizing as Sizing
 import UI.Tooltip as Tooltip
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
-import UnisonCloud.FetchLogParams as FetchLogParams
+import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
@@ -74,9 +75,9 @@ type LogBrowsingContext
 
 type alias Log =
     { expandedLines : Set String -- Set (LogId)
-    , freshOldLines : WebData (List LogLine)
+    , olderLogLines : WebData (List LogLine)
     , logLines : WebData (List LogLine)
-    , freshNewLines : WebData (List LogLine)
+    , newerLogLines : WebData (List LogLine)
     }
 
 
@@ -88,12 +89,12 @@ init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
 init appContext logBrowsingContext =
     ( { log =
             { expandedLines = Set.empty
-            , freshOldLines = NotAsked
+            , olderLogLines = NotAsked
             , logLines = Loading
-            , freshNewLines = NotAsked
+            , newerLogLines = NotAsked
             }
       }
-    , fetchLogLines appContext logBrowsingContext
+    , fetchInitialLogLines appContext logBrowsingContext
     )
 
 
@@ -102,75 +103,83 @@ init appContext logBrowsingContext =
 
 
 type Msg
-    = FetchLogLinesFinished (WebData (List LogLine))
+    = FetchInitialLogLinesFinished (WebData (List LogLine))
+    | FetchOlderLogLinesFinished (WebData (List LogLine))
+    | FetchNewerLogLinesFinished (WebData (List LogLine))
     | Scroll ScrollEvent
-    | FetchNew
-    | FetchOld
     | ToggleLogLine LogLine
 
 
-update : AppContext -> Msg -> Model -> ( Model, Cmd Msg )
-update _ msg model =
+update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
+update appContext logBrowsingContext msg model =
     let
         log =
             model.log
     in
     case msg of
-        FetchLogLinesFinished logLines ->
+        FetchInitialLogLinesFinished logLines ->
             let
                 log_ =
                     { log | logLines = logLines }
             in
             ( { model | log = log_ }, Cmd.none )
 
-        FetchNew ->
-            ( model, Cmd.none )
+        FetchOlderLogLinesFinished olderLogLines ->
+            let
+                log_ =
+                    { log | olderLogLines = olderLogLines }
+            in
+            ( { model | log = log_ }, Cmd.none )
 
-        {-
-           let
-               log_ =
-                   { log
-                       | logLines = log.freshNewLines ++ log.logLines
-                       , freshNewLines = newLines
-                   }
-           in
-           ( { model | log = log_ }, Cmd.none )
-        -}
-        FetchOld ->
-            ( model, Cmd.none )
+        FetchNewerLogLinesFinished newerLogLines ->
+            let
+                log_ =
+                    { log | logLines = newerLogLines }
+            in
+            ( { model | log = log_ }, Cmd.none )
 
-        {-
-           let
-               log_ =
-                   { log
-                       | logLines = log.logLines ++ log.freshOldLines
-                       , freshOldLines = oldLines
-                   }
-           in
-           ( { model | log = log_ }, Cmd.none )
-        -}
-        Scroll _ ->
-            {-
-               let
-                   topOffset =
-                       abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
+        Scroll ev ->
+            let
+                bookmark =
+                    log.olderLogLines
+                        |> RemoteData.withDefault []
+                        |> List.head
+                        |> MaybeE.orElse
+                            (RemoteData.withDefault Nothing (RemoteData.map List.head log.logLines))
+                        |> Maybe.map .loggedAt
+            in
+            case bookmark of
+                Nothing ->
+                    let
+                        log_ =
+                            { log | logLines = Loading }
+                    in
+                    ( { model | log = log_ }, fetchInitialLogLines appContext logBrowsingContext )
 
-                   closenessOffset =
-                       0
+                Just bm ->
+                    let
+                        topOffset =
+                            abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
 
-                   isCloseToTop =
-                       topOffset <= closenessOffset
+                        closenessOffset =
+                            0
 
-                   log_ =
-                       if isCloseToTop then
-                           { log | logLines = log.logLines ++ oldLines }
+                        isCloseToTop =
+                            topOffset <= closenessOffset
 
-                       else
-                           log
-               in
-               ( { model | log = log_ }, Cmd.none )
-            -}
-            ( model, Cmd.none )
+                        ( log_, cmd ) =
+                            if isCloseToTop then
+                                let
+                                    logLines =
+                                        log.logLines
+                                            |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.olderLogLines)
+                                in
+                                ( { log | logLines = logLines, olderLogLines = Loading }, fetchOlderLogLines appContext logBrowsingContext bm )
+
+                            else
+                                ( log, Cmd.none )
+                    in
+                    ( { model | log = log_ }, cmd )
 
         ToggleLogLine line ->
             let
@@ -193,24 +202,60 @@ logEntryHeight =
 -- EFFECTS
 
 
-fetchLogLines : AppContext -> LogBrowsingContext -> Cmd Msg
-fetchLogLines appContext logBrowsingContext =
+fetchInitialLogLines : AppContext -> LogBrowsingContext -> Cmd Msg
+fetchInitialLogLines appContext logBrowsingContext =
     let
         params =
             FetchLogParams.fetchLogParams
                 |> FetchLogParams.withLimit 25
+    in
+    fetchLogLines_ appContext logBrowsingContext params FetchInitialLogLinesFinished
+
+
+fetchOlderLogLines : AppContext -> LogBrowsingContext -> DateTime -> Cmd Msg
+fetchOlderLogLines appContext logBrowsingContext bookmark =
+    let
+        params =
+            FetchLogParams.fetchLogParams
+                |> FetchLogParams.withDirection FetchLogParams.Backward
+                |> FetchLogParams.withEnd bookmark
+    in
+    fetchLogLines_ appContext logBrowsingContext params FetchOlderLogLinesFinished
+
+
+fetchNewerLogLines : AppContext -> LogBrowsingContext -> DateTime -> Cmd Msg
+fetchNewerLogLines appContext logBrowsingContext bookmark =
+    let
+        params =
+            FetchLogParams.fetchLogParams
+                |> FetchLogParams.withDirection FetchLogParams.Forward
+                |> FetchLogParams.withStart bookmark
+    in
+    fetchLogLines_ appContext logBrowsingContext params FetchNewerLogLinesFinished
+
+
+fetchLogLines_ :
+    AppContext
+    -> LogBrowsingContext
+    -> FetchLogParams
+    -> (WebData (List LogLine) -> Msg)
+    -> Cmd Msg
+fetchLogLines_ appContext logBrowsingContext params doneMsg =
+    let
+        params_ =
+            FetchLogParams.withLimit 25 params
 
         endpoint =
             case logBrowsingContext of
                 ServiceContext sid ->
-                    CloudApi.serviceLogs sid params
+                    CloudApi.serviceLogs sid params_
 
                 ServiceDeployContext sh ->
-                    CloudApi.serviceDeployLogs sh params
+                    CloudApi.serviceDeployLogs sh params_
     in
     endpoint
         |> HttpApi.toRequest (Decode.field "logs" (Decode.list LogLine.decode))
-            (RemoteData.fromResult >> FetchLogLinesFinished)
+            (RemoteData.fromResult >> doneMsg)
         |> HttpApi.perform appContext.api
 
 
@@ -351,9 +396,13 @@ viewKeyedEntry model idx entry =
 view : AppContext -> Model -> Html Msg
 view appContext model =
     let
+        allLogLines =
+            RemoteData.withDefault [] model.log.olderLogLines
+                ++ RemoteData.withDefault [] model.log.logLines
+                ++ RemoteData.withDefault [] model.log.newerLogLines
+
         lines =
-            model.log.logLines
-                |> RemoteData.withDefault []
+            allLogLines
                 |> LogEntries.fromLines appContext.timeZone
                 |> List.indexedMap (viewKeyedEntry model)
     in
