@@ -379,7 +379,7 @@ viewKeyedEntry model idx entry =
     let
         {- TODO: Use entry.id -}
         key d suffix =
-            (d |> DateTime.toPosix |> Time.posixToMillis |> String.fromInt)
+            (d |> DateTime.millisSinceEpoch |> String.fromInt)
                 ++ "_"
                 ++ String.fromInt idx
                 ++ "_"
