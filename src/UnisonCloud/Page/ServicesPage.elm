@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicesPage exposing (..)
 
-import Html exposing (Html, div, h2, text)
+import Html exposing (Html, div, h1, h2, p, text)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
@@ -41,6 +41,7 @@ import UnisonCloud.ServiceHash as ServiceHash
 type ServicesModal
     = NoModal
     | GetStartedModal
+    | AssignmentGuideModal
 
 
 type alias Model =
@@ -68,6 +69,7 @@ type Msg
     = FetchServicesFinished (WebData (List Service))
     | FetchUnassignedDeploysFinished (WebData (List ServiceDeploy))
     | ShowGetStartedModal
+    | ShowAssignmentGuideModal
     | CloseModal
 
 
@@ -82,6 +84,9 @@ update _ msg model =
 
         ShowGetStartedModal ->
             ( { model | modal = GetStartedModal }, Cmd.none )
+
+        ShowAssignmentGuideModal ->
+            ( { model | modal = AssignmentGuideModal }, Cmd.none )
 
         CloseModal ->
             ( { model | modal = NoModal }, Cmd.none )
@@ -144,7 +149,7 @@ viewService service =
         |> Card.view
 
 
-viewUnassignedDeploys : List ServiceDeploy -> Html msg
+viewUnassignedDeploys : List ServiceDeploy -> Html Msg
 viewUnassignedDeploys deploys =
     let
         viewUnassignedDeploy d =
@@ -159,8 +164,8 @@ viewUnassignedDeploys deploys =
     in
     div [ class "unassigned-deploys" ]
         ([ Divider.divider |> Divider.small |> Divider.withoutMargin |> Divider.view
-         , h2 []
-            [ text "Ad-hoc Service Deploys" ]
+         , h1 [] [ text "Ad-hoc Service Deploys" ]
+         , p [] [ text "Organize your deploys by assigning them to a service", Button.button ShowAssignmentGuideModal "Learn how" |> Button.small |> Button.view ]
          ]
             ++ List.map viewUnassignedDeploy deploys
         )
@@ -202,6 +207,23 @@ helloWorld = do
         |> Modal.content
         |> Modal.modal "get-started-modal" CloseModal
         |> Modal.withHeader "Get started with Unison Cloud services"
+        |> Modal.withActions
+            [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It"
+                |> Button.emphasized
+            ]
+        |> Modal.view
+
+
+viewAssignmentGuideModal : Html Msg
+viewAssignmentGuideModal =
+    let
+        content =
+            div [ class "assignment-guide-modal" ] [ text "todo" ]
+    in
+    content
+        |> Modal.content
+        |> Modal.modal "assignment-guide-modal" CloseModal
+        |> Modal.withHeader "Assigning deployments to services"
         |> Modal.withActions
             [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It"
                 |> Button.emphasized
@@ -295,6 +317,9 @@ view model =
 
                 GetStartedModal ->
                     Just viewGetStartedModal
+
+                AssignmentGuideModal ->
+                    Just viewAssignmentGuideModal
 
         page =
             PageLayout.centeredLayout
