@@ -2,7 +2,7 @@ module UnisonCloud.Log exposing (..)
 
 import Dict
 import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
-import Html.Attributes exposing (class, classList, title)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
@@ -18,6 +18,7 @@ import UI.Button as Button
 import UI.DateTime as DateTime exposing (DateTime)
 import UI.Icon as Icon
 import UI.Sizing as Sizing
+import UI.Tooltip as Tooltip
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
@@ -259,7 +260,16 @@ viewDataTable data =
 
 viewLoggedAt : DateTime -> Html Msg
 viewLoggedAt dateTime =
-    div [ class "log-line_logged-at", title (DateTime.toISO8601 dateTime) ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
+    let
+        content =
+            Tooltip.text (DateTime.toISO8601 dateTime)
+
+        trigger =
+            div [ class "log-line_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
+    in
+    content
+        |> Tooltip.tooltip
+        |> Tooltip.view trigger
 
 
 viewLine : Model -> LogLine -> Html Msg
