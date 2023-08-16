@@ -9,7 +9,6 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
-import List.Extra as ListE
 import Maybe.Extra as MaybeE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
@@ -144,9 +143,9 @@ update appContext logBrowsingContext msg model =
                 bookmark =
                     log.olderLogLines
                         |> RemoteData.withDefault []
-                        |> ListE.last
+                        |> List.head
                         |> MaybeE.orElse
-                            (RemoteData.withDefault Nothing (RemoteData.map ListE.last log.logLines))
+                            (RemoteData.withDefault Nothing (RemoteData.map List.head log.logLines))
                         |> Maybe.map .loggedAt
             in
             case bookmark of
