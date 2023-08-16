@@ -168,12 +168,15 @@ update appContext logBrowsingContext msg model =
 
                         ( log_, cmd ) =
                             if isCloseToTop then
-                                let
-                                    logLines =
-                                        log.logLines
-                                            |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.olderLogLines)
-                                in
-                                ( { log | logLines = logLines, olderLogLines = Loading }, fetchOlderLogLines appContext logBrowsingContext bm )
+                                {-
+                                   let
+                                       logLines =
+                                           log.logLines
+                                               |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.olderLogLines)
+                                   in
+                                   ( { log | logLines = logLines, olderLogLines = Loading }, fetchOlderLogLines appContext logBrowsingContext bm )
+                                -}
+                                ( log, fetchOlderLogLines appContext logBrowsingContext bm )
 
                             else
                                 ( log, Cmd.none )
