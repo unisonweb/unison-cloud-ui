@@ -385,7 +385,6 @@ viewLine model isFresh line =
             [ caret
             , LogLevel.view line.level
             , text line.id
-            , DateTime.view DateTime.ShortDate line.loggedAt
             , viewLoggedAt line.loggedAt
             , viewLogMessage line
             ]
