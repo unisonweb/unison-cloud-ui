@@ -12,54 +12,53 @@ import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
 
 
+fromLines : Test
+fromLines =
+    describe "LogEntries.fromString"
+        [ test "Inserts date boundaries" <|
+            \_ ->
+                let
+                    result =
+                        logLines
+                            |> List.map (\l -> { justFetched = False, line = l })
+                            |> LogEntries.fromLines Time.utc
+                            |> List.map logEntryToString
 
-{-
-   fromLines : Test
-   fromLines =
-       describe "LogEntries.fromString"
-           [ test "Inserts date boundaries" <|
-               \_ ->
-                   let
-                       result =
-                           logLines
-                               |> List.map (\l -> { justFetched = False, line = l })
-                               |> LogEntries.fromLines Time.utc
-                               |> List.map logEntryToString
+                    expected =
+                        [ LogEntries.Line { justFetched = False, line = logLines_.newest }
+                        , LogEntries.Line { justFetched = False, line = logLines_.new }
+                        , LogEntries.Line { justFetched = False, line = logLines_.old }
+                        , LogEntries.DateBoundary logLines_.old.loggedAt
+                        , LogEntries.Line { justFetched = False, line = logLines_.oldest }
 
-                       expected =
-                           [ LogEntries.Line { justFetched = False, line = logLines_.newest }
-                           , LogEntries.Line { justFetched = False, line = logLines_.new }
-                           , LogEntries.Line { justFetched = False, line = logLines_.old }
-                           , LogEntries.DateBoundary logLines_.old.loggedAt
-                           , LogEntries.Line { justFetched = False, line = logLines_.oldest }
-                           , LogEntries.DateBoundary logLines_.oldest.loggedAt
-                           ]
-                               |> List.map logEntryToString
-                   in
-                   Expect.equal expected result
-           , test "Inserts date boundaries (using parsed data)" <|
-               \_ ->
-                   let
-                       result =
-                           logLinesRaw
-                               |> List.map (\l -> { justFetched = False, line = l })
-                               |> LogEntries.fromLines Time.utc
-                               |> List.map logEntryToString
+                        -- , LogEntries.DateBoundary logLines_.oldest.loggedAt
+                        ]
+                            |> List.map logEntryToString
+                in
+                Expect.equal expected result
+        , test "Inserts date boundaries (using parsed data)" <|
+            \_ ->
+                let
+                    result =
+                        logLinesRaw
+                            |> List.map (\l -> { justFetched = False, line = l })
+                            |> LogEntries.fromLines Time.utc
+                            |> List.map logEntryToString
 
-                       expected =
-                           [ "Log Line: 2023-08-15T15:48:40.211Z"
-                           , "Date Boundary: 2023-08-15T15:48:40.211Z"
-                           , "Log Line: 2023-08-14T20:30:49.312Z"
-                           , "Log Line: 2023-08-14T18:21:59.503Z"
-                           , "Date Boundary: 2023-08-14T18:21:59.503Z"
-                           ]
-                   in
-                   Expect.equal expected result
-           ]
+                    expected =
+                        [ "Log Line: 2023-08-15T15:48:40.211Z"
+                        , "Date Boundary: 2023-08-15T15:48:40.211Z"
+                        , "Log Line: 2023-08-14T20:30:49.312Z"
+                        , "Log Line: 2023-08-14T18:21:59.503Z"
+
+                        -- , "Date Boundary: 2023-08-14T18:21:59.503Z"
+                        ]
+                in
+                Expect.equal expected result
+        ]
 
 
 
--}
 -- HELPERS
 
 
