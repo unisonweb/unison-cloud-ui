@@ -377,23 +377,14 @@ viewDateBoundary date =
         ]
 
 
-viewKeyedEntry : Model -> Int -> LogEntry -> ( String, Html Msg )
-viewKeyedEntry model idx entry =
-    let
-        {- TODO: Use entry.id -}
-        key d suffix =
-            (d |> DateTime.millisSinceEpoch |> String.fromInt)
-                ++ "_"
-                ++ String.fromInt idx
-                ++ "_"
-                ++ suffix
-    in
+viewKeyedEntry : Model -> LogEntry -> ( String, Html Msg )
+viewKeyedEntry model entry =
     case entry of
         Line line ->
-            ( key line.line.loggedAt "line", lazy (viewLine model line.justFetched) line.line )
+            ( line.line.id, lazy (viewLine model line.justFetched) line.line )
 
         DateBoundary date ->
-            ( key date "boundary", lazy viewDateBoundary date )
+            ( "boundary-" ++ DateTime.toISO8601 date, lazy viewDateBoundary date )
 
 
 view : AppContext -> Model -> Html Msg
@@ -414,7 +405,7 @@ view appContext model =
         lines =
             allLogLines
                 |> LogEntries.fromLines appContext.timeZone
-                |> List.indexedMap (viewKeyedEntry model)
+                |> List.map (viewKeyedEntry model)
     in
     div [ class "log" ]
         [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
