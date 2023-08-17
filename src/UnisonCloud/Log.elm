@@ -167,7 +167,7 @@ update appContext logBrowsingContext msg model =
                             (RemoteData.withDefault Nothing (RemoteData.map List.head log.logLines))
                         |> Maybe.map .loggedAt
             in
-            case bookmark of
+            case Debug.log "bookmark" bookmark of
                 Nothing ->
                     let
                         log_ =
