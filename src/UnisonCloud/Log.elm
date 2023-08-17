@@ -130,7 +130,7 @@ update appContext logBrowsingContext msg model =
 
                 logLines =
                     log.logLines
-                        |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.olderLogLines)
+                        |> RemoteData.map (\ls -> RemoteData.withDefault [] log.olderLogLines ++ ls)
 
                 x =
                     Debug.log "Done: " (List.length olderLogLines_)
@@ -150,7 +150,7 @@ update appContext logBrowsingContext msg model =
             let
                 logLines =
                     log.logLines
-                        |> RemoteData.map (\ls -> RemoteData.withDefault [] log.newerLogLines ++ ls)
+                        |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.newerLogLines)
 
                 log_ =
                     { log | logLines = logLines, newerLogLines = newerLogLines }
@@ -200,7 +200,7 @@ update appContext logBrowsingContext msg model =
                             if isCloseToEdge then
                                 let
                                     x =
-                                        Debug.log "" "Fetching older lines..."
+                                        Debug.log "Fetching older lines..." ""
                                 in
                                 {-
                                    let
