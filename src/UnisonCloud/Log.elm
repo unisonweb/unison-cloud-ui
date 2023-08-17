@@ -157,17 +157,18 @@ update appContext logBrowsingContext msg model =
 
                 Just bm ->
                     let
-                        topOffset =
-                            abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
+                        edgeOffset =
+                            -- abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
+                            abs (ev.scrollHeight - ev.clientHeight)
 
                         closenessOffset =
                             0
 
-                        isCloseToTop =
-                            topOffset <= closenessOffset
+                        isCloseToEdge =
+                            edgeOffset <= closenessOffset
 
                         ( log_, cmd ) =
-                            if isCloseToTop then
+                            if isCloseToEdge then
                                 {-
                                    let
                                        logLines =
