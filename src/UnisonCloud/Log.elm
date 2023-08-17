@@ -167,7 +167,7 @@ update appContext logBrowsingContext msg model =
                             (RemoteData.withDefault Nothing (RemoteData.map List.head log.logLines))
                         |> Maybe.map .loggedAt
 
-                x =
+                sad =
                     Debug.log "bookmark" (Maybe.map DateTime.toISO8601 bookmark)
             in
             case bookmark of
