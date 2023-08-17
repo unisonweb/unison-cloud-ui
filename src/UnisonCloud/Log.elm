@@ -150,7 +150,7 @@ update appContext logBrowsingContext msg model =
             let
                 logLines =
                     log.logLines
-                        |> RemoteData.map (\ls -> RemoteData.withDefault [] log.newerLogLines)
+                        |> RemoteData.map (\ls -> RemoteData.withDefault [] log.newerLogLines ++ ls)
 
                 log_ =
                     { log | logLines = logLines, newerLogLines = newerLogLines }
@@ -411,6 +411,16 @@ viewDateBoundary date =
         ]
 
 
+viewEntry : Model -> LogEntry -> Html Msg
+viewEntry model entry =
+    case entry of
+        Line line ->
+            viewLine model line.justFetched line.line
+
+        DateBoundary date ->
+            viewDateBoundary date
+
+
 viewKeyedEntry : Model -> LogEntry -> ( String, Html Msg )
 viewKeyedEntry model entry =
     case entry of
@@ -439,8 +449,9 @@ view appContext model =
         lines =
             allLogLines
                 |> LogEntries.fromLines appContext.timeZone
-                |> List.map (viewKeyedEntry model)
+                |> List.map (viewEntry model)
     in
     div [ class "log" ]
-        [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
+        --[ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
+        [ div [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
         ]
