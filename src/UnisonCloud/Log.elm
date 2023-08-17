@@ -133,7 +133,7 @@ update appContext logBrowsingContext msg model =
                         |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.olderLogLines)
 
                 x =
-                    Debug.log "Fetching older lines: Done: " (List.length olderLogLines_)
+                    Debug.log "Done: " (List.length olderLogLines_)
 
                 z =
                     Debug.log "Prev number of logs" (List.length (RemoteData.withDefault [] log.logLines))
@@ -336,7 +336,8 @@ viewLoggedAt dateTime =
             Tooltip.text (DateTime.toISO8601 dateTime)
 
         trigger =
-            div [ class "log-line_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
+            -- div [ class "log-line_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
+            div [ class "log-line_logged-at" ] [ text (DateTime.toISO8601 dateTime) ]
     in
     content
         |> Tooltip.tooltip
