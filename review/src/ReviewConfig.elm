@@ -16,5 +16,6 @@ config =
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
-    , Simplify.rule Simplify.defaults
+
+    -- , Simplify.rule Simplify.defaults
     ]

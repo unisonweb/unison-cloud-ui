@@ -125,6 +125,9 @@ update appContext logBrowsingContext msg model =
 
         FetchOlderLogLinesFinished olderLogLines ->
             let
+                x =
+                    Debug.log "Fetching older lines: Done: " (List.length (RemoteData.withDefault [] olderLogLines))
+
                 log_ =
                     { log | olderLogLines = olderLogLines }
             in
@@ -169,6 +172,10 @@ update appContext logBrowsingContext msg model =
 
                         ( log_, cmd ) =
                             if isCloseToEdge then
+                                let
+                                    x =
+                                        Debug.log "" "Fetching older lines..."
+                                in
                                 {-
                                    let
                                        logLines =
