@@ -32,7 +32,7 @@ Metrics.init();
 
 if (APP_ENV === "production") {
   Sentry.init({
-    dsn: "https://8eb2ee6bb78d4131bdbb1b6a70f6b0c0@o4503934538547200.ingest.sentry.io/4504458036903936",
+    dsn: "https://8d9abe3e4e5fc91fce30fe26d8799ed7@o4503934538547200.ingest.sentry.io/4505721469272064",
     integrations: [new BrowserTracing()],
     sampleRate: 0.25,
     environment: APP_ENV,
