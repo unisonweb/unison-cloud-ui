@@ -136,10 +136,10 @@ update appContext logBrowsingContext msg model =
                     Debug.log "Done: " (List.length olderLogLines_)
 
                 z =
-                    Debug.log "Prev number of logs" (List.length (RemoteData.withDefault [] log.logLines))
+                    Debug.log "Prev number of logs" (List.length (RemoteData.withDefault [] logLines))
 
                 y =
-                    Debug.log "Total number of logs" (List.length (RemoteData.withDefault [] logLines))
+                    Debug.log "Total number of logs" (List.length (RemoteData.withDefault [] logLines ++ olderLogLines_))
 
                 log_ =
                     { log | logLines = logLines, olderLogLines = olderLogLines }
@@ -159,12 +159,18 @@ update appContext logBrowsingContext msg model =
 
         Scroll ev ->
             let
+                olderLogLines_ =
+                    RemoteData.withDefault [] log.olderLogLines
+
+                logLines_ =
+                    RemoteData.withDefault [] log.logLines
+
+                allLogLines =
+                    olderLogLines_ ++ logLines_
+
                 bookmark =
-                    log.olderLogLines
-                        |> RemoteData.withDefault []
+                    allLogLines
                         |> List.head
-                        |> MaybeE.orElse
-                            (RemoteData.withDefault Nothing (RemoteData.map List.head log.logLines))
                         |> Maybe.map .loggedAt
 
                 sad =
