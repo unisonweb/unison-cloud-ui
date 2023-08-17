@@ -9,7 +9,6 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
-import Maybe.Extra as MaybeE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -125,21 +124,9 @@ update appContext logBrowsingContext msg model =
 
         FetchOlderLogLinesFinished olderLogLines ->
             let
-                olderLogLines_ =
-                    RemoteData.withDefault [] olderLogLines
-
                 logLines =
                     log.logLines
                         |> RemoteData.map (\ls -> RemoteData.withDefault [] log.olderLogLines ++ ls)
-
-                x =
-                    Debug.log "Done: " (List.length olderLogLines_)
-
-                z =
-                    Debug.log "Prev number of logs" (List.length (RemoteData.withDefault [] logLines))
-
-                y =
-                    Debug.log "Total number of logs" (List.length (RemoteData.withDefault [] logLines ++ olderLogLines_))
 
                 log_ =
                     { log | logLines = logLines, olderLogLines = olderLogLines }
@@ -172,9 +159,6 @@ update appContext logBrowsingContext msg model =
                     allLogLines
                         |> List.head
                         |> Maybe.map .loggedAt
-
-                sad =
-                    Debug.log "bookmark" (Maybe.map DateTime.toISO8601 bookmark)
             in
             case bookmark of
                 Nothing ->
@@ -198,18 +182,6 @@ update appContext logBrowsingContext msg model =
 
                         ( log_, cmd ) =
                             if isCloseToEdge then
-                                let
-                                    x =
-                                        Debug.log "Fetching older lines..." ""
-                                in
-                                {-
-                                   let
-                                       logLines =
-                                           log.logLines
-                                               |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.olderLogLines)
-                                   in
-                                   ( { log | logLines = logLines, olderLogLines = Loading }, fetchOlderLogLines appContext logBrowsingContext bm )
-                                -}
                                 ( log, fetchOlderLogLines appContext logBrowsingContext bm )
 
                             else
@@ -423,12 +395,19 @@ viewEntry model entry =
 
 viewKeyedEntry : Model -> LogEntry -> ( String, Html Msg )
 viewKeyedEntry model entry =
-    case entry of
-        Line line ->
-            ( line.line.id, lazy (viewLine model line.justFetched) line.line )
+    let
+        row =
+            lazy (viewEntry model) entry
 
-        DateBoundary date ->
-            ( "boundary-" ++ DateTime.toISO8601 date, lazy viewDateBoundary date )
+        key =
+            case entry of
+                Line line ->
+                    line.line.id
+
+                DateBoundary date ->
+                    "boundary-" ++ DateTime.toISO8601 date
+    in
+    ( key, row )
 
 
 view : AppContext -> Model -> Html Msg
@@ -449,9 +428,7 @@ view appContext model =
         lines =
             allLogLines
                 |> LogEntries.fromLines appContext.timeZone
-                |> List.map (viewEntry model)
+                |> List.map (viewKeyedEntry model)
     in
     div [ class "log" ]
-        --[ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
-        [ div [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines
-        ]
+        [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines ]
