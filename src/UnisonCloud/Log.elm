@@ -128,15 +128,23 @@ update appContext logBrowsingContext msg model =
                 x =
                     Debug.log "Fetching older lines: Done: " (List.length (RemoteData.withDefault [] olderLogLines))
 
+                logLines =
+                    log.logLines
+                        |> RemoteData.map (\ls -> RemoteData.withDefault [] log.olderLogLines)
+
                 log_ =
-                    { log | olderLogLines = olderLogLines }
+                    { log | logLines = logLines, olderLogLines = olderLogLines }
             in
             ( { model | log = log_ }, Cmd.none )
 
         FetchNewerLogLinesFinished newerLogLines ->
             let
+                logLines =
+                    log.logLines
+                        |> RemoteData.map (\ls -> RemoteData.withDefault [] log.newerLogLines)
+
                 log_ =
-                    { log | logLines = newerLogLines }
+                    { log | logLines = logLines, newerLogLines = newerLogLines }
             in
             ( { model | log = log_ }, Cmd.none )
 
