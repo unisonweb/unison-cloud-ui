@@ -158,14 +158,14 @@ update appContext logBrowsingContext msg model =
                 Just bm ->
                     let
                         edgeOffset =
-                            -- abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
-                            abs (ev.scrollHeight - ev.clientHeight)
+                            abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
 
                         closenessOffset =
                             0
 
                         isCloseToEdge =
-                            edgeOffset <= closenessOffset
+                            -- edgeOffset <= closenessOffset
+                            ev.scrollTop == (ev.scrollHeight - ev.clientHeight)
 
                         ( log_, cmd ) =
                             if isCloseToEdge then
