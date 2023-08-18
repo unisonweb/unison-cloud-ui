@@ -165,7 +165,7 @@ viewUnassignedDeploys hasServices deploys =
         howToOrganizeBlurb =
             if hasServices then
                 p [ class "unassigned-deploys_learn-how-to-organize" ]
-                    [ text "Organize your deploys by assigning them to a service"
+                    [ text "Organize your deploys by assigning them to a service."
                     , Button.button ShowAssignmentGuideModal "Learn how"
                         |> Button.small
                         |> Button.view
