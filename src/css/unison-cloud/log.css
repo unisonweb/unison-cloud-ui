@@ -116,11 +116,20 @@
   --c-color_background: var(--c-color_background_custom);
 }
 
-.log-entry_log-line.log-line_info.log-line_fresh,
-.log-entry_log-line.log-line_warn.log-line_fresh,
-.log-entry_log-line.log-line_error.log-line_fresh,
-.log-entry_log-line.log-line_custom.log-line_fresh {
-  --c-color_background: var(--color-orange-3);
+.log-entry_log-line.log-line_info.log-line_just-fetched,
+.log-entry_log-line.log-line_warn.log-line_just-fetched,
+.log-entry_log-line.log-line_error.log-line_just-fetched,
+.log-entry_log-line.log-line_custom.log-line_just-fetched {
+  animation: just-fetched-fade 5s;
+}
+
+@keyframes just-fetched-fade {
+   0% {
+     background: var(--u-color_info_container_subdued);
+   }
+   100% {
+     background: var(--c-color_background);
+   }
 }
 
 .log-entry_log-line {
