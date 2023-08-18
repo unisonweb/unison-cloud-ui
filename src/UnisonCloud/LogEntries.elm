@@ -31,14 +31,7 @@ fromLines timeZone lines =
         f l ( entries, currentDate ) =
             case currentDate of
                 Nothing ->
-                    {-
-                       ( [ DateBoundary l.loggedAt, Line l ]
-                       , Just l.loggedAt
-                       )
-                    -}
-                    ( [ Line l ]
-                    , Just l.line.loggedAt
-                    )
+                    ( [ Line l ], Just l.line.loggedAt )
 
                 Just d ->
                     if DateTime.isSameDay timeZone l.line.loggedAt d then

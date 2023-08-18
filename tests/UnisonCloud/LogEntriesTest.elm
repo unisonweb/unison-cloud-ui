@@ -30,8 +30,6 @@ fromLines =
                         , LogEntries.Line { justFetched = False, line = logLines_.old }
                         , LogEntries.DateBoundary logLines_.old.loggedAt
                         , LogEntries.Line { justFetched = False, line = logLines_.oldest }
-
-                        -- , LogEntries.DateBoundary logLines_.oldest.loggedAt
                         ]
                             |> List.map logEntryToString
                 in
@@ -50,8 +48,6 @@ fromLines =
                         , "Date Boundary: 2023-08-15T15:48:40.211Z"
                         , "Log Line: 2023-08-14T20:30:49.312Z"
                         , "Log Line: 2023-08-14T18:21:59.503Z"
-
-                        -- , "Date Boundary: 2023-08-14T18:21:59.503Z"
                         ]
                 in
                 Expect.equal expected result
