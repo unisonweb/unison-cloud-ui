@@ -360,7 +360,10 @@ viewLine zone model isFresh line =
     div
         [ class "log-entry log-entry_log-line"
         , class ("log-line_" ++ LogLevel.toClassName_ line.level)
-        , classList [ ( "log-line_expandable", expandable ), ( "log-line_fresh", isFresh ) ]
+        , classList
+            [ ( "log-line_expandable", expandable )
+            , ( "log-line_just-fetched", isFresh )
+            ]
         ]
         [ div [ class "log-line_collapsed" ]
             [ caret
