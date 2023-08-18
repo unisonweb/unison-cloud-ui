@@ -12,6 +12,7 @@ import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
+import Time
 import UI
 import UI.Button as Button
 import UI.DateTime as DateTime exposing (DateTime)
@@ -309,23 +310,23 @@ viewDataTable data =
         |> (\d -> table [ class "log-line_log-message_data-table" ] [ tbody [] d ])
 
 
-viewLoggedAt : DateTime -> Html Msg
-viewLoggedAt dateTime =
+viewLoggedAt : Time.Zone -> DateTime -> Html Msg
+viewLoggedAt zone dateTime =
     let
         content =
             Tooltip.text (DateTime.toISO8601 dateTime)
 
         trigger =
-            -- div [ class "log-line_logged-at" ] [ DateTime.view DateTime.TimeWithSeconds dateTime ]
-            div [ class "log-line_logged-at" ] [ text (DateTime.toISO8601 dateTime) ]
+            div [ class "log-line_logged-at" ]
+                [ text (DateTime.toString DateTime.TimeWithSeconds zone dateTime) ]
     in
     content
         |> Tooltip.tooltip
         |> Tooltip.view trigger
 
 
-viewLine : Model -> Bool -> LogLine -> Html Msg
-viewLine model isFresh line =
+viewLine : Time.Zone -> Model -> Bool -> LogLine -> Html Msg
+viewLine zone model isFresh line =
     let
         isExpanded =
             Set.member line.id model.log.expandedLines
@@ -364,8 +365,7 @@ viewLine model isFresh line =
         [ div [ class "log-line_collapsed" ]
             [ caret
             , LogLevel.view line.level
-            , text line.id
-            , viewLoggedAt line.loggedAt
+            , viewLoggedAt zone line.loggedAt
             , viewLogMessage line
             ]
         , expanded
@@ -382,21 +382,21 @@ viewDateBoundary date =
         ]
 
 
-viewEntry : Model -> LogEntry -> Html Msg
-viewEntry model entry =
+viewEntry : Time.Zone -> Model -> LogEntry -> Html Msg
+viewEntry zone model entry =
     case entry of
         Line line ->
-            viewLine model line.justFetched line.line
+            viewLine zone model line.justFetched line.line
 
         DateBoundary date ->
             viewDateBoundary date
 
 
-viewKeyedEntry : Model -> LogEntry -> ( String, Html Msg )
-viewKeyedEntry model entry =
+viewKeyedEntry : Time.Zone -> Model -> LogEntry -> ( String, Html Msg )
+viewKeyedEntry zone model entry =
     let
         row =
-            lazy (viewEntry model) entry
+            lazy (viewEntry zone model) entry
 
         key =
             case entry of
@@ -412,6 +412,9 @@ viewKeyedEntry model entry =
 view : AppContext -> Model -> Html Msg
 view appContext model =
     let
+        timeZone =
+            appContext.timeZone
+
         older =
             RemoteData.withDefault [] model.log.olderLogLines |> List.map (\l -> { justFetched = True, line = l })
 
@@ -426,8 +429,8 @@ view appContext model =
 
         lines =
             allLogLines
-                |> LogEntries.fromLines appContext.timeZone
-                |> List.map (viewKeyedEntry model)
+                |> LogEntries.fromLines timeZone
+                |> List.map (viewKeyedEntry timeZone model)
     in
     div [ class "log" ]
         [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines ]
