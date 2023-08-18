@@ -1,12 +1,3 @@
-module UnisonCloud.Link exposing (..)
-
-import Html exposing (Html, text)
-import UI.Click as Click exposing (Click)
-import UnisonCloud.Route as Route exposing (Route)
-import UnisonCloud.ServiceHash exposing (ServiceHash)
-
-
-
 {-
 
    Link
@@ -15,6 +6,18 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
    Various UI.Click link helpers for Routes and external links
 
 -}
+
+
+module UnisonCloud.Link exposing (..)
+
+import Html exposing (Html, text)
+import UI.Click as Click exposing (Click)
+import UnisonCloud.Route as Route exposing (Route)
+import UnisonCloud.Service exposing (ServiceId)
+import UnisonCloud.ServiceHash exposing (ServiceHash)
+
+
+
 -- EXTERNAL URLS
 
 
@@ -107,6 +110,16 @@ logout =
 overview : Click msg
 overview =
     toClick Route.overview
+
+
+services : Click msg
+services =
+    toClick Route.services
+
+
+service : ServiceId -> Click msg
+service sid =
+    toClick (Route.service sid)
 
 
 serviceDeploy : ServiceHash -> Click msg

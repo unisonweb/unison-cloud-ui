@@ -177,8 +177,7 @@ update appContext logBrowsingContext msg model =
                             0
 
                         isCloseToEdge =
-                            -- edgeOffset <= closenessOffset
-                            ev.scrollTop == (ev.scrollHeight - ev.clientHeight)
+                            edgeOffset <= closenessOffset
 
                         ( log_, cmd ) =
                             if isCloseToEdge then

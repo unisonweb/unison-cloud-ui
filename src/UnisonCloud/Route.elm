@@ -1,8 +1,17 @@
+{-
+   Note that this doesn't use Url.Parser to parse the URL as you'd normally see in
+   Elm apps. This is because of how we represent Fully Qualified Names in the url
+   by turning `.` into `/`:
+   `base.data.List.map` is represented in the url as `base/data/List/map`
+-}
+
+
 module UnisonCloud.Route exposing
     ( Route(..)
     , fromUrl
     , navigate
     , overview
+    , service
     , serviceDeploy
     , services
     , toRoute
@@ -16,6 +25,7 @@ import Code.HashQualified exposing (HashQualified(..))
 import Code.UrlParsers exposing (b, s, slash)
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import UnisonCloud.AppError as AppError exposing (AppError)
+import UnisonCloud.Service as Service exposing (ServiceId)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
 import Url.Builder exposing (relative, string)
@@ -24,6 +34,7 @@ import Url.Builder exposing (relative, string)
 type Route
     = Overview
     | Services
+    | Service ServiceId
     | ServiceDeploy ServiceHash
     | Error AppError
     | NotFound String
@@ -46,6 +57,11 @@ services =
     Services
 
 
+service : ServiceId -> Route
+service sid =
+    Service sid
+
+
 serviceDeploy : ServiceHash -> Route
 serviceDeploy sh =
     ServiceDeploy sh
@@ -60,6 +76,7 @@ toRoute queryString =
     oneOf
         [ b overviewParser
         , b servicesParser
+        , b serviceParser
         , b serviceDeployParser
         , b (errorParser queryString)
         ]
@@ -75,6 +92,28 @@ overviewParser =
 servicesParser : Parser Route
 servicesParser =
     succeed Services |. slash |. s "services" |. end
+
+
+serviceIdParser : Parser ServiceId
+serviceIdParser =
+    let
+        parseMaybe mid =
+            case mid of
+                Just s_ ->
+                    Parser.succeed s_
+
+                Nothing ->
+                    Parser.problem "Invalid ServiceId"
+    in
+    Parser.chompUntilEndOr "/"
+        |> Parser.getChompedString
+        |> Parser.map Service.serviceIdFromString
+        |> Parser.andThen parseMaybe
+
+
+serviceParser : Parser Route
+serviceParser =
+    succeed Service |. slash |. s "services" |. slash |= serviceIdParser |. end
 
 
 serviceHashParser : Parser ServiceHash
@@ -120,27 +159,12 @@ errorParser queryString =
     succeed (Error appError) |. slash |. s "error"
 
 
-{-| In environments like Unison Local, the UI is served with a base path
-
-This means that a route to a definition might look like:
-
-  - "/:some-token/ui/latest/terms/base/List/map"
-    (where "/:some-token/ui/" is the base path.)
-
-The base path is determined outside of the Elm app using the <base> tag in the
+{-| The base path is determined outside of the Elm app using the <base> tag in the
 <head> section of the document. The Browser uses this tag to prefix all links.
 
 The base path must end in a slash for links to work correctly, but our parser
 expects a path to starts with a slash. When parsing the URL we thus pre-process
 the path to strip the base path and ensure a slash prefix before we parse.
-
----
-
-Note that this doesn't use Url.Parser to parse the URL as you'd normally see in
-Elm apps. This is because of how we represent Fully Qualified Names in the url
-by turning `.` into `/`:
-
-`base.data.List.map` is represented in the url as `base/data/List/map`
 
 -}
 fromUrl : String -> Url -> Route
@@ -187,6 +211,9 @@ toUrlPattern r =
         Services ->
             "services"
 
+        Service _ ->
+            "services/:service-id"
+
         ServiceDeploy _ ->
             "service-deploys/:service-hash"
 
@@ -207,6 +234,9 @@ toUrlString route =
 
                 Services ->
                     ( [ "services" ], [] )
+
+                Service sid ->
+                    ( [ "services", Service.serviceIdToString sid ], [] )
 
                 ServiceDeploy sh ->
                     ( [ "service-deploys", ServiceHash.toUrlString sh ], [] )

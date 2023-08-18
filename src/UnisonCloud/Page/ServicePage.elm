@@ -1,9 +1,7 @@
 module UnisonCloud.Page.ServicePage exposing (..)
 
-import Html exposing (Html)
+import Html exposing (Html, text)
 import Http
-import Lib.HttpApi as HttpApi
-import RemoteData exposing (RemoteData(..), WebData)
 import UI.AppDocument exposing (AppDocument)
 import UI.Card as Card
 import UI.ErrorCard as ErrorCard
@@ -11,12 +9,9 @@ import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
 import UI.Placeholder as Placeholder
-import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
-import UnisonCloud.Log as Log
-import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
-import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
+import UnisonCloud.Service as Service exposing (ServiceId)
 
 
 
@@ -24,18 +19,12 @@ import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
 type alias Model =
-    { deploy : WebData ServiceDeploy
-    , log : Log.Model
-    }
+    ()
 
 
-init : AppContext -> ServiceHash -> ( Model, Cmd Msg )
-init appContext serviceHash =
-    let
-        ( log, logCmd ) =
-            Log.init appContext (Log.ServiceDeployContext serviceHash)
-    in
-    ( { deploy = Loading, log = log }, Cmd.batch [ fetchServiceDeploy appContext serviceHash, Cmd.map LogMsg logCmd ] )
+init : AppContext -> ServiceId -> ( Model, Cmd Msg )
+init _ _ =
+    ( (), Cmd.none )
 
 
 
@@ -43,38 +32,12 @@ init appContext serviceHash =
 
 
 type Msg
-    = FetchServiceDeployFinished (WebData ServiceDeploy)
-    | LogMsg Log.Msg
+    = NoOp
 
 
-update : AppContext -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
-update appContext serviceHash msg model =
-    case msg of
-        FetchServiceDeployFinished deploy ->
-            ( { model | deploy = deploy }, Cmd.none )
-
-        LogMsg logMsg ->
-            let
-                ( log, logCmd ) =
-                    Log.update appContext
-                        (Log.ServiceDeployContext serviceHash)
-                        logMsg
-                        model.log
-            in
-            ( { model | log = log }, Cmd.map LogMsg logCmd )
-
-
-
--- EFFECTS
-
-
-fetchServiceDeploy : AppContext -> ServiceHash -> Cmd Msg
-fetchServiceDeploy appContext sh =
-    CloudApi.serviceDeploy sh
-        |> HttpApi.toRequest
-            ServiceDeploy.decode
-            (RemoteData.fromResult >> FetchServiceDeployFinished)
-        |> HttpApi.perform appContext.api
+update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
+update _ _ _ model =
+    ( model, Cmd.none )
 
 
 
@@ -116,37 +79,22 @@ viewError _ =
         |> Card.view
 
 
-view : AppContext -> ServiceHash -> Model -> AppDocument Msg
-view appContext sh model =
+view : AppContext -> ServiceId -> Model -> AppDocument Msg
+view _ sid _ =
     let
         content =
-            case model.deploy of
-                NotAsked ->
-                    [ viewLoading ]
-
-                Loading ->
-                    [ viewLoading ]
-
-                Success _ ->
-                    let
-                        log =
-                            Log.view appContext model.log
-                    in
-                    [ Html.map LogMsg log ]
-
-                Failure e ->
-                    [ viewError e ]
+            [ text "TODO" ]
 
         page =
             PageLayout.centeredLayout
                 (PageContent.oneColumn content
-                    |> PageContent.withPageTitle (PageTitle.title ("Service Deploy: " ++ ServiceHash.toShortString sh))
+                    |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ Service.serviceIdToString sid))
                 )
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground
     in
-    { pageId = "service-deploy-page"
-    , title = "Service Deploy: " ++ ServiceHash.toShortString sh ++ " | Unison Cloud"
+    { pageId = "service-page"
+    , title = "Service: " ++ Service.serviceIdToString sid ++ " | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing

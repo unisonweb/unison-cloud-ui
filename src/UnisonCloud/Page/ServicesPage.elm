@@ -121,18 +121,19 @@ fetchUnassignedDeploys appContext =
 viewService : Service -> Html msg
 viewService service =
     let
-        ( heading, latestDeploy ) =
+        heading =
+            Link.view service.name (Link.service service.id)
+
+        latestDeploy =
             case service.latestDeploy of
                 Just d ->
-                    ( Link.view service.name (Link.serviceDeploy d.hash)
-                    , div [ class "latest-deploy" ]
+                    div [ class "latest-deploy" ]
                         [ StatusBanner.good (ServiceHash.toShortString d.hash)
                         , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
-                    )
 
                 Nothing ->
-                    ( text service.name, text "🐣 No deploys yet" )
+                    text "🐣 No deploys yet"
 
         tags =
             if Set.isEmpty service.tags then

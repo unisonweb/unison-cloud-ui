@@ -9,8 +9,7 @@
   border: 1px solid var(--u-color_border);
   padding: 0.75rem;
   display: flex;
-  /*flex-direction: column-reverse; */
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 0.5rem;
   border-radius: var(--border-radius-base);
   overflow-x: hidden;
