@@ -20,16 +20,15 @@ fromLines =
                 let
                     result =
                         logLines
-                            |> List.map (\l -> { justFetched = False, line = l })
                             |> LogEntries.fromLines Time.utc
                             |> List.map logEntryToString
 
                     expected =
-                        [ LogEntries.Line { justFetched = False, line = logLines_.newest }
-                        , LogEntries.Line { justFetched = False, line = logLines_.new }
-                        , LogEntries.Line { justFetched = False, line = logLines_.old }
+                        [ LogEntries.Line logLines_.newest
+                        , LogEntries.Line logLines_.new
+                        , LogEntries.Line logLines_.old
                         , LogEntries.DateBoundary logLines_.old.loggedAt
-                        , LogEntries.Line { justFetched = False, line = logLines_.oldest }
+                        , LogEntries.Line logLines_.oldest
                         ]
                             |> List.map logEntryToString
                 in
@@ -39,7 +38,6 @@ fromLines =
                 let
                     result =
                         logLinesRaw
-                            |> List.map (\l -> { justFetched = False, line = l })
                             |> LogEntries.fromLines Time.utc
                             |> List.map logEntryToString
 
@@ -115,7 +113,7 @@ logEntryToString : LogEntries.LogEntry -> String
 logEntryToString entry =
     case entry of
         LogEntries.Line l ->
-            "Log Line: " ++ DateTime.toISO8601 l.line.loggedAt
+            "Log Line: " ++ DateTime.toISO8601 l.loggedAt
 
         LogEntries.DateBoundary d ->
             "Date Boundary: " ++ DateTime.toISO8601 d

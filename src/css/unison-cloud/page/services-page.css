@@ -17,9 +17,7 @@
   gap: 1.5rem;
 }
 
-.services-page 
-  .unassigned-deploys 
-  .unassigned-deploys_learn-how-to-organize {
+.services-page .unassigned-deploys .unassigned-deploys_learn-how-to-organize {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;

@@ -5,12 +5,8 @@ import UI.DateTime as DateTime exposing (DateTime)
 import UnisonCloud.LogLine exposing (LogLine)
 
 
-type alias LineWithFetched =
-    { justFetched : Bool, line : LogLine }
-
-
 type LogEntry
-    = Line LineWithFetched
+    = Line LogLine
     | DateBoundary DateTime
 
 
@@ -25,21 +21,21 @@ date markers, by running through the list, we're also flipping its order, so
 that when css again flips it, it will be rendered with the newest entry in the
 bottom of the screen, like you'd see with `tail`.
 -}
-fromLines : Time.Zone -> List LineWithFetched -> List LogEntry
+fromLines : Time.Zone -> List LogLine -> List LogEntry
 fromLines timeZone lines =
     let
         f l ( entries, currentDate ) =
             case currentDate of
                 Nothing ->
-                    ( [ Line l ], Just l.line.loggedAt )
+                    ( [ Line l ], Just l.loggedAt )
 
                 Just d ->
-                    if DateTime.isSameDay timeZone l.line.loggedAt d then
-                        ( entries ++ [ Line l ], Just l.line.loggedAt )
+                    if DateTime.isSameDay timeZone l.loggedAt d then
+                        ( entries ++ [ Line l ], Just l.loggedAt )
 
                     else
-                        ( entries ++ [ DateBoundary l.line.loggedAt, Line l ]
-                        , Just l.line.loggedAt
+                        ( entries ++ [ DateBoundary l.loggedAt, Line l ]
+                        , Just l.loggedAt
                         )
     in
     lines

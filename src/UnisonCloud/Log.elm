@@ -325,8 +325,8 @@ viewLoggedAt zone dateTime =
         |> Tooltip.view trigger
 
 
-viewLine : Time.Zone -> Model -> Bool -> LogLine -> Html Msg
-viewLine zone model isFresh line =
+viewLine : Time.Zone -> Model -> LogLine -> Html Msg
+viewLine zone model line =
     let
         isExpanded =
             Set.member line.id model.log.expandedLines
@@ -360,10 +360,7 @@ viewLine zone model isFresh line =
     div
         [ class "log-entry log-entry_log-line"
         , class ("log-line_" ++ LogLevel.toClassName_ line.level)
-        , classList
-            [ ( "log-line_expandable", expandable )
-            , ( "log-line_just-fetched", isFresh )
-            ]
+        , classList [ ( "log-line_expandable", expandable ) ]
         ]
         [ div [ class "log-line_collapsed" ]
             [ caret
@@ -389,7 +386,7 @@ viewEntry : Time.Zone -> Model -> LogEntry -> Html Msg
 viewEntry zone model entry =
     case entry of
         Line line ->
-            viewLine zone model line.justFetched line.line
+            viewLine zone model line
 
         DateBoundary date ->
             viewDateBoundary date
@@ -404,7 +401,7 @@ viewKeyedEntry zone model entry =
         key =
             case entry of
                 Line line ->
-                    line.line.id
+                    line.id
 
                 DateBoundary date ->
                     "boundary-" ++ DateTime.toISO8601 date
@@ -419,13 +416,13 @@ view appContext model =
             appContext.timeZone
 
         older =
-            RemoteData.withDefault [] model.log.olderLogLines |> List.map (\l -> { justFetched = True, line = l })
+            RemoteData.withDefault [] model.log.olderLogLines
 
         current =
-            RemoteData.withDefault [] model.log.logLines |> List.map (\l -> { justFetched = False, line = l })
+            RemoteData.withDefault [] model.log.logLines
 
         newer =
-            RemoteData.withDefault [] model.log.newerLogLines |> List.map (\l -> { justFetched = True, line = l })
+            RemoteData.withDefault [] model.log.newerLogLines
 
         allLogLines =
             older ++ current ++ newer
