@@ -13,7 +13,6 @@ import UI.Button as Button
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.Click as Click
-import UI.Divider as Divider
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
 import UI.ErrorCard as ErrorCard
@@ -150,8 +149,8 @@ viewService service =
         |> Card.view
 
 
-viewUnassignedDeploys : List ServiceDeploy -> Html Msg
-viewUnassignedDeploys deploys =
+viewUnassignedDeploys : Bool -> List ServiceDeploy -> Html Msg
+viewUnassignedDeploys hasServices deploys =
     let
         viewUnassignedDeploy d =
             Card.card
@@ -162,11 +161,22 @@ viewUnassignedDeploys deploys =
                 ]
                 |> Card.asContained
                 |> Card.view
+
+        howToOrganizeBlurb =
+            if hasServices then
+                p [ class "unassigned-deploys_learn-how-to-organize" ]
+                    [ text "Organize your deploys by assigning them to a service"
+                    , Button.button ShowAssignmentGuideModal "Learn how"
+                        |> Button.small
+                        |> Button.view
+                    ]
+
+            else
+                UI.nothing
     in
     div [ class "unassigned-deploys" ]
-        ([ Divider.divider |> Divider.small |> Divider.withoutMargin |> Divider.view
-         , h1 [] [ text "Ad-hoc Service Deploys" ]
-         , p [] [ text "Organize your deploys by assigning them to a service", Button.button ShowAssignmentGuideModal "Learn how" |> Button.small |> Button.view ]
+        ([ h1 [] [ text "Ad-hoc Service Deploys" ]
+         , howToOrganizeBlurb
          ]
             ++ List.map viewUnassignedDeploy deploys
         )
@@ -263,8 +273,23 @@ viewError _ =
         |> Card.view
 
 
-viewEmptyState : Html Msg
-viewEmptyState =
+viewServicesEmptyState : Html Msg
+viewServicesEmptyState =
+    EmptyState.iconCloud
+        (EmptyState.CircleCenterPiece (text "🌤️"))
+        |> EmptyState.withContent
+            [ h2 [] [ text "Sunny, with a chance of clouds" ]
+            , Button.iconThenLabel ShowAssignmentGuideModal
+                Icon.graduationCap
+                "Assign deployments to services for better organization"
+                |> Button.decorativeBlue
+                |> Button.view
+            ]
+        |> EmptyStateCard.view
+
+
+viewCompleteEmptyState : Html Msg
+viewCompleteEmptyState =
     EmptyState.iconCloud
         (EmptyState.CircleCenterPiece (text "🌤️"))
         |> EmptyState.withContent
@@ -296,17 +321,17 @@ view model =
                 Success ( services, deploys ) ->
                     case ( services, deploys ) of
                         ( [], [] ) ->
-                            [ viewEmptyState ]
+                            [ viewCompleteEmptyState ]
 
                         ( [], _ ) ->
-                            [ viewUnassignedDeploys deploys ]
+                            [ viewServicesEmptyState, viewUnassignedDeploys False deploys ]
 
                         ( _, [] ) ->
                             List.map viewService services
 
                         _ ->
                             List.map viewService services
-                                ++ [ viewUnassignedDeploys deploys ]
+                                ++ [ viewUnassignedDeploys True deploys ]
 
                 Failure e ->
                     [ viewError e ]
