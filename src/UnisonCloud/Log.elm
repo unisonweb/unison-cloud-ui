@@ -208,7 +208,14 @@ update appContext logBrowsingContext msg model =
             ( { model | log = log_ }, Cmd.none )
 
         RevealNewOffscreenLogLines ->
-            ( model, Cmd.none )
+            let
+                log_ =
+                    { log
+                        | newestLogLines = log.newestLogLines
+                        , offScreenNewestLogLines = NotAsked
+                    }
+            in
+            ( { model | log = log_ }, Cmd.none )
 
 
 
