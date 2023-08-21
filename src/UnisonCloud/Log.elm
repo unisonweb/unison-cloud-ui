@@ -9,6 +9,8 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
+import Lib.Util exposing (pluralize)
+import List.Extra as ListE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -76,7 +78,8 @@ type alias Log =
     { expandedLines : Set String -- Set (LogId)
     , olderLogLines : WebData (List LogLine)
     , logLines : WebData (List LogLine)
-    , newerLogLines : WebData (List LogLine)
+    , newestLogLines : WebData (List LogLine)
+    , offScreenNewestLogLines : WebData (List LogLine)
     }
 
 
@@ -90,7 +93,8 @@ init appContext logBrowsingContext =
             { expandedLines = Set.empty
             , olderLogLines = NotAsked
             , logLines = Loading
-            , newerLogLines = NotAsked
+            , newestLogLines = NotAsked
+            , offScreenNewestLogLines = NotAsked
             }
       }
     , fetchInitialLogLines appContext logBrowsingContext
@@ -104,9 +108,10 @@ init appContext logBrowsingContext =
 type Msg
     = FetchInitialLogLinesFinished (WebData (List LogLine))
     | FetchOlderLogLinesFinished (WebData (List LogLine))
-    | FetchNewerLogLinesFinished (WebData (List LogLine))
+    | FetchNewestLogLinesFinished (WebData (List LogLine))
     | Scroll ScrollEvent
     | ToggleLogLine LogLine
+    | RevealNewOffscreenLogLines
 
 
 update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
@@ -120,8 +125,18 @@ update appContext logBrowsingContext msg model =
             let
                 log_ =
                     { log | logLines = logLines }
+
+                ( log__, cmd ) =
+                    case RemoteData.map ListE.last logLines of
+                        Success (Just l) ->
+                            ( { log_ | offScreenNewestLogLines = Loading }
+                            , fetchNewestLogLines appContext logBrowsingContext l.loggedAt
+                            )
+
+                        _ ->
+                            ( log_, Cmd.none )
             in
-            ( { model | log = log_ }, Cmd.none )
+            ( { model | log = log__ }, cmd )
 
         FetchOlderLogLinesFinished olderLogLines ->
             let
@@ -134,14 +149,10 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }, Cmd.none )
 
-        FetchNewerLogLinesFinished newerLogLines ->
+        FetchNewestLogLinesFinished lines ->
             let
-                logLines =
-                    log.logLines
-                        |> RemoteData.map (\ls -> ls ++ RemoteData.withDefault [] log.newerLogLines)
-
                 log_ =
-                    { log | logLines = logLines, newerLogLines = newerLogLines }
+                    { log | offScreenNewestLogLines = lines }
             in
             ( { model | log = log_ }, Cmd.none )
 
@@ -196,6 +207,9 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }, Cmd.none )
 
+        RevealNewOffscreenLogLines ->
+            ( model, Cmd.none )
+
 
 
 -- HELPERS
@@ -230,15 +244,15 @@ fetchOlderLogLines appContext logBrowsingContext bookmark =
     fetchLogLines_ appContext logBrowsingContext params FetchOlderLogLinesFinished
 
 
-fetchNewerLogLines : AppContext -> LogBrowsingContext -> DateTime -> Cmd Msg
-fetchNewerLogLines appContext logBrowsingContext bookmark =
+fetchNewestLogLines : AppContext -> LogBrowsingContext -> DateTime -> Cmd Msg
+fetchNewestLogLines appContext logBrowsingContext bookmark =
     let
         params =
             FetchLogParams.fetchLogParams
                 |> FetchLogParams.withDirection FetchLogParams.Forward
                 |> FetchLogParams.withStart bookmark
     in
-    fetchLogLines_ appContext logBrowsingContext params FetchNewerLogLinesFinished
+    fetchLogLines_ appContext logBrowsingContext params FetchNewestLogLinesFinished
 
 
 fetchLogLines_ :
@@ -421,11 +435,26 @@ view appContext model =
         current =
             RemoteData.withDefault [] model.log.logLines
 
-        newer =
-            RemoteData.withDefault [] model.log.newerLogLines
+        newest =
+            RemoteData.withDefault [] model.log.newestLogLines
 
         allLogLines =
-            older ++ current ++ newer
+            older ++ current ++ newest
+
+        offscreenLines =
+            case model.log.offScreenNewestLogLines of
+                Success [] ->
+                    UI.nothing
+
+                Success ls ->
+                    div [ class "log_new-offscreen-log-lines" ]
+                        [ text (pluralize "New log line" "New log lines" (List.length ls))
+                        , Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal"
+                            |> Button.view
+                        ]
+
+                _ ->
+                    UI.nothing
 
         lines =
             allLogLines
@@ -433,4 +462,4 @@ view appContext model =
                 |> List.map (viewKeyedEntry timeZone model)
     in
     div [ class "log" ]
-        [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines ]
+        [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines, offscreenLines ]
