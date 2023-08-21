@@ -258,6 +258,6 @@
 }
 
 .log .log_new-offscreen-log-lines .nudge {
-  top: -0.5rem;
-  right: -0.5rem;
+  top: -1rem;
+  right: 0.5rem;
 }
