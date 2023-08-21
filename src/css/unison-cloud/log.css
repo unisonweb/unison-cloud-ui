@@ -255,7 +255,7 @@
   position: absolute;
   right: 1.5rem;
   bottom: 1rem;
-  background: var(--u-color_info_container_subdued);
+  background: var(--u-color_info_element);
   color: var(--u-color_text);
   padding: 0.5rem;
   padding-left: 0.75rem;
@@ -282,7 +282,7 @@
   width: var(--icon-size);
   height: var(--icon-size);
   border-radius: calc(var(--icon-size) / 2);
-  background: var(--u-color_info_element);
+  background: var(--u-color_info_icon-on-element);
 }
 
 .log
