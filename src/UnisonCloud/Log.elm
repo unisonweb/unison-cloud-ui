@@ -160,10 +160,10 @@ update appContext logBrowsingContext msg model =
         RequestToFetchNewestLogLines ->
             let
                 ( log_, cmd ) =
-                    case RemoteData.map ListE.last log.logLines of
-                        Success (Just l) ->
+                    case newestLoggedAt model.log of
+                        Just loggedAt ->
                             ( { log | offScreenNewestLogLines = Loading }
-                            , fetchNewestLogLines appContext logBrowsingContext l.loggedAt
+                            , fetchNewestLogLines appContext logBrowsingContext loggedAt
                             )
 
                         _ ->
@@ -176,7 +176,7 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | offScreenNewestLogLines = lines }
             in
-            ( { model | log = log_ }, Cmd.none )
+            ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
 
         Scroll ev ->
             let
@@ -186,11 +186,11 @@ update appContext logBrowsingContext msg model =
                 logLines_ =
                     RemoteData.withDefault [] log.logLines
 
-                allLogLines =
+                allLogLines_ =
                     olderLogLines_ ++ logLines_
 
                 bookmark =
-                    allLogLines
+                    allLogLines_
                         |> List.head
                         |> Maybe.map .loggedAt
             in
@@ -247,6 +247,37 @@ update appContext logBrowsingContext msg model =
 
 
 -- HELPERS
+
+
+oldestLoggedAt : Log -> Maybe DateTime
+oldestLoggedAt log =
+    log
+        |> logLinesOldestToNewest
+        |> List.head
+        |> Maybe.map .loggedAt
+
+
+newestLoggedAt : Log -> Maybe DateTime
+newestLoggedAt log =
+    log
+        |> logLinesOldestToNewest
+        |> ListE.last
+        |> Maybe.map .loggedAt
+
+
+logLinesOldestToNewest : Log -> List LogLine
+logLinesOldestToNewest log =
+    let
+        older =
+            RemoteData.withDefault [] log.olderLogLines
+
+        current =
+            RemoteData.withDefault [] log.logLines
+
+        newest =
+            RemoteData.withDefault [] log.newestLogLines
+    in
+    older ++ current ++ newest
 
 
 logEntryHeight : Sizing.Rem
@@ -463,18 +494,6 @@ view appContext model =
         timeZone =
             appContext.timeZone
 
-        older =
-            RemoteData.withDefault [] model.log.olderLogLines
-
-        current =
-            RemoteData.withDefault [] model.log.logLines
-
-        newest =
-            RemoteData.withDefault [] model.log.newestLogLines
-
-        allLogLines =
-            newest ++ current ++ older
-
         offscreenLines =
             case model.log.offScreenNewestLogLines of
                 Success [] ->
@@ -493,7 +512,8 @@ view appContext model =
                     UI.nothing
 
         lines =
-            allLogLines
+            logLinesOldestToNewest model.log
+                |> List.reverse
                 |> LogEntries.fromLines timeZone
                 |> List.map (viewKeyedEntry timeZone model)
     in
