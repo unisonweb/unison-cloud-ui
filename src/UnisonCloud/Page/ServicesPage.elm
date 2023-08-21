@@ -29,6 +29,7 @@ import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
+import UnisonCloud.Service.ServiceName as ServiceName
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 import UnisonCloud.ServiceHash as ServiceHash
 
@@ -121,7 +122,7 @@ viewService : Service -> Html msg
 viewService service =
     let
         heading =
-            Link.view service.name (Link.service service.id)
+            Link.view (ServiceName.toString service.name) (Link.service service.name)
 
         latestDeploy =
             case service.latestDeploy of

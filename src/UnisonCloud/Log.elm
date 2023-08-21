@@ -10,7 +10,7 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
-import Lib.Util exposing (pluralize)
+import Lib.Util as Util exposing (pluralize)
 import List.Extra as ListE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
@@ -29,7 +29,7 @@ import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
-import UnisonCloud.Service exposing (ServiceId)
+import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
@@ -68,7 +68,7 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 type LogBrowsingContext
-    = ServiceContext ServiceId
+    = ServiceContext ServiceName
     | ServiceDeployContext ServiceHash
 
 
@@ -115,6 +115,7 @@ type Msg
     | Scroll ScrollEvent
     | ToggleLogLine LogLine
     | RevealNewOffscreenLogLines
+    | RequestToFetchNewestLogLines
 
 
 update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
@@ -131,18 +132,8 @@ update appContext logBrowsingContext msg model =
             let
                 log_ =
                     { log | logLines = logLines }
-
-                ( log__, cmd ) =
-                    case RemoteData.map ListE.last logLines of
-                        Success (Just l) ->
-                            ( { log_ | offScreenNewestLogLines = Loading }
-                            , fetchNewestLogLines appContext logBrowsingContext l.loggedAt
-                            )
-
-                        _ ->
-                            ( log_, Cmd.none )
             in
-            ( { model | log = log__ }, cmd )
+            ( { model | log = log_ }, Util.delayMsg 10000 RequestToFetchNewestLogLines )
 
         FetchOlderLogLinesFinished olderLogLines ->
             let
@@ -154,6 +145,20 @@ update appContext logBrowsingContext msg model =
                     { log | logLines = logLines, olderLogLines = olderLogLines }
             in
             ( { model | log = log_ }, Cmd.none )
+
+        RequestToFetchNewestLogLines ->
+            let
+                ( log_, cmd ) =
+                    case RemoteData.map ListE.last log.logLines of
+                        Success (Just l) ->
+                            ( { log | offScreenNewestLogLines = Loading }
+                            , fetchNewestLogLines appContext logBrowsingContext l.loggedAt
+                            )
+
+                        _ ->
+                            ( log, Cmd.none )
+            in
+            ( { model | log = log_ }, cmd )
 
         FetchNewestLogLinesFinished lines ->
             let
@@ -286,8 +291,8 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
 
         endpoint =
             case logBrowsingContext of
-                ServiceContext sid ->
-                    CloudApi.serviceLogs sid params_
+                ServiceContext name ->
+                    CloudApi.serviceLogs name params_
 
                 ServiceDeployContext sh ->
                     CloudApi.serviceDeployLogs sh params_
@@ -471,7 +476,7 @@ view appContext model =
                                 [ class "log_new-offscreen-log-lines_icon" ]
                                 [ Icon.view Icon.boltLightning ]
                             , text (String.fromInt (List.length ls))
-                            , text (pluralize " New log entry" " New log entries" (List.length ls))
+                            , text (pluralize " new log entry" " new log entries" (List.length ls))
                             ]
                         , Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal"
                             |> Button.small

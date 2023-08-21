@@ -2,47 +2,22 @@ module UnisonCloud.Service exposing (..)
 
 import Json.Decode as Decode exposing (string)
 import Json.Decode.Pipeline exposing (optional, required)
-import Lib.Util as Util
 import Set exposing (Set)
+import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
-
-
-type ServiceId
-    = ServiceId String
 
 
 type alias Service =
     { id : ServiceId
-    , name : String
+    , name : ServiceName
     , latestDeploy : Maybe ServiceDeploy
     , tags : Set String
     }
 
 
 
--- HELPERS
-
-
-serviceIdToString : ServiceId -> String
-serviceIdToString (ServiceId id_) =
-    id_
-
-
-{-| TODO: Validate somehow
--}
-serviceIdFromString : String -> Maybe ServiceId
-serviceIdFromString s =
-    Just (ServiceId s)
-
-
-
 -- DECODE
-
-
-decodeServiceId : Decode.Decoder ServiceId
-decodeServiceId =
-    Decode.map serviceIdFromString Decode.string
-        |> Decode.andThen (Util.decodeFailInvalid "Invalid ServiceId")
 
 
 decode : Decode.Decoder Service
@@ -56,7 +31,7 @@ decode =
             }
     in
     Decode.succeed makeService
-        |> required "id" decodeServiceId
-        |> required "name" Decode.string
+        |> required "id" ServiceId.decode
+        |> required "name" ServiceName.decode
         |> optional "latestServiceDeploy" (Decode.map Just ServiceDeploy.decode) Nothing
         |> optional "tags" (Decode.list string) []

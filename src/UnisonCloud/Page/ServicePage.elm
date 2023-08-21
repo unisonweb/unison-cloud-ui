@@ -11,7 +11,7 @@ import UI.PageTitle as PageTitle
 import UI.Placeholder as Placeholder
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
-import UnisonCloud.Service as Service exposing (ServiceId)
+import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 
 
 
@@ -22,7 +22,7 @@ type alias Model =
     ()
 
 
-init : AppContext -> ServiceId -> ( Model, Cmd Msg )
+init : AppContext -> ServiceName -> ( Model, Cmd Msg )
 init _ _ =
     ( (), Cmd.none )
 
@@ -35,7 +35,7 @@ type Msg
     = NoOp
 
 
-update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
+update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
 update _ _ _ model =
     ( model, Cmd.none )
 
@@ -79,8 +79,8 @@ viewError _ =
         |> Card.view
 
 
-view : AppContext -> ServiceId -> Model -> AppDocument Msg
-view _ sid _ =
+view : AppContext -> ServiceName -> Model -> AppDocument Msg
+view _ name _ =
     let
         content =
             [ text "TODO" ]
@@ -88,13 +88,13 @@ view _ sid _ =
         page =
             PageLayout.centeredLayout
                 (PageContent.oneColumn content
-                    |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ Service.serviceIdToString sid))
+                    |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ ServiceName.toString name))
                 )
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground
     in
     { pageId = "service-page"
-    , title = "Service: " ++ Service.serviceIdToString sid ++ " | Unison Cloud"
+    , title = "Service: " ++ ServiceName.toString name ++ " | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing

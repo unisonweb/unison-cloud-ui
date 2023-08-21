@@ -25,7 +25,7 @@ import Code.HashQualified exposing (HashQualified(..))
 import Code.UrlParsers exposing (b, s, slash)
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import UnisonCloud.AppError as AppError exposing (AppError)
-import UnisonCloud.Service as Service exposing (ServiceId)
+import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
 import Url.Builder exposing (relative, string)
@@ -34,7 +34,7 @@ import Url.Builder exposing (relative, string)
 type Route
     = Overview
     | Services
-    | Service ServiceId
+    | Service ServiceName
     | ServiceDeploy ServiceHash
     | Error AppError
     | NotFound String
@@ -57,9 +57,9 @@ services =
     Services
 
 
-service : ServiceId -> Route
-service sid =
-    Service sid
+service : ServiceName -> Route
+service name =
+    Service name
 
 
 serviceDeploy : ServiceHash -> Route
@@ -94,8 +94,8 @@ servicesParser =
     succeed Services |. slash |. s "services" |. end
 
 
-serviceIdParser : Parser ServiceId
-serviceIdParser =
+serviceNameParser : Parser ServiceName
+serviceNameParser =
     let
         parseMaybe mid =
             case mid of
@@ -103,17 +103,17 @@ serviceIdParser =
                     Parser.succeed s_
 
                 Nothing ->
-                    Parser.problem "Invalid ServiceId"
+                    Parser.problem "Invalid ServiceName"
     in
     Parser.chompUntilEndOr "/"
         |> Parser.getChompedString
-        |> Parser.map Service.serviceIdFromString
+        |> Parser.map ServiceName.fromString
         |> Parser.andThen parseMaybe
 
 
 serviceParser : Parser Route
 serviceParser =
-    succeed Service |. slash |. s "services" |. slash |= serviceIdParser |. end
+    succeed Service |. slash |. s "services" |. slash |= serviceNameParser |. end
 
 
 serviceHashParser : Parser ServiceHash
@@ -235,8 +235,8 @@ toUrlString route =
                 Services ->
                     ( [ "services" ], [] )
 
-                Service sid ->
-                    ( [ "services", Service.serviceIdToString sid ], [] )
+                Service name ->
+                    ( [ "services", ServiceName.toString name ], [] )
 
                 ServiceDeploy sh ->
                     ( [ "service-deploys", ServiceHash.toUrlString sh ], [] )
