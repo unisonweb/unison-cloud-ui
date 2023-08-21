@@ -3,6 +3,7 @@
   flex: 1;
   flex-direction: column;
   gap: 1.5rem;
+  position: relative;
 }
 
 .log .log-entries {
@@ -252,7 +253,21 @@
 
 .log .log_new-offscreen-log-lines {
   position: absolute;
-  background: var(--u-color_info);
+  right: 0;
+  background: var(--u-color_info_container_subdued);
+  color: var(--u-color_info_text);
   padding: 0.75rem 1rem;
   border-radius: var(--border-radius-base);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--font-size-medium);
+  text-align: right;
+}
+
+.log
+  .log_new-offscreen-log-lines
+  .log_new-offscreen-log-lines_icon-and-text
+  .icon {
+  color: var(--u-color_info_icon);
 }

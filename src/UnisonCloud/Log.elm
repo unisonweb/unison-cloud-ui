@@ -448,8 +448,12 @@ view appContext model =
 
                 Success ls ->
                     div [ class "log_new-offscreen-log-lines" ]
-                        [ text (pluralize "New log line" "New log lines" (List.length ls))
+                        [ div [ class "log_new-offscreen-log-lines_icon-and-text" ]
+                            [ Icon.view Icon.info
+                            , text (pluralize "New log line" "New log lines" (List.length ls))
+                            ]
                         , Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal"
+                            |> Button.small
                             |> Button.view
                         ]
 
