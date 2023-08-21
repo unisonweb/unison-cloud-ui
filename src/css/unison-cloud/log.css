@@ -254,13 +254,13 @@
 .log .log_new-offscreen-log-lines {
   position: absolute;
   right: 1rem;
-  top: 1rem;
+  bottom: 1rem;
   background: var(--u-color_info_container_subdued);
   color: var(--u-color_text);
   padding: 0.75rem 1rem;
   border-radius: var(--border-radius-base);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.25rem;
   font-size: var(--font-size-small);
   text-align: right;
@@ -273,9 +273,18 @@
   gap: 0.25rem;
 }
 
+.log .log_new-offscreen-log-lines .log_new-offscreen-log-lines_icon {
+  --icon-size: 0.75rem;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  border-radius: calc(var(--icon-size) / 2);
+  background: var(--u-color_info_element);
+}
+
 .log
   .log_new-offscreen-log-lines
   .log_new-offscreen-log-lines_icon-and-text
   .icon {
-  color: var(--u-color_icon);
+  font-size: var(--font-size-small);
+  color: white;
 }
