@@ -513,7 +513,6 @@ view appContext model =
 
         lines =
             logLinesOldestToNewest model.log
-                |> List.reverse
                 |> LogEntries.fromLines timeZone
                 |> List.map (viewKeyedEntry timeZone model)
     in
