@@ -255,40 +255,4 @@
   position: absolute;
   right: 1.5rem;
   bottom: 1rem;
-  background: var(--u-color_info_element);
-  color: var(--u-color_text);
-  padding: 0.5rem;
-  padding-left: 0.75rem;
-  border-radius: var(--border-radius-base);
-  display: flex;
-  flex-direction: row;
-  gap: 0.75rem;
-  font-size: var(--font-size-small);
-  text-align: right;
-}
-
-.log .log_new-offscreen-log-lines .log_new-offscreen-log-lines_icon-and-text {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.log .log_new-offscreen-log-lines .log_new-offscreen-log-lines_icon {
-  --icon-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--icon-size);
-  height: var(--icon-size);
-  border-radius: calc(var(--icon-size) / 2);
-  background: var(--u-color_info_icon-on-element);
-}
-
-.log
-  .log_new-offscreen-log-lines
-  .log_new-offscreen-log-lines_icon-and-text
-  .icon {
-  font-size: var(--font-size-small);
-  color: white;
 }

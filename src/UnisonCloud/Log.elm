@@ -21,6 +21,7 @@ import UI
 import UI.Button as Button
 import UI.DateTime as DateTime exposing (DateTime)
 import UI.Icon as Icon
+import UI.Nudge as Nudge
 import UI.Sizing as Sizing
 import UI.Tooltip as Tooltip
 import UnisonCloud.Api as CloudApi
@@ -471,17 +472,11 @@ view appContext model =
 
                 Success ls ->
                     div [ class "log_new-offscreen-log-lines" ]
-                        [ div [ class "log_new-offscreen-log-lines_icon-and-text" ]
-                            [ div
-                                [ class "log_new-offscreen-log-lines_icon" ]
-                                [ Icon.view Icon.boltLightning ]
-                            , text (String.fromInt (List.length ls))
-                            , text (pluralize " new log entry" " new log entries" (List.length ls))
-                            ]
-                        , Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal"
+                        [ Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal new entries"
                             |> Button.small
                             |> Button.emphasized
                             |> Button.view
+                        , Nudge.nudge |> Nudge.withNumber (List.length ls) |> Nudge.view
                         ]
 
                 _ ->
