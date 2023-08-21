@@ -13,7 +13,7 @@ module UnisonCloud.Link exposing (..)
 import Html exposing (Html, text)
 import UI.Click as Click exposing (Click)
 import UnisonCloud.Route as Route exposing (Route)
-import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 

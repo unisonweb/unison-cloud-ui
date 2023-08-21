@@ -10,7 +10,7 @@ import Html.Lazy exposing (lazy)
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
-import Lib.Util as Util exposing (pluralize)
+import Lib.Util as Util
 import List.Extra as ListE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
@@ -105,6 +105,16 @@ init appContext logBrowsingContext =
 
 
 
+-- CONFIG
+
+
+pollingInterval : Float
+pollingInterval =
+    -- 7.5 seconds
+    7500
+
+
+
 -- UPDATE
 
 
@@ -134,7 +144,7 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | logLines = logLines }
             in
-            ( { model | log = log_ }, Util.delayMsg 10000 RequestToFetchNewestLogLines )
+            ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
 
         FetchOlderLogLinesFinished olderLogLines ->
             let
