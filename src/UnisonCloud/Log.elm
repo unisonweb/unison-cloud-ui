@@ -446,7 +446,7 @@ view appContext model =
             RemoteData.withDefault [] model.log.newestLogLines
 
         allLogLines =
-            older ++ current ++ newest
+            newest ++ current ++ older
 
         offscreenLines =
             case model.log.offScreenNewestLogLines of
