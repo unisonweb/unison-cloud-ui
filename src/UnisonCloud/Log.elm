@@ -451,7 +451,7 @@ view appContext model =
                         [ div [ class "log_new-offscreen-log-lines_icon-and-text" ]
                             [ div
                                 [ class "log_new-offscreen-log-lines_icon" ]
-                                [ Icon.view Icon.lightningBolt ]
+                                [ Icon.view Icon.boltLightning ]
                             , text (pluralize "New log line" "New log lines" (List.length ls))
                             ]
                         , Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal"
