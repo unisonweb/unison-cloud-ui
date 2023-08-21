@@ -275,7 +275,7 @@
 }
 
 .log .log_new-offscreen-log-lines .log_new-offscreen-log-lines_icon {
-  --icon-size: 1;
+  --icon-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
