@@ -454,6 +454,7 @@ view appContext model =
                             ]
                         , Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal"
                             |> Button.small
+                            |> Button.decorativeBlue
                             |> Button.view
                         ]
 

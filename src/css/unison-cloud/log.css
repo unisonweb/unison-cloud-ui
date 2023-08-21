@@ -253,21 +253,29 @@
 
 .log .log_new-offscreen-log-lines {
   position: absolute;
-  right: 0;
+  right: 1rem;
+  top: 1rem;
   background: var(--u-color_info_container_subdued);
-  color: var(--u-color_info_text);
+  color: var(--u-color_text);
   padding: 0.75rem 1rem;
   border-radius: var(--border-radius-base);
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  font-size: var(--font-size-medium);
+  font-size: var(--font-size-small);
   text-align: right;
+}
+
+.log .log_new-offscreen-log-lines .log_new-offscreen-log-lines_icon-and-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .log
   .log_new-offscreen-log-lines
   .log_new-offscreen-log-lines_icon-and-text
   .icon {
-  color: var(--u-color_info_icon);
+  color: var(--u-color_icon);
 }
