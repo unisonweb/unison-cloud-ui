@@ -1,5 +1,6 @@
 module UnisonCloud.Log exposing (..)
 
+import Browser.Dom as Dom
 import Dict
 import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, classList)
@@ -14,6 +15,7 @@ import List.Extra as ListE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
+import Task
 import Time
 import UI
 import UI.Button as Button
@@ -106,7 +108,8 @@ init appContext logBrowsingContext =
 
 
 type Msg
-    = FetchInitialLogLinesFinished (WebData (List LogLine))
+    = NoOp
+    | FetchInitialLogLinesFinished (WebData (List LogLine))
     | FetchOlderLogLinesFinished (WebData (List LogLine))
     | FetchNewestLogLinesFinished (WebData (List LogLine))
     | Scroll ScrollEvent
@@ -121,6 +124,9 @@ update appContext logBrowsingContext msg model =
             model.log
     in
     case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
         FetchInitialLogLinesFinished logLines ->
             let
                 log_ =
@@ -214,8 +220,13 @@ update appContext logBrowsingContext msg model =
                         | newestLogLines = log.newestLogLines
                         , offScreenNewestLogLines = NotAsked
                     }
+
+                cmd =
+                    Dom.getViewport
+                        |> Task.andThen (.scene >> .height >> Dom.setViewport 0)
+                        |> Task.perform (always NoOp)
             in
-            ( { model | log = log_ }, Cmd.none )
+            ( { model | log = log_ }, cmd )
 
 
 
@@ -460,7 +471,7 @@ view appContext model =
                                 [ class "log_new-offscreen-log-lines_icon" ]
                                 [ Icon.view Icon.boltLightning ]
                             , text (String.fromInt (List.length ls))
-                            , text (pluralize "New log line" "New log lines" (List.length ls))
+                            , text (pluralize " New log entry" " New log entries" (List.length ls))
                             ]
                         , Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal"
                             |> Button.small
