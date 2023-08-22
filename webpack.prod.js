@@ -62,7 +62,6 @@ const unisonCloud = {
             loader: "elm-webpack-loader",
             options: {
               debug: false,
-              optimize: false,
               cwd: __dirname,
             },
           },

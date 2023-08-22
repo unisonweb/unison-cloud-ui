@@ -114,6 +114,11 @@ pollingInterval =
     7500
 
 
+pageSize : Int
+pageSize =
+    15
+
+
 
 -- UPDATE
 
@@ -345,7 +350,7 @@ fetchLogLines_ :
 fetchLogLines_ appContext logBrowsingContext params doneMsg =
     let
         params_ =
-            FetchLogParams.withLimit 15 params
+            FetchLogParams.withLimit pageSize params
 
         endpoint =
             case logBrowsingContext of
