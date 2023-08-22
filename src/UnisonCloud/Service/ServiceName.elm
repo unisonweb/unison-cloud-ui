@@ -39,6 +39,11 @@ isValidName raw =
     Regex.contains re raw
 
 
+equals : ServiceName -> ServiceName -> Bool
+equals (ServiceName a) (ServiceName b) =
+    a == b
+
+
 
 -- DECODE
 

@@ -39,6 +39,11 @@ isValidId raw =
     Regex.contains re raw
 
 
+equals : ServiceId -> ServiceId -> Bool
+equals (ServiceId a) (ServiceId b) =
+    a == b
+
+
 
 -- DECODE
 

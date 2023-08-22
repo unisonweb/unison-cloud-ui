@@ -2,10 +2,12 @@ module UnisonCloud.Service exposing (..)
 
 import Json.Decode as Decode exposing (string)
 import Json.Decode.Pipeline exposing (optional, required)
+import Lib.UserHandle as UserHandle
 import Set exposing (Set)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
+import Url exposing (Url)
 
 
 type alias Service =
@@ -14,6 +16,34 @@ type alias Service =
     , latestDeploy : Maybe ServiceDeploy
     , tags : Set String
     }
+
+
+isExposed : Service -> Bool
+isExposed serv =
+    serv.latestDeploy
+        |> Maybe.map ServiceDeploy.isExposed
+        |> Maybe.withDefault False
+
+
+exposedUrl : Service -> Maybe Url
+exposedUrl serv =
+    let
+        withDeploy d =
+            if ServiceDeploy.isExposed d then
+                [ ServiceName.toString serv.name
+                , UserHandle.toUnprefixedString d.deployedBy
+                , "services"
+                , "unison"
+                , "cloud"
+                ]
+                    |> String.join "."
+                    |> Url.fromString
+
+            else
+                Nothing
+    in
+    serv.latestDeploy
+        |> Maybe.andThen withDeploy
 
 
 

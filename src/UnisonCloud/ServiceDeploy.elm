@@ -14,8 +14,14 @@ type alias ServiceDeploy =
     -- TODO: deployedBy should be a full user
     , deployedBy : UserHandle
     , deployedAt : DateTime
+    , exposedAt : Maybe DateTime
     , tags : Set String
     }
+
+
+isExposed : ServiceDeploy -> Bool
+isExposed d =
+    d.exposedAt /= Nothing
 
 
 
@@ -25,10 +31,11 @@ type alias ServiceDeploy =
 decode : Decode.Decoder ServiceDeploy
 decode =
     let
-        makeServiceDeploy hash deployedBy deployedAt tags =
+        makeServiceDeploy hash deployedBy deployedAt exposedAt tags =
             { hash = hash
             , deployedBy = deployedBy
             , deployedAt = deployedAt
+            , exposedAt = exposedAt
             , tags = Set.fromList tags
             }
     in
@@ -36,4 +43,5 @@ decode =
         |> required "hash" ServiceHash.decode
         |> requiredAt [ "deployedBy", "handle" ] UserHandle.decodeUnprefixed
         |> required "deployedAt" DateTime.decode
+        |> optional "exposedAt" (Decode.map Just DateTime.decode) Nothing
         |> optional "tags" (Decode.list string) []

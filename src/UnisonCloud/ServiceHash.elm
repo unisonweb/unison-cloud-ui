@@ -132,6 +132,11 @@ toApiString (ServiceHash h) =
     h
 
 
+equals : ServiceHash -> ServiceHash -> Bool
+equals (ServiceHash a) (ServiceHash b) =
+    a == b
+
+
 
 -- DECODE
 
