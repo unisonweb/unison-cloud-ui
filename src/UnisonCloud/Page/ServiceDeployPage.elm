@@ -10,7 +10,6 @@ import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
-import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
@@ -83,27 +82,7 @@ fetchServiceDeploy appContext sh =
 
 viewLoading : Html msg
 viewLoading =
-    let
-        placeholder_ length intensity =
-            Placeholder.text |> Placeholder.withLength length |> Placeholder.withIntensity intensity |> Placeholder.view
-
-        placeholders =
-            [ placeholder_ Placeholder.Medium Placeholder.Normal
-            , placeholder_ Placeholder.Small Placeholder.Subdued
-            , placeholder_ Placeholder.Large Placeholder.Subdued
-            , placeholder_ Placeholder.Medium Placeholder.Subdued
-            , placeholder_ Placeholder.Medium Placeholder.Normal
-            , placeholder_ Placeholder.Small Placeholder.Subdued
-            , placeholder_ Placeholder.Large Placeholder.Subdued
-            , placeholder_ Placeholder.Medium Placeholder.Subdued
-            ]
-
-        viewCard_ =
-            Card.card placeholders
-                |> Card.asContained
-                |> Card.view
-    in
-    viewCard_
+    Log.viewLoading
 
 
 viewError : Http.Error -> Html msg

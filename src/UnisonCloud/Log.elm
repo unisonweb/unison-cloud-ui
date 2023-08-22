@@ -22,6 +22,7 @@ import UI.Button as Button
 import UI.DateTime as DateTime exposing (DateTime)
 import UI.Icon as Icon
 import UI.Nudge as Nudge
+import UI.Placeholder as Placeholder
 import UI.Sizing as Sizing
 import UI.Tooltip as Tooltip
 import UnisonCloud.Api as CloudApi
@@ -509,33 +510,67 @@ viewKeyedEntry zone model entry =
     ( key, row )
 
 
+viewLoading : Html msg
+viewLoading =
+    let
+        placeholder_ length intensity =
+            Placeholder.text |> Placeholder.withLength length |> Placeholder.withIntensity intensity |> Placeholder.view
+
+        placeholders =
+            [ placeholder_ Placeholder.Medium Placeholder.Normal
+            , placeholder_ Placeholder.Small Placeholder.Subdued
+            , placeholder_ Placeholder.Large Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Normal
+            , placeholder_ Placeholder.Small Placeholder.Subdued
+            , placeholder_ Placeholder.Large Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Subdued
+            ]
+    in
+    div [ class "log", id "log" ]
+        [ div [ class "log-entries" ] placeholders
+        ]
+
+
 view : AppContext -> Model -> Html Msg
 view appContext model =
     let
         timeZone =
             appContext.timeZone
-
-        offscreenLines =
-            case model.log.offScreenNewestLogLines of
-                Success [] ->
-                    UI.nothing
-
-                Success ls ->
-                    div [ class "log_new-offscreen-log-lines" ]
-                        [ Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal new entries"
-                            |> Button.small
-                            |> Button.emphasized
-                            |> Button.view
-                        , Nudge.nudge |> Nudge.withNumber (List.length ls) |> Nudge.view
-                        ]
-
-                _ ->
-                    UI.nothing
-
-        lines =
-            logLinesOldestToNewest model.log
-                |> LogEntries.fromLines timeZone
-                |> List.map (viewKeyedEntry timeZone model)
     in
-    div [ class "log", id "log" ]
-        [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines, offscreenLines ]
+    case model.log.logLines of
+        NotAsked ->
+            viewLoading
+
+        Loading ->
+            viewLoading
+
+        Success _ ->
+            let
+                offscreenLines =
+                    case model.log.offScreenNewestLogLines of
+                        Success [] ->
+                            UI.nothing
+
+                        Success ls ->
+                            div [ class "log_new-offscreen-log-lines" ]
+                                [ Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal new entries"
+                                    |> Button.small
+                                    |> Button.emphasized
+                                    |> Button.view
+                                , Nudge.nudge |> Nudge.withNumber (List.length ls) |> Nudge.view
+                                ]
+
+                        _ ->
+                            UI.nothing
+
+                lines =
+                    logLinesOldestToNewest model.log
+                        |> LogEntries.fromLines timeZone
+                        |> List.map (viewKeyedEntry timeZone model)
+            in
+            div [ class "log", id "log" ]
+                [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines, offscreenLines ]
+
+        Failure _ ->
+            div [] [ text "Something went wrong in fetching the logs" ]
