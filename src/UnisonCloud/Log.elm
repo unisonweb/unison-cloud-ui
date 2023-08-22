@@ -173,8 +173,17 @@ update appContext logBrowsingContext msg model =
 
         FetchNewestLogLinesFinished lines ->
             let
+                allLogIds =
+                    log
+                        |> logLinesOldestToNewest
+                        |> List.map .id
+
+                lines_ =
+                    lines
+                        |> RemoteData.map (List.filter (\l -> not (List.member l.id allLogIds)))
+
                 log_ =
-                    { log | offScreenNewestLogLines = lines }
+                    { log | offScreenNewestLogLines = lines_ }
             in
             ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
 
