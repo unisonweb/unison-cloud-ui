@@ -2,8 +2,8 @@ module UnisonCloud.Log exposing (..)
 
 import Browser.Dom as Dom
 import Dict
-import Html exposing (Html, div, hr, id, table, tbody, td, text, th, tr)
-import Html.Attributes exposing (class, classList)
+import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
+import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
