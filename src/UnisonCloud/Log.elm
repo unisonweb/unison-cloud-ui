@@ -117,7 +117,7 @@ pollingInterval =
 
 pageSize : Int
 pageSize =
-    15
+    25
 
 
 
