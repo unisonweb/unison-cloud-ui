@@ -3,7 +3,7 @@ module UnisonCloud.Log exposing (..)
 import Browser.Dom as Dom
 import Dict
 import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
@@ -238,9 +238,16 @@ update appContext logBrowsingContext msg model =
                     }
 
                 cmd =
-                    Dom.getViewportOf "log"
-                        |> Task.andThen (.scene >> .height >> Dom.setViewport 0)
+                    Dom.getViewportOf
+                        "log"
+                        |> Task.andThen (.scene >> .height >> Dom.setViewportOf "log" 0)
                         |> Task.attempt (always NoOp)
+
+                {- cmd =
+                   cmd =
+                       Dom.setViewportOf "log" 0 0
+                           |> Task.attempt (always NoOp)
+                -}
             in
             ( { model | log = log_ }, cmd )
 
