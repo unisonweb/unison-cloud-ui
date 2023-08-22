@@ -11,7 +11,7 @@
   left: 0;
   right: 0;
   /* this allows us to avoid top and bottom while still having near full screen height */
-  height: 100%; 
+  height: 100%;
   border: 1px solid var(--u-color_border);
   padding: 0.75rem;
   display: flex;
