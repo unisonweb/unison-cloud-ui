@@ -176,10 +176,9 @@ viewUnassignedDeploys hasServices deploys =
                 UI.nothing
     in
     div [ class "unassigned-deploys" ]
-        ([ h1 [] [ text "Ad-hoc Service Deploys" ]
-         , howToOrganizeBlurb
-         ]
-            ++ List.map viewUnassignedDeploy deploys
+        (div [ class "unassigned-deploys_header" ]
+            [ h1 [] [ text "Ad-hoc Service Deploys" ], howToOrganizeBlurb ]
+            :: List.map viewUnassignedDeploy deploys
         )
 
 

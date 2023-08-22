@@ -15,12 +15,20 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.services-page .unassigned-deploys .unassigned-deploys_header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .services-page .unassigned-deploys .unassigned-deploys_learn-how-to-organize {
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+  margin: 0;
 }
 
 .services-page .latest-deploy {
