@@ -415,14 +415,15 @@ viewLoggedAt : Time.Zone -> DateTime -> Html Msg
 viewLoggedAt zone dateTime =
     let
         content =
-            Tooltip.text (DateTime.toISO8601 dateTime)
+            Tooltip.text (DateTime.toString DateTime.FullDateTime zone dateTime)
 
         trigger =
             div [ class "log-line_logged-at" ]
-                [ text (DateTime.toString DateTime.TimeWithSeconds zone dateTime) ]
+                [ text (DateTime.toString DateTime.TimeWithSeconds24Hour zone dateTime) ]
     in
     content
         |> Tooltip.tooltip
+        |> Tooltip.withArrow Tooltip.Start
         |> Tooltip.view trigger
 
 
