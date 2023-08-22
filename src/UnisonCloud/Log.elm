@@ -528,7 +528,7 @@ viewLoading =
             ]
     in
     div [ class "log", id "log" ]
-        [ div [ class "log-entries" ] placeholders
+        [ div [ class "log-entries log-entries_loading" ] (placeholders ++ placeholders ++ placeholders ++ placeholders)
         ]
 
 

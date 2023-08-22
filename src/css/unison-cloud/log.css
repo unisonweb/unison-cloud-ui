@@ -20,6 +20,11 @@
   height: 400px;
 }
 
+.log .log-entries.log-entries_loading {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 .log-entry_date-boundary {
   position: relative;
   color: var(--color-orange-1);
