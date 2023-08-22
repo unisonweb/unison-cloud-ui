@@ -3,7 +3,7 @@ module UnisonCloud.Log exposing (..)
 import Browser.Dom as Dom
 import Dict
 import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
@@ -238,9 +238,9 @@ update appContext logBrowsingContext msg model =
                     }
 
                 cmd =
-                    Dom.getViewport
+                    Dom.getViewportOf "log"
                         |> Task.andThen (.scene >> .height >> Dom.setViewport 0)
-                        |> Task.perform (always NoOp)
+                        |> Task.attempt (always NoOp)
             in
             ( { model | log = log_ }, cmd )
 
@@ -516,5 +516,5 @@ view appContext model =
                 |> LogEntries.fromLines timeZone
                 |> List.map (viewKeyedEntry timeZone model)
     in
-    div [ class "log" ]
+    div [ class "log", id "log" ]
         [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines, offscreenLines ]
