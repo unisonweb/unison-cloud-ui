@@ -10,9 +10,11 @@ import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
+import UI.TabList as TabList
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
+import UnisonCloud.Link as Link
 import UnisonCloud.Log as Log
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
@@ -116,11 +118,14 @@ view appContext sh model =
                 Failure e ->
                     [ viewError e ]
 
+        tabList =
+            TabList.tabList [] (TabList.tab "Activity" (Link.serviceDeploy sh)) []
+
         page =
-            PageLayout.centeredLayout
-                (PageContent.oneColumn content
-                    |> PageContent.withPageTitle (PageTitle.title ("Service Deploy: " ++ ServiceHash.toShortString sh))
-                )
+            PageLayout.tabbedLayout
+                (PageTitle.title ("Service Deploy: " ++ ServiceHash.toShortString sh))
+                tabList
+                (PageContent.oneColumn content)
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground
     in

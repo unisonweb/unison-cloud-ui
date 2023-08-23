@@ -25,13 +25,14 @@
 
 .log .log-entries.log-entries_loading {
   overflow: hidden;
-  margin-right: 2rem;
+  margin-left: 2rem;
 }
 
 .log .log-entries.log-entries_loading .log-entry_loading {
   height: 1.5rem;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .log-entry_date-boundary {

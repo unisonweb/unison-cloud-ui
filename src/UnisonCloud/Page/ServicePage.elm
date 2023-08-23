@@ -9,8 +9,10 @@ import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
 import UI.Placeholder as Placeholder
+import UI.TabList as TabList
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
+import UnisonCloud.Link as Link
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 
 
@@ -85,13 +87,18 @@ view _ name _ =
         content =
             [ text "TODO" ]
 
+        tabList =
+            TabList.tabList
+                []
+                (TabList.tab "Activity" Link.website)
+                [ TabList.tab "Deploys" Link.website ]
+
         page =
-            PageLayout.centeredLayout
-                (PageContent.oneColumn content
-                    |> PageContent.withPageTitle (PageTitle.title ("Service: " ++ ServiceName.toString name))
-                )
+            PageLayout.tabbedLayout
+                (PageTitle.title ("Service: " ++ ServiceName.toString name))
+                tabList
+                (PageContent.oneColumn content)
                 (PageLayout.PageFooter [])
-                |> PageLayout.withSubduedBackground
     in
     { pageId = "service-page"
     , title = "Service: " ++ ServiceName.toString name ++ " | Unison Cloud"
