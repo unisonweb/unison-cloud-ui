@@ -1,4 +1,4 @@
-.sign-in-page {
+.sign-in-page .column {
   display: flex;
   flex-direction: column;
   align-items: center;

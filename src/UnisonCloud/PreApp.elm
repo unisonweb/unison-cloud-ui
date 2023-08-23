@@ -182,8 +182,8 @@ view model =
                     , PageLayout.view
                         (PageLayout.centeredLayout
                             (PageContent.oneColumn
-                                [ Button.button_ Link.login "Sign In to Unison Cloud"
-                                    |> Button.medium
+                                [ Button.iconThenLabel_ Link.login Icon.cloud "Sign In to Unison Cloud"
+                                    |> Button.large
                                     |> Button.decorativeBlue
                                     |> Button.view
                                 ]
