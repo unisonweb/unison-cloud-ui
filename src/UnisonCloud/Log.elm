@@ -529,7 +529,10 @@ viewLoading =
             ]
     in
     div [ class "log", id "log" ]
-        [ div [ class "log-entries log-entries_loading" ] (placeholders ++ placeholders ++ placeholders ++ placeholders)
+        [ div [ class "log-entries log-entries_loading" ]
+            ((placeholders ++ placeholders ++ placeholders ++ placeholders)
+                |> List.map (\p -> div [ class "log-entry_loading" ] [ p ])
+            )
         ]
 
 
