@@ -5,6 +5,7 @@ import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import Set
 import UI
@@ -13,6 +14,7 @@ import UI.Button as Button
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.Click as Click
+import UI.DateTime as DateTime
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
 import UI.ErrorCard as ErrorCard
@@ -80,7 +82,16 @@ update _ msg model =
             ( { model | services = services }, Cmd.none )
 
         FetchUnassignedDeploysFinished deploys ->
-            ( { model | unassignedDeploys = deploys }, Cmd.none )
+            let
+                deploys_ =
+                    deploys
+                        |> RemoteData.map
+                            (Util.sortByWith
+                                (.deployedAt >> DateTime.toISO8601)
+                                (Util.descending compare)
+                            )
+            in
+            ( { model | unassignedDeploys = deploys_ }, Cmd.none )
 
         ShowGetStartedModal ->
             ( { model | modal = GetStartedModal }, Cmd.none )

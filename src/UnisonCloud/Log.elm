@@ -264,12 +264,6 @@ update appContext logBrowsingContext msg model =
                         "log-entries"
                         |> Task.andThen (.scene >> .height >> Dom.setViewportOf "log-entries" 0)
                         |> Task.attempt (always NoOp)
-
-                {- cmd =
-                   cmd =
-                       Dom.setViewportOf "log-entries" 0 0
-                           |> Task.attempt (always NoOp)
-                -}
             in
             ( { model | log = log_ }, cmd )
 
