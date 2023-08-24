@@ -130,7 +130,11 @@ view appContext sh model =
                         byAt =
                             ByAt.byAt deploy.deployedBy deploy.deployedAt
                     in
-                    ( [ Html.map LogMsg log ], viewDescription sh [ ByAt.view byAt ] )
+                    ( [ Html.map LogMsg log ]
+                    , viewDescription sh
+                        [ ByAt.view appContext.timeZone appContext.now byAt
+                        ]
+                    )
 
                 Failure e ->
                     ( [ viewError e ], viewDescription sh [] )

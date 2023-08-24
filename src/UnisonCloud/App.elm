@@ -199,7 +199,7 @@ view model =
                 Services services ->
                     AppDocument.map
                         ServicesPageMsg
-                        (ServicesPage.view services)
+                        (ServicesPage.view appContext services)
 
                 Service serviceName service ->
                     AppDocument.map

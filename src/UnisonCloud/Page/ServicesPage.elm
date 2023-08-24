@@ -118,8 +118,8 @@ fetchUnassignedDeploys appContext =
 -- VIEW
 
 
-viewService : Service -> Html msg
-viewService service =
+viewService : AppContext -> Service -> Html msg
+viewService appContext service =
     let
         heading =
             Link.view (ServiceName.toString service.name) (Link.service service.name)
@@ -129,7 +129,7 @@ viewService service =
                 Just d ->
                     div [ class "latest-deploy" ]
                         [ StatusBanner.good (ServiceHash.toShortString d.hash)
-                        , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
+                        , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
 
                 Nothing ->
@@ -150,15 +150,15 @@ viewService service =
         |> Card.view
 
 
-viewUnassignedDeploys : Bool -> List ServiceDeploy -> Html Msg
-viewUnassignedDeploys hasServices deploys =
+viewUnassignedDeploys : AppContext -> Bool -> List ServiceDeploy -> Html Msg
+viewUnassignedDeploys appContext hasServices deploys =
     let
         viewUnassignedDeploy d =
             Card.card
                 [ Click.view []
                     [ h2 [] [ text (ServiceHash.toShortString d.hash) ] ]
                     (Link.serviceDeploy d.hash)
-                , ByAt.view (ByAt.byAt d.deployedBy d.deployedAt)
+                , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
                 |> Card.asContained
                 |> Card.view
@@ -301,8 +301,8 @@ viewCompleteEmptyState =
         |> EmptyStateCard.view
 
 
-view : Model -> AppDocument Msg
-view model =
+view : AppContext -> Model -> AppDocument Msg
+view appContext model =
     let
         data =
             RemoteData.map2
@@ -324,14 +324,14 @@ view model =
                             [ viewCompleteEmptyState ]
 
                         ( [], _ ) ->
-                            [ viewServicesEmptyState, viewUnassignedDeploys False deploys ]
+                            [ viewServicesEmptyState, viewUnassignedDeploys appContext False deploys ]
 
                         ( _, [] ) ->
-                            List.map viewService services
+                            List.map (viewService appContext) services
 
                         _ ->
-                            List.map viewService services
-                                ++ [ viewUnassignedDeploys True deploys ]
+                            List.map (viewService appContext) services
+                                ++ [ viewUnassignedDeploys appContext True deploys ]
 
                 Failure e ->
                     [ viewError e ]
