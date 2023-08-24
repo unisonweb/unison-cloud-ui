@@ -261,13 +261,13 @@ update appContext logBrowsingContext msg model =
 
                 cmd =
                     Dom.getViewportOf
-                        "log"
-                        |> Task.andThen (.scene >> .height >> Dom.setViewportOf "log" 0)
+                        "log-entries"
+                        |> Task.andThen (.scene >> .height >> Dom.setViewportOf "log-entries" 0)
                         |> Task.attempt (always NoOp)
 
                 {- cmd =
                    cmd =
-                       Dom.setViewportOf "log" 0 0
+                       Dom.setViewportOf "log-entries" 0 0
                            |> Task.attempt (always NoOp)
                 -}
             in
@@ -535,7 +535,7 @@ viewLoading =
             , placeholder_ Placeholder.Medium Placeholder.Subdued
             ]
     in
-    div [ class "log", id "log" ]
+    div [ class "log" ]
         [ div [ class "log-entries log-entries_loading" ]
             ((placeholders ++ placeholders ++ placeholders ++ placeholders)
                 |> List.map (\p -> div [ class "log-entry_loading" ] [ p ])
@@ -580,8 +580,15 @@ view appContext model =
                         |> LogEntries.fromLines timeZone
                         |> List.map (viewKeyedEntry timeZone model)
             in
-            div [ class "log", id "log" ]
-                [ Html.Keyed.node "div" [ on "scroll" (ScrollEvent.decodeToMsg Scroll), class "log-entries" ] lines, offscreenLines ]
+            div [ class "log" ]
+                [ Html.Keyed.node "div"
+                    [ id "log-entries"
+                    , on "scroll" (ScrollEvent.decodeToMsg Scroll)
+                    , class "log-entries"
+                    ]
+                    lines
+                , offscreenLines
+                ]
 
         Failure _ ->
             div [] [ text "Something went wrong in fetching the logs" ]
