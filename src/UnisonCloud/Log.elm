@@ -1,3 +1,31 @@
+{-
+
+   Infinite Scroll Challenges and Goals
+   ------------------------------------
+
+   * There should not be any Jank when scrolling up to look at older log messages
+   * We should preload well ahead of the scroll bar, so there's no "loading"
+   * We should not jump and yank the UI when new data is rendered
+   * We need to scroll and load in both directions (maybe not in v1?)
+
+   * https://addyosmani.com/blog/infinite-scroll-without-layout-shifts/
+
+   One solution could be to pre-render a large empty area outside of the
+   viewport, but this requires you to know the total number of lines and the
+   height of an line (the latter not being a big deal).
+
+   Instagram doesn't seem to work that way. By looking at the scroll bar when
+   scroll you can see that it jumps, but the page itself remains smooth, this
+   indicates to me that there isn't a large empty area prerendered, but really
+   good scroll position maintenance.
+
+   We could render the new elements off to the side, in an iframe, measure the
+   sizes of everything before adding them such that we can calculate the new
+   scroll position perfectly and make the switch without the user knowing.
+
+-}
+
+
 module UnisonCloud.Log exposing (..)
 
 import Browser.Dom as Dom
@@ -36,37 +64,7 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 
--- 2 directional infinite scroll
--- should start loading well before items are added
--- when items are added the scroll position shouldn't be affected... HOW?
--- https://addyosmani.com/blog/infinite-scroll-without-layout-shifts/
 -- MODEL
-{-
-
-   Infinite Scroll Challenges
-   --------------------------
-
-   * There should not be any yank when scrolling up to look at older log messages
-   * We should preload well ahead of the scroll bar, so there's no "loading"
-   * We should not jump and yank the UI when new data is rendered
-   * We need to scroll and load in both directions (maybe not in v1?)
-
-   * https://addyosmani.com/blog/infinite-scroll-without-layout-shifts/
-
-   One solution could be to pre-render a large empty area outside of the
-   viewport, but this requires you to know the total number of lines and the
-   height of an line (the latter not being a big deal).
-
-   Instagram doesn't seem to work that way. By looking at the scroll bar when
-   scroll you can see that it jumps, but the page itself remains smooth, this
-   indicates to me that there isn't a large empty area prerendered, but really
-   good scroll position maintenance.
-
-   We could render the new elements off to the side, in an iframe, measure the
-   sizes of everything before adding them such that we can calculate the new
-   scroll position perfectly and make the switch without the user knowing.
-
--}
 
 
 type LogBrowsingContext
@@ -246,9 +244,18 @@ update appContext logBrowsingContext msg model =
 
         RevealNewOffscreenLogLines ->
             let
+                logLines =
+                    case ( log.logLines, log.newestLogLines ) of
+                        ( Success ll, Success nl ) ->
+                            Success (ll ++ nl)
+
+                        _ ->
+                            log.logLines
+
                 log_ =
                     { log
-                        | newestLogLines = log.newestLogLines
+                        | logLines = logLines
+                        , newestLogLines = log.offScreenNewestLogLines
                         , offScreenNewestLogLines = NotAsked
                     }
 
