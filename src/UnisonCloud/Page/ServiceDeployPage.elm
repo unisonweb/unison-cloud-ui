@@ -1,15 +1,17 @@
 module UnisonCloud.Page.ServiceDeployPage exposing (..)
 
-import Html exposing (Html)
+import Html exposing (Html, text)
 import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
 import UI.AppDocument exposing (AppDocument)
+import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
+import UI.Placeholder as Placeholder
 import UI.TabList as TabList
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
@@ -100,37 +102,44 @@ viewError _ =
 view : AppContext -> ServiceHash -> Model -> AppDocument Msg
 view appContext sh model =
     let
-        content =
+        ( content, pageTitleDescription ) =
             case model.deploy of
                 NotAsked ->
-                    [ viewLoading ]
+                    ( [ viewLoading ], Placeholder.view Placeholder.text )
 
                 Loading ->
-                    [ viewLoading ]
+                    ( [ viewLoading ], Placeholder.view Placeholder.text )
 
-                Success _ ->
+                Success deploy ->
                     let
                         log =
                             Log.view appContext model.log
+
+                        byAt =
+                            ByAt.byAt deploy.deployedBy deploy.deployedAt
                     in
-                    [ Html.map LogMsg log ]
+                    ( [ Html.map LogMsg log ], ByAt.view byAt )
 
                 Failure e ->
-                    [ viewError e ]
+                    ( [ viewError e ], text "" )
+
+        pageTitle =
+            PageTitle.title ("Unassigned Service Deploy: " ++ ServiceHash.toShortString sh)
+                |> PageTitle.withDescription_ pageTitleDescription
 
         tabList =
             TabList.tabList [] (TabList.tab "Activity" (Link.serviceDeploy sh)) []
 
         page =
             PageLayout.tabbedLayout
-                (PageTitle.title ("Service Deploy: " ++ ServiceHash.toShortString sh))
+                pageTitle
                 tabList
                 (PageContent.oneColumn content)
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground
     in
     { pageId = "service-deploy-page"
-    , title = "Service Deploy: " ++ ServiceHash.toShortString sh ++ " | Unison Cloud"
+    , title = "Unassigned Service Deploy: " ++ ServiceHash.toShortString sh ++ " | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing
