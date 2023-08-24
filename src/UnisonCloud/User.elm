@@ -58,4 +58,4 @@ decodeSummary =
     Decode.succeed makeSummary
         |> required "handle" UserHandle.decodeUnprefixed
         |> required "name" (nullable string)
-        |> required "avatarUrl" (nullable decodeUrl)
+        |> required "avatar_url" (nullable decodeUrl)
