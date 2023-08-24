@@ -12,6 +12,7 @@
   margin-top: 0.75rem;
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 0.5rem;
   font-size: var(--font-size-medium);
   color: var(--u-color_text_subdued);
