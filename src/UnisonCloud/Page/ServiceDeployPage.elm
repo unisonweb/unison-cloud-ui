@@ -128,7 +128,7 @@ view appContext sh model =
                             Log.view appContext model.log
 
                         byAt =
-                            ByAt.byAt deploy.deployedBy.handle deploy.deployedAt
+                            ByAt.byAt deploy.deployedBy deploy.deployedAt
                     in
                     ( [ Html.map LogMsg log ], viewDescription sh [ ByAt.view byAt ] )
 
