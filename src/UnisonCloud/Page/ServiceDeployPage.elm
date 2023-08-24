@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServiceDeployPage exposing (..)
 
-import Html exposing (Html, text)
+import Html exposing (Html, div, text)
 import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
@@ -102,13 +102,16 @@ viewError _ =
 view : AppContext -> ServiceHash -> Model -> AppDocument Msg
 view appContext sh model =
     let
+        shortServiceHash =
+            ServiceHash.toShortString sh
+
         ( content, pageTitleDescription ) =
             case model.deploy of
                 NotAsked ->
-                    ( [ viewLoading ], Placeholder.view Placeholder.text )
+                    ( [ viewLoading ], div [] [ text shortServiceHash, Placeholder.view Placeholder.text ] )
 
                 Loading ->
-                    ( [ viewLoading ], Placeholder.view Placeholder.text )
+                    ( [ viewLoading ], div [] [ text shortServiceHash, Placeholder.view Placeholder.text ] )
 
                 Success deploy ->
                     let
@@ -118,13 +121,13 @@ view appContext sh model =
                         byAt =
                             ByAt.byAt deploy.deployedBy deploy.deployedAt
                     in
-                    ( [ Html.map LogMsg log ], ByAt.view byAt )
+                    ( [ Html.map LogMsg log ], div [] [ text shortServiceHash, ByAt.view byAt ] )
 
                 Failure e ->
-                    ( [ viewError e ], text "" )
+                    ( [ viewError e ], text shortServiceHash )
 
         pageTitle =
-            PageTitle.title ("Unassigned Service Deploy: " ++ ServiceHash.toShortString sh)
+            PageTitle.title "Unassigned Service Deploy"
                 |> PageTitle.withDescription_ pageTitleDescription
 
         tabList =
