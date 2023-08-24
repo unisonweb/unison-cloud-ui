@@ -31,7 +31,7 @@ exposedUrl serv =
         withDeploy d =
             if ServiceDeploy.isExposed d then
                 [ ServiceName.toString serv.name
-                , UserHandle.toUnprefixedString d.deployedBy
+                , UserHandle.toUnprefixedString d.deployedBy.handle
                 , "services"
                 , "unison"
                 , "cloud"
