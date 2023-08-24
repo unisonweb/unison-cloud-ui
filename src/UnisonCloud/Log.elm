@@ -565,7 +565,7 @@ view appContext model =
                             UI.nothing
 
                         Success ls ->
-                            div [ class "log_new-offscreen-log-lines" ]
+                            div [ class "log_reveal-new-offscreen-log-lines" ]
                                 [ Button.iconThenLabel RevealNewOffscreenLogLines Icon.arrowDown "Reveal new entries"
                                     |> Button.small
                                     |> Button.emphasized

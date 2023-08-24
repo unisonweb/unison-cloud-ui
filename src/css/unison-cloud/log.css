@@ -266,13 +266,14 @@
   color: var(--color-blue-2);
 }
 
-.log .log_new-offscreen-log-lines {
+.log .log_reveal-new-offscreen-log-lines {
   position: absolute;
-  right: 0.5rem;
+  right: 1.5rem;
   bottom: 1rem;
 }
 
-.log .log_new-offscreen-log-lines .nudge {
-  top: -1rem;
+.log .log_reveal-new-offscreen-log-lines .nudge {
+  position: absolute;
+  top: -0.5rem;
   right: 0.5rem;
 }
