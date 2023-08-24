@@ -275,5 +275,5 @@
 .log .log_reveal-new-offscreen-log-lines .nudge {
   position: absolute;
   top: -0.5rem;
-  right: 0.5rem;
+  right: -0.5rem;
 }
