@@ -25,7 +25,7 @@
 
 .log .log-entries.log-entries_loading {
   overflow: hidden;
-  margin-left: 2rem;
+  padding-left: 2rem;
 }
 
 .log .log-entries.log-entries_loading .log-entry_loading {
