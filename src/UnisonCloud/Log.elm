@@ -166,9 +166,16 @@ update appContext logBrowsingContext msg model =
                 ( log_, cmd ) =
                     case newestLoggedAt model.log of
                         Just loggedAt ->
-                            ( { log | offScreenNewestLogLines = Loading }
-                            , fetchNewestLogLines appContext logBrowsingContext loggedAt
-                            )
+                            let
+                                l =
+                                    case log.offScreenNewestLogLines of
+                                        Success _ ->
+                                            log
+
+                                        _ ->
+                                            { log | offScreenNewestLogLines = Loading }
+                            in
+                            ( l, fetchNewestLogLines appContext logBrowsingContext loggedAt )
 
                         _ ->
                             ( log, Cmd.none )
