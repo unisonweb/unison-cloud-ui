@@ -1,6 +1,7 @@
 module UnisonCloud.Page.ServiceDeployPage exposing (..)
 
 import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
@@ -99,19 +100,27 @@ viewError _ =
         |> Card.view
 
 
+viewDescription : ServiceHash -> List (Html msg) -> Html msg
+viewDescription serviceHash content =
+    div [ class "service-deploy_description" ]
+        (text (ServiceHash.toShortString serviceHash) :: content)
+
+
 view : AppContext -> ServiceHash -> Model -> AppDocument Msg
 view appContext sh model =
     let
-        shortServiceHash =
-            ServiceHash.toShortString sh
+        loading_ =
+            ( [ viewLoading ]
+            , viewDescription sh [ Placeholder.view Placeholder.text ]
+            )
 
         ( content, pageTitleDescription ) =
             case model.deploy of
                 NotAsked ->
-                    ( [ viewLoading ], div [] [ text shortServiceHash, Placeholder.view Placeholder.text ] )
+                    loading_
 
                 Loading ->
-                    ( [ viewLoading ], div [] [ text shortServiceHash, Placeholder.view Placeholder.text ] )
+                    loading_
 
                 Success deploy ->
                     let
@@ -121,10 +130,10 @@ view appContext sh model =
                         byAt =
                             ByAt.byAt deploy.deployedBy deploy.deployedAt
                     in
-                    ( [ Html.map LogMsg log ], div [] [ text shortServiceHash, ByAt.view byAt ] )
+                    ( [ Html.map LogMsg log ], viewDescription sh [ ByAt.view byAt ] )
 
                 Failure e ->
-                    ( [ viewError e ], text shortServiceHash )
+                    ( [ viewError e ], viewDescription sh [] )
 
         pageTitle =
             PageTitle.title "Unassigned Service Deploy"

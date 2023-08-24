@@ -5,7 +5,6 @@ import Json.Decode.Pipeline exposing (optional, required, requiredAt)
 import Lib.UserHandle as UserHandle exposing (UserHandle)
 import Set exposing (Set)
 import UI.DateTime as DateTime exposing (DateTime)
-import UI.TabList as TabList
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
