@@ -131,7 +131,10 @@ serviceNameParser =
 
 serviceParser : Parser Route
 serviceParser =
-    succeed (\n -> Service n Activity) |. slash |. s "services" |. slash |= serviceNameParser |. end
+    oneOf
+        [ b (succeed (\n -> Service n Activity) |. slash |. s "services" |. slash |= serviceNameParser |. end)
+        , b (succeed (\n -> Service n Deploys) |. slash |. s "services" |. slash |= serviceNameParser |. slash |. s "deploys" |. end)
+        ]
 
 
 serviceHashParser : Parser ServiceHash
