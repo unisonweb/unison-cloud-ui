@@ -5,7 +5,6 @@ import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
-import UI
 import UI.AppDocument exposing (AppDocument)
 import UI.ByAt as ByAt
 import UI.Card as Card
@@ -24,6 +23,7 @@ import UnisonCloud.Page.ServicePage.ServiceDeploysPage as ServiceDeploysPage
 import UnisonCloud.Route as Route exposing (ServiceRoute)
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
+import UnisonCloud.ServiceHash as ServiceHash
 
 
 
@@ -145,10 +145,10 @@ viewError _ =
         |> Card.view
 
 
-viewDescription : ServiceName -> List (Html msg) -> Html msg
-viewDescription serviceName content =
+viewDescription : List (Html msg) -> Html msg
+viewDescription content =
     div [ class "service_description" ]
-        (text (ServiceName.toString serviceName) :: content)
+        content
 
 
 view : AppContext -> ServiceName -> Model -> AppDocument Msg
@@ -156,7 +156,7 @@ view appContext serviceName model =
     let
         loading_ =
             ( PageContent.oneColumn [ viewLoading model.subPage ]
-            , viewDescription serviceName [ Placeholder.view Placeholder.text ]
+            , viewDescription [ Placeholder.view Placeholder.text ]
             )
 
         tabList =
@@ -183,17 +183,19 @@ view appContext serviceName model =
 
                 Success service ->
                     let
-                        byAt =
+                        latestDeploy =
                             case service.latestDeploy of
                                 Just deploy ->
-                                    ByAt.byAt deploy.deployedBy deploy.deployedAt
+                                    [ text (ServiceHash.toShortString deploy.hash)
+                                    , ByAt.byAt deploy.deployedBy deploy.deployedAt
                                         |> ByAt.view appContext.timeZone appContext.now
+                                    ]
 
                                 Nothing ->
-                                    UI.nothing
+                                    []
 
                         description =
-                            viewDescription serviceName [ byAt ]
+                            viewDescription latestDeploy
 
                         subPage =
                             case model.subPage of
@@ -208,7 +210,7 @@ view appContext serviceName model =
                     ( subPage, description )
 
                 Failure e ->
-                    ( PageContent.oneColumn [ viewError e ], viewDescription serviceName [] )
+                    ( PageContent.oneColumn [ viewError e ], viewDescription [] )
 
         pageTitle =
             PageTitle.title (ServiceName.toString serviceName)
