@@ -8,10 +8,12 @@
 
 module UnisonCloud.Route exposing
     ( Route(..)
+    , ServiceRoute(..)
     , fromUrl
     , navigate
     , overview
     , service
+    , serviceActivity
     , serviceDeploy
     , services
     , toRoute
@@ -34,10 +36,14 @@ import Url.Builder exposing (relative, string)
 type Route
     = Overview
     | Services
-    | Service ServiceName
+    | Service ServiceName ServiceRoute
     | ServiceDeploy ServiceHash
     | Error AppError
     | NotFound String
+
+
+type ServiceRoute
+    = Activity
 
 
 
@@ -58,8 +64,13 @@ services =
 
 
 service : ServiceName -> Route
-service name =
-    Service name
+service =
+    serviceActivity
+
+
+serviceActivity : ServiceName -> Route
+serviceActivity name =
+    Service name Activity
 
 
 serviceDeploy : ServiceHash -> Route
@@ -113,7 +124,7 @@ serviceNameParser =
 
 serviceParser : Parser Route
 serviceParser =
-    succeed Service |. slash |. s "services" |. slash |= serviceNameParser |. end
+    succeed (\n -> Service n Activity) |. slash |. s "services" |. slash |= serviceNameParser |. end
 
 
 serviceHashParser : Parser ServiceHash
@@ -211,7 +222,7 @@ toUrlPattern r =
         Services ->
             "services"
 
-        Service _ ->
+        Service _ Activity ->
             "services/:service-id"
 
         ServiceDeploy _ ->
@@ -235,7 +246,7 @@ toUrlString route =
                 Services ->
                     ( [ "services" ], [] )
 
-                Service name ->
+                Service name Activity ->
                     ( [ "services", ServiceName.toString name ], [] )
 
                 ServiceDeploy sh ->

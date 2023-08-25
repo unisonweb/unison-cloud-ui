@@ -56,10 +56,10 @@ init appContext route =
                     in
                     ( Services services, Cmd.map ServicesPageMsg servicesCmd )
 
-                Route.Service name ->
+                Route.Service name serviceRoute ->
                     let
                         ( service, serviceCmd ) =
-                            ServicePage.init appContext name
+                            ServicePage.init appContext name serviceRoute
                     in
                     ( Service name service, Cmd.map ServicePageMsg serviceCmd )
 
@@ -125,10 +125,10 @@ update msg model =
                             in
                             ( { model | page = Services services }, Cmd.map ServicesPageMsg servicesCmd )
 
-                        Route.Service serviceName ->
+                        Route.Service serviceName serviceRoute ->
                             let
                                 ( service, serviceCmd ) =
-                                    ServicePage.init model.appContext serviceName
+                                    ServicePage.init model.appContext serviceName serviceRoute
                             in
                             ( { model | page = Service serviceName service }, Cmd.map ServicePageMsg serviceCmd )
 

@@ -19,7 +19,8 @@ import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
-import UnisonCloud.Log as Log
+import UnisonCloud.Page.ServicePage.ServiceActivityPage as ServiceActivityPage
+import UnisonCloud.Route as Route exposing (ServiceRoute(..))
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 
@@ -28,20 +29,30 @@ import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 -- MODEL
 
 
+type SubPage
+    = Activity ServiceActivityPage.Model
+
+
 type alias Model =
     { service : WebData Service
-    , log : Log.Model
+    , subPage : SubPage
     }
 
 
-init : AppContext -> ServiceName -> ( Model, Cmd Msg )
-init appContext serviceName =
+init : AppContext -> ServiceName -> ServiceRoute -> ( Model, Cmd Msg )
+init appContext serviceName serviceRoute =
     let
-        ( log, logCmd ) =
-            Log.init appContext (Log.ServiceContext serviceName)
+        ( subPage, subPageCmd ) =
+            case serviceRoute of
+                Route.Activity ->
+                    let
+                        ( activity, activityCmd ) =
+                            ServiceActivityPage.init appContext serviceName
+                    in
+                    ( Activity activity, Cmd.map ServiceActivityPageMsg activityCmd )
     in
-    ( { service = Loading, log = log }
-    , Cmd.batch [ fetchService appContext serviceName, Cmd.map LogMsg logCmd ]
+    ( { service = Loading, subPage = subPage }
+    , Cmd.batch [ fetchService appContext serviceName, subPageCmd ]
     )
 
 
@@ -51,24 +62,26 @@ init appContext serviceName =
 
 type Msg
     = FetchServiceFinished (WebData Service)
-    | LogMsg Log.Msg
+    | ServiceActivityPageMsg ServiceActivityPage.Msg
 
 
 update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
 update appContext serviceName msg model =
-    case msg of
-        FetchServiceFinished service ->
+    case ( msg, model.subPage ) of
+        ( FetchServiceFinished service, _ ) ->
             ( { model | service = service }, Cmd.none )
 
-        LogMsg logMsg ->
+        ( ServiceActivityPageMsg activityMsg, Activity activity ) ->
             let
-                ( log, logCmd ) =
-                    Log.update appContext
-                        (Log.ServiceContext serviceName)
-                        logMsg
-                        model.log
+                ( activity_, activityCmd ) =
+                    ServiceActivityPage.update appContext
+                        serviceName
+                        activityMsg
+                        activity
             in
-            ( { model | log = log }, Cmd.map LogMsg logCmd )
+            ( { model | subPage = Activity activity_ }
+            , Cmd.map ServiceActivityPageMsg activityCmd
+            )
 
 
 
@@ -88,9 +101,11 @@ fetchService appContext serviceName =
 -- VIEW
 
 
-viewLoading : Html msg
-viewLoading =
-    Log.viewLoading
+viewLoading : SubPage -> Html msg
+viewLoading subPage =
+    case subPage of
+        Activity _ ->
+            ServiceActivityPage.viewLoading
 
 
 viewError : Http.Error -> Html msg
@@ -112,7 +127,7 @@ view : AppContext -> ServiceName -> Model -> AppDocument Msg
 view appContext serviceName model =
     let
         loading_ =
-            ( [ viewLoading ]
+            ( PageContent.oneColumn [ viewLoading model.subPage ]
             , viewDescription serviceName [ Placeholder.view Placeholder.text ]
             )
 
@@ -125,25 +140,25 @@ view appContext serviceName model =
                     loading_
 
                 Success service ->
-                    let
-                        log =
-                            Log.view appContext model.log
+                    case model.subPage of
+                        Activity activity ->
+                            let
+                                byAt =
+                                    case service.latestDeploy of
+                                        Just deploy ->
+                                            ByAt.byAt deploy.deployedBy deploy.deployedAt
+                                                |> ByAt.view appContext.timeZone appContext.now
 
-                        byAt =
-                            case service.latestDeploy of
-                                Just deploy ->
-                                    ByAt.byAt deploy.deployedBy deploy.deployedAt
-                                        |> ByAt.view appContext.timeZone appContext.now
-
-                                Nothing ->
-                                    UI.nothing
-                    in
-                    ( [ Html.map LogMsg log ]
-                    , viewDescription serviceName [ byAt ]
-                    )
+                                        Nothing ->
+                                            UI.nothing
+                            in
+                            ( PageContent.map ServiceActivityPageMsg
+                                (ServiceActivityPage.view appContext serviceName activity)
+                            , viewDescription serviceName [ byAt ]
+                            )
 
                 Failure e ->
-                    ( [ viewError e ], viewDescription serviceName [] )
+                    ( PageContent.oneColumn [ viewError e ], viewDescription serviceName [] )
 
         pageTitle =
             PageTitle.title (ServiceName.toString serviceName)
@@ -159,7 +174,7 @@ view appContext serviceName model =
             PageLayout.tabbedLayout
                 pageTitle
                 tabList
-                (PageContent.oneColumn content)
+                content
                 (PageLayout.PageFooter [])
     in
     { pageId = "service-page"
