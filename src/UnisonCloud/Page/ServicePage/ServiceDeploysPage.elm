@@ -1,18 +1,21 @@
 module UnisonCloud.Page.ServicePage.ServiceDeploysPage exposing (..)
 
-import Html exposing (Html, text)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
+import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent exposing (PageContent)
+import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
-import UnisonCloud.Log as Log
 import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
+import UnisonCloud.ServiceHash as ServiceHash
 
 
 
@@ -65,7 +68,23 @@ fetchServiceDeploys appContext serviceName =
 
 viewLoading : Html msg
 viewLoading =
-    Log.viewLoading
+    let
+        placeholder_ length intensity =
+            Placeholder.text |> Placeholder.withLength length |> Placeholder.withIntensity intensity |> Placeholder.view
+
+        placeholders =
+            [ placeholder_ Placeholder.Medium Placeholder.Normal
+            , placeholder_ Placeholder.Small Placeholder.Subdued
+            , placeholder_ Placeholder.Large Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Normal
+            , placeholder_ Placeholder.Small Placeholder.Subdued
+            , placeholder_ Placeholder.Large Placeholder.Subdued
+            , placeholder_ Placeholder.Medium Placeholder.Subdued
+            ]
+    in
+    Card.card placeholders
+        |> Card.view
 
 
 viewError : Http.Error -> Html msg
@@ -77,6 +96,38 @@ viewError _ =
         |> Card.view
 
 
+viewDeploy : AppContext -> ServiceDeploy -> Html msg
+viewDeploy appContext deploy =
+    let
+        byAt =
+            ByAt.byAt deploy.deployedBy deploy.deployedAt
+    in
+    div [ class "service-deploys-page_deploy" ]
+        [ text (ServiceHash.toShortString deploy.hash)
+        , ByAt.view appContext.timeZone appContext.now byAt
+        ]
+
+
+viewDeploys : AppContext -> List ServiceDeploy -> Html msg
+viewDeploys appContext deploys =
+    div [ class "service-deploys-page_deploys" ] (List.map (viewDeploy appContext) deploys)
+
+
 view : AppContext -> ServiceName -> Model -> PageContent Msg
-view _ _ _ =
-    PageContent.oneColumn [ text "TODO" ]
+view appContext _ model =
+    let
+        content =
+            case model.deploys of
+                NotAsked ->
+                    viewLoading
+
+                Loading ->
+                    viewLoading
+
+                Success deploys ->
+                    viewDeploys appContext deploys
+
+                Failure e ->
+                    viewError e
+    in
+    PageContent.oneColumn [ content ]
