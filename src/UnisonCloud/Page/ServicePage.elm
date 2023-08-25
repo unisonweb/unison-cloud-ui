@@ -18,8 +18,8 @@ import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
+import UnisonCloud.Page.ServicePage.AssignedServiceDeploysPage as AssignedServiceDeploysPage
 import UnisonCloud.Page.ServicePage.ServiceActivityPage as ServiceActivityPage
-import UnisonCloud.Page.ServicePage.ServiceDeploysPage as ServiceDeploysPage
 import UnisonCloud.Route as Route exposing (ServiceRoute)
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
@@ -32,7 +32,7 @@ import UnisonCloud.ServiceHash as ServiceHash
 
 type SubPage
     = Activity ServiceActivityPage.Model
-    | Deploys ServiceDeploysPage.Model
+    | Deploys AssignedServiceDeploysPage.Model
 
 
 type alias Model =
@@ -56,9 +56,9 @@ init appContext serviceName serviceRoute =
                 Route.Deploys ->
                     let
                         ( deploys, deploysCmd ) =
-                            ServiceDeploysPage.init appContext serviceName
+                            AssignedServiceDeploysPage.init appContext serviceName
                     in
-                    ( Deploys deploys, Cmd.map ServiceDeploysPageMsg deploysCmd )
+                    ( Deploys deploys, Cmd.map AssignedServiceDeploysPageMsg deploysCmd )
     in
     ( { service = Loading, subPage = subPage }
     , Cmd.batch [ fetchService appContext serviceName, subPageCmd ]
@@ -72,7 +72,7 @@ init appContext serviceName serviceRoute =
 type Msg
     = FetchServiceFinished (WebData Service)
     | ServiceActivityPageMsg ServiceActivityPage.Msg
-    | ServiceDeploysPageMsg ServiceDeploysPage.Msg
+    | AssignedServiceDeploysPageMsg AssignedServiceDeploysPage.Msg
 
 
 update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
@@ -93,16 +93,16 @@ update appContext serviceName msg model =
             , Cmd.map ServiceActivityPageMsg activityCmd
             )
 
-        ( ServiceDeploysPageMsg deploysMsg, Deploys deploys ) ->
+        ( AssignedServiceDeploysPageMsg deploysMsg, Deploys deploys ) ->
             let
                 ( deploys_, deploysCmd ) =
-                    ServiceDeploysPage.update appContext
+                    AssignedServiceDeploysPage.update appContext
                         serviceName
                         deploysMsg
                         deploys
             in
             ( { model | subPage = Deploys deploys_ }
-            , Cmd.map ServiceDeploysPageMsg deploysCmd
+            , Cmd.map AssignedServiceDeploysPageMsg deploysCmd
             )
 
         _ ->
@@ -133,7 +133,7 @@ viewLoading subPage =
             ServiceActivityPage.viewLoading
 
         Deploys _ ->
-            ServiceDeploysPage.viewLoading
+            AssignedServiceDeploysPage.viewLoading
 
 
 viewError : Http.Error -> Html msg
@@ -204,8 +204,8 @@ view appContext serviceName model =
                                         (ServiceActivityPage.view appContext serviceName activity)
 
                                 Deploys deploys ->
-                                    PageContent.map ServiceDeploysPageMsg
-                                        (ServiceDeploysPage.view appContext serviceName deploys)
+                                    PageContent.map AssignedServiceDeploysPageMsg
+                                        (AssignedServiceDeploysPage.view appContext serviceName deploys)
                     in
                     ( subPage, description )
 

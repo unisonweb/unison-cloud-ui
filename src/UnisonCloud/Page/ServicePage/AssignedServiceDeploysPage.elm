@@ -1,13 +1,15 @@
-module UnisonCloud.Page.ServicePage.ServiceDeploysPage exposing (..)
+module UnisonCloud.Page.ServicePage.AssignedServiceDeploysPage exposing (..)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import UI.ByAt as ByAt
 import UI.Card as Card
+import UI.DateTime as DateTime
 import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent exposing (PageContent)
 import UI.Placeholder as Placeholder
@@ -46,7 +48,16 @@ update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
 update _ _ msg model =
     case msg of
         FetchServiceDeploysFinished deploys ->
-            ( { model | deploys = deploys }, Cmd.none )
+            let
+                deploys_ =
+                    deploys
+                        |> RemoteData.map
+                            (Util.sortByWith
+                                (.deployedAt >> DateTime.toISO8601)
+                                (Util.descending compare)
+                            )
+            in
+            ( { model | deploys = deploys_ }, Cmd.none )
 
 
 
