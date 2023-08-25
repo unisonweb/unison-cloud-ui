@@ -1,5 +1,6 @@
 module UnisonCloud.Api exposing
-    ( service
+    ( assignedServiceDeploys
+    , service
     , serviceDeploy
     , serviceDeployLogs
     , serviceLogs
@@ -32,6 +33,14 @@ service sName =
 serviceDeploy : ServiceHash -> Endpoint
 serviceDeploy sh =
     GET { path = [ "deployments", ServiceHash.toApiString sh ], queryParams = [] }
+
+
+assignedServiceDeploys : ServiceName -> Endpoint
+assignedServiceDeploys serviceName =
+    GET
+        { path = [ "services", ServiceName.toString serviceName, "deploys" ]
+        , queryParams = []
+        }
 
 
 unassignedServiceDeploys : Endpoint

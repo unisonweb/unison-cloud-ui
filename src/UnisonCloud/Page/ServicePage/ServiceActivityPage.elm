@@ -1,16 +1,9 @@
 module UnisonCloud.Page.ServicePage.ServiceActivityPage exposing (..)
 
 import Html exposing (Html)
-import Http
-import Lib.HttpApi as HttpApi
-import RemoteData exposing (RemoteData(..), WebData)
-import UI.Card as Card
-import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent exposing (PageContent)
-import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
-import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName exposing (ServiceName)
 
 
@@ -19,8 +12,7 @@ import UnisonCloud.Service.ServiceName exposing (ServiceName)
 
 
 type alias Model =
-    { service : WebData Service
-    , log : Log.Model
+    { log : Log.Model
     }
 
 
@@ -30,8 +22,8 @@ init appContext serviceName =
         ( log, logCmd ) =
             Log.init appContext (Log.ServiceContext serviceName)
     in
-    ( { service = Loading, log = log }
-    , Cmd.batch [ fetchService appContext serviceName, Cmd.map LogMsg logCmd ]
+    ( { log = log }
+    , Cmd.map LogMsg logCmd
     )
 
 
@@ -40,16 +32,12 @@ init appContext serviceName =
 
 
 type Msg
-    = FetchServiceFinished (WebData Service)
-    | LogMsg Log.Msg
+    = LogMsg Log.Msg
 
 
 update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
 update appContext serviceName msg model =
     case msg of
-        FetchServiceFinished service ->
-            ( { model | service = service }, Cmd.none )
-
         LogMsg logMsg ->
             let
                 ( log, logCmd ) =
@@ -62,34 +50,12 @@ update appContext serviceName msg model =
 
 
 
--- EFFECTS
-
-
-fetchService : AppContext -> ServiceName -> Cmd Msg
-fetchService appContext serviceName =
-    CloudApi.service serviceName
-        |> HttpApi.toRequest
-            Service.decode
-            (RemoteData.fromResult >> FetchServiceFinished)
-        |> HttpApi.perform appContext.api
-
-
-
 -- VIEW
 
 
 viewLoading : Html msg
 viewLoading =
     Log.viewLoading
-
-
-viewError : Http.Error -> Html msg
-viewError _ =
-    ErrorCard.errorCard
-        "Couldn't load activity"
-        "Something unexpected happened on our end when loading the service activity and we can't display it."
-        |> ErrorCard.toCard
-        |> Card.view
 
 
 view : AppContext -> ServiceName -> Model -> PageContent Msg

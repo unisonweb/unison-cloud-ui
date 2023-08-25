@@ -127,6 +127,11 @@ serviceActivity sName =
     toClick (Route.serviceActivity sName)
 
 
+serviceDeploysForService : ServiceName -> Click msg
+serviceDeploysForService sName =
+    toClick (Route.serviceDeploysForService sName)
+
+
 serviceDeploy : ServiceHash -> Click msg
 serviceDeploy sh =
     toClick (Route.serviceDeploy sh)

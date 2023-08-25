@@ -15,6 +15,7 @@ module UnisonCloud.Route exposing
     , service
     , serviceActivity
     , serviceDeploy
+    , serviceDeploysForService
     , services
     , toRoute
     , toUrlPattern
@@ -44,6 +45,7 @@ type Route
 
 type ServiceRoute
     = Activity
+    | Deploys
 
 
 
@@ -71,6 +73,11 @@ service =
 serviceActivity : ServiceName -> Route
 serviceActivity name =
     Service name Activity
+
+
+serviceDeploysForService : ServiceName -> Route
+serviceDeploysForService name =
+    Service name Deploys
 
 
 serviceDeploy : ServiceHash -> Route
@@ -225,6 +232,9 @@ toUrlPattern r =
         Service _ Activity ->
             "services/:service-id"
 
+        Service _ Deploys ->
+            "services/:service-id/deploys"
+
         ServiceDeploy _ ->
             "service-deploys/:service-hash"
 
@@ -248,6 +258,9 @@ toUrlString route =
 
                 Service name Activity ->
                     ( [ "services", ServiceName.toString name ], [] )
+
+                Service name Deploys ->
+                    ( [ "services", ServiceName.toString name, "deploys" ], [] )
 
                 ServiceDeploy sh ->
                     ( [ "service-deploys", ServiceHash.toUrlString sh ], [] )

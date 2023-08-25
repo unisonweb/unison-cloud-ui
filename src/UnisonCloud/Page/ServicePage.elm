@@ -20,7 +20,8 @@ import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Page.ServicePage.ServiceActivityPage as ServiceActivityPage
-import UnisonCloud.Route as Route exposing (ServiceRoute(..))
+import UnisonCloud.Page.ServicePage.ServiceDeploysPage as ServiceDeploysPage
+import UnisonCloud.Route as Route exposing (ServiceRoute)
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 
@@ -31,6 +32,7 @@ import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 
 type SubPage
     = Activity ServiceActivityPage.Model
+    | Deploys ServiceDeploysPage.Model
 
 
 type alias Model =
@@ -50,6 +52,13 @@ init appContext serviceName serviceRoute =
                             ServiceActivityPage.init appContext serviceName
                     in
                     ( Activity activity, Cmd.map ServiceActivityPageMsg activityCmd )
+
+                Route.Deploys ->
+                    let
+                        ( deploys, deploysCmd ) =
+                            ServiceDeploysPage.init appContext serviceName
+                    in
+                    ( Deploys deploys, Cmd.map ServiceDeploysPageMsg deploysCmd )
     in
     ( { service = Loading, subPage = subPage }
     , Cmd.batch [ fetchService appContext serviceName, subPageCmd ]
@@ -63,6 +72,7 @@ init appContext serviceName serviceRoute =
 type Msg
     = FetchServiceFinished (WebData Service)
     | ServiceActivityPageMsg ServiceActivityPage.Msg
+    | ServiceDeploysPageMsg ServiceDeploysPage.Msg
 
 
 update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
@@ -82,6 +92,21 @@ update appContext serviceName msg model =
             ( { model | subPage = Activity activity_ }
             , Cmd.map ServiceActivityPageMsg activityCmd
             )
+
+        ( ServiceDeploysPageMsg deploysMsg, Deploys deploys ) ->
+            let
+                ( deploys_, deploysCmd ) =
+                    ServiceDeploysPage.update appContext
+                        serviceName
+                        deploysMsg
+                        deploys
+            in
+            ( { model | subPage = Deploys deploys_ }
+            , Cmd.map ServiceDeploysPageMsg deploysCmd
+            )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
@@ -107,6 +132,9 @@ viewLoading subPage =
         Activity _ ->
             ServiceActivityPage.viewLoading
 
+        Deploys _ ->
+            ServiceDeploysPage.viewLoading
+
 
 viewError : Http.Error -> Html msg
 viewError _ =
@@ -131,6 +159,20 @@ view appContext serviceName model =
             , viewDescription serviceName [ Placeholder.view Placeholder.text ]
             )
 
+        tabList =
+            case model.subPage of
+                Activity _ ->
+                    TabList.tabList
+                        []
+                        (TabList.tab "Activity" (Link.serviceActivity serviceName))
+                        [ TabList.tab "Deploys" (Link.serviceDeploysForService serviceName) ]
+
+                Deploys _ ->
+                    TabList.tabList
+                        [ TabList.tab "Activity" (Link.serviceActivity serviceName) ]
+                        (TabList.tab "Deploys" (Link.serviceDeploysForService serviceName))
+                        []
+
         ( content, pageTitleDescription ) =
             case model.service of
                 NotAsked ->
@@ -140,22 +182,30 @@ view appContext serviceName model =
                     loading_
 
                 Success service ->
-                    case model.subPage of
-                        Activity activity ->
-                            let
-                                byAt =
-                                    case service.latestDeploy of
-                                        Just deploy ->
-                                            ByAt.byAt deploy.deployedBy deploy.deployedAt
-                                                |> ByAt.view appContext.timeZone appContext.now
+                    let
+                        byAt =
+                            case service.latestDeploy of
+                                Just deploy ->
+                                    ByAt.byAt deploy.deployedBy deploy.deployedAt
+                                        |> ByAt.view appContext.timeZone appContext.now
 
-                                        Nothing ->
-                                            UI.nothing
-                            in
-                            ( PageContent.map ServiceActivityPageMsg
-                                (ServiceActivityPage.view appContext serviceName activity)
-                            , viewDescription serviceName [ byAt ]
-                            )
+                                Nothing ->
+                                    UI.nothing
+
+                        description =
+                            viewDescription serviceName [ byAt ]
+
+                        subPage =
+                            case model.subPage of
+                                Activity activity ->
+                                    PageContent.map ServiceActivityPageMsg
+                                        (ServiceActivityPage.view appContext serviceName activity)
+
+                                Deploys deploys ->
+                                    PageContent.map ServiceDeploysPageMsg
+                                        (ServiceDeploysPage.view appContext serviceName deploys)
+                    in
+                    ( subPage, description )
 
                 Failure e ->
                     ( PageContent.oneColumn [ viewError e ], viewDescription serviceName [] )
@@ -163,12 +213,6 @@ view appContext serviceName model =
         pageTitle =
             PageTitle.title (ServiceName.toString serviceName)
                 |> PageTitle.withDescription_ pageTitleDescription
-
-        tabList =
-            TabList.tabList
-                []
-                (TabList.tab "Activity" Link.website)
-                []
 
         page =
             PageLayout.tabbedLayout
