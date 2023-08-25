@@ -39,7 +39,9 @@ init appContext serviceHash =
         ( log, logCmd ) =
             Log.init appContext (Log.ServiceDeployContext serviceHash)
     in
-    ( { deploy = Loading, log = log }, Cmd.batch [ fetchServiceDeploy appContext serviceHash, Cmd.map LogMsg logCmd ] )
+    ( { deploy = Loading, log = log }
+    , Cmd.batch [ fetchServiceDeploy appContext serviceHash, Cmd.map LogMsg logCmd ]
+    )
 
 
 
@@ -96,7 +98,6 @@ viewError _ =
         "Couldn't load service deploy"
         "Something unexpected happened on our end when loading the service deploy and we can't display it."
         |> ErrorCard.toCard
-        |> Card.asContainedWithFade
         |> Card.view
 
 

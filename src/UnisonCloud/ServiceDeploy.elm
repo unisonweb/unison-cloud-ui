@@ -10,8 +10,6 @@ import UnisonCloud.User as User exposing (UserSummary)
 
 type alias ServiceDeploy =
     { hash : ServiceHash
-
-    -- TODO: deployedBy should be a full user
     , deployedBy : UserSummary
     , deployedAt : DateTime
     , exposedAt : Maybe DateTime
