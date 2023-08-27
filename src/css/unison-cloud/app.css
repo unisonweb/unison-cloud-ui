@@ -17,6 +17,23 @@ body:has(#modal-overlay) {
   overflow: clip;
 }
 
+/* -- App Error ------------------------------------------------------------ */
+
+.app-error {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8rem;
+  font-weight: 600;
+  color: var(--u-color_text);
+}
+
+.app-error .icon {
+  font-size: 4rem;
+  color: var(--u-color_critical_icon);
+}
+
 @media only screen and (--u-viewport_max-md) {
   #app {
     width: 100vw;
