@@ -35,6 +35,7 @@ import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
+import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
@@ -145,8 +146,16 @@ update appContext logBrowsingContext msg model =
 
         FetchInitialLogLinesFinished logLines ->
             let
+                logLines_ =
+                    case logLines of
+                        Failure (Http.BadStatus 404) ->
+                            Success []
+
+                        _ ->
+                            logLines
+
                 log_ =
-                    { log | logLines = logLines }
+                    { log | logLines = logLines_ }
             in
             ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
 
