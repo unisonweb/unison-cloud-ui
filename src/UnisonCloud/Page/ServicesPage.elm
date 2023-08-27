@@ -138,10 +138,11 @@ viewService appContext service =
         latestDeploy =
             case service.latestDeploy of
                 Just d ->
-                    div [ class "latest-deploy" ]
+                    Click.view [ class "latest-deploy" ]
                         [ StatusBanner.good (ServiceHash.toShortString d.hash)
                         , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
+                        (Link.serviceDeploy d.hash)
 
                 Nothing ->
                     text "🐣 No deploys yet"

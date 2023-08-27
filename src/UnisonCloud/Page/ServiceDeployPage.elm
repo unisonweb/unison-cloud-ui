@@ -141,7 +141,7 @@ view appContext sh model =
                     ( [ viewError e ], viewDescription sh [] )
 
         pageTitle =
-            PageTitle.title "Unassigned Service Deploy"
+            PageTitle.title "Service Deploy"
                 |> PageTitle.withDescription_ pageTitleDescription
 
         tabList =
@@ -156,7 +156,7 @@ view appContext sh model =
                 |> PageLayout.withSubduedBackground
     in
     { pageId = "service-deploy-page"
-    , title = "Unassigned Service Deploy: " ++ ServiceHash.toShortString sh ++ " | Unison Cloud"
+    , title = "Service Deploy: " ++ ServiceHash.toShortString sh ++ " | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing
