@@ -4,7 +4,7 @@ import Html exposing (Html)
 import UI.PageContent as PageContent exposing (PageContent)
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
-import UnisonCloud.Service.ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceId exposing (ServiceId)
 
 
 
@@ -16,11 +16,11 @@ type alias Model =
     }
 
 
-init : AppContext -> ServiceName -> ( Model, Cmd Msg )
-init appContext serviceName =
+init : AppContext -> ServiceId -> ( Model, Cmd Msg )
+init appContext serviceId =
     let
         ( log, logCmd ) =
-            Log.init appContext (Log.ServiceContext serviceName)
+            Log.init appContext (Log.ServiceContext serviceId)
     in
     ( { log = log }
     , Cmd.map LogMsg logCmd
@@ -35,14 +35,14 @@ type Msg
     = LogMsg Log.Msg
 
 
-update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
-update appContext serviceName msg model =
+update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
+update appContext serviceId msg model =
     case msg of
         LogMsg logMsg ->
             let
                 ( log, logCmd ) =
                     Log.update appContext
-                        (Log.ServiceContext serviceName)
+                        (Log.ServiceContext serviceId)
                         logMsg
                         model.log
             in
@@ -58,7 +58,7 @@ viewLoading =
     Log.viewLoading
 
 
-view : AppContext -> ServiceName -> Model -> PageContent Msg
+view : AppContext -> ServiceId -> Model -> PageContent Msg
 view appContext _ model =
     let
         log =

@@ -133,7 +133,7 @@ viewService : AppContext -> Service -> Html msg
 viewService appContext service =
     let
         heading =
-            Link.view (ServiceName.toString service.name) (Link.service service.name)
+            Link.view (ServiceName.toString service.name) (Link.service service.id)
 
         latestDeploy =
             case service.latestDeploy of

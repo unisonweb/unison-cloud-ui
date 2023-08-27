@@ -28,7 +28,7 @@ import Code.HashQualified exposing (HashQualified(..))
 import Code.UrlParsers exposing (b, s, slash)
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import UnisonCloud.AppError as AppError exposing (AppError)
-import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
 import Url.Builder exposing (relative, string)
@@ -37,7 +37,7 @@ import Url.Builder exposing (relative, string)
 type Route
     = Overview
     | Services
-    | Service ServiceName ServiceRoute
+    | Service ServiceId ServiceRoute
     | ServiceDeploy ServiceHash
     | Error AppError
     | NotFound String
@@ -65,17 +65,17 @@ services =
     Services
 
 
-service : ServiceName -> Route
+service : ServiceId -> Route
 service =
     serviceActivity
 
 
-serviceActivity : ServiceName -> Route
+serviceActivity : ServiceId -> Route
 serviceActivity name =
     Service name Activity
 
 
-serviceDeploysForService : ServiceName -> Route
+serviceDeploysForService : ServiceId -> Route
 serviceDeploysForService name =
     Service name Deploys
 
@@ -112,8 +112,8 @@ servicesParser =
     succeed Services |. slash |. s "services" |. end
 
 
-serviceNameParser : Parser ServiceName
-serviceNameParser =
+serviceIdParser : Parser ServiceId
+serviceIdParser =
     let
         parseMaybe mid =
             case mid of
@@ -121,19 +121,19 @@ serviceNameParser =
                     Parser.succeed s_
 
                 Nothing ->
-                    Parser.problem "Invalid ServiceName"
+                    Parser.problem "Invalid ServiceId"
     in
     Parser.chompUntilEndOr "/"
         |> Parser.getChompedString
-        |> Parser.map ServiceName.fromString
+        |> Parser.map ServiceId.fromString
         |> Parser.andThen parseMaybe
 
 
 serviceParser : Parser Route
 serviceParser =
     oneOf
-        [ b (succeed (\n -> Service n Activity) |. slash |. s "services" |. slash |= serviceNameParser |. end)
-        , b (succeed (\n -> Service n Deploys) |. slash |. s "services" |. slash |= serviceNameParser |. slash |. s "deploys" |. end)
+        [ b (succeed (\n -> Service n Activity) |. slash |. s "services" |. slash |= serviceIdParser |. end)
+        , b (succeed (\n -> Service n Deploys) |. slash |. s "services" |. slash |= serviceIdParser |. slash |. s "deploys" |. end)
         ]
 
 
@@ -260,10 +260,10 @@ toUrlString route =
                     ( [ "services" ], [] )
 
                 Service name Activity ->
-                    ( [ "services", ServiceName.toString name ], [] )
+                    ( [ "services", ServiceId.toString name ], [] )
 
                 Service name Deploys ->
-                    ( [ "services", ServiceName.toString name, "deploys" ], [] )
+                    ( [ "services", ServiceId.toString name, "deploys" ], [] )
 
                 ServiceDeploy sh ->
                     ( [ "service-deploys", ServiceHash.toUrlString sh ], [] )

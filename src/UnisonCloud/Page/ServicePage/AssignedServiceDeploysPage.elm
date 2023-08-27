@@ -15,7 +15,7 @@ import UI.PageContent as PageContent exposing (PageContent)
 import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
-import UnisonCloud.Service.ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 import UnisonCloud.ServiceHash as ServiceHash
 
@@ -29,10 +29,10 @@ type alias Model =
     }
 
 
-init : AppContext -> ServiceName -> ( Model, Cmd Msg )
-init appContext serviceName =
+init : AppContext -> ServiceId -> ( Model, Cmd Msg )
+init appContext serviceId =
     ( { deploys = Loading }
-    , fetchServiceDeploys appContext serviceName
+    , fetchServiceDeploys appContext serviceId
     )
 
 
@@ -44,7 +44,7 @@ type Msg
     = FetchServiceDeploysFinished (WebData (List ServiceDeploy))
 
 
-update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
+update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
 update _ _ msg model =
     case msg of
         FetchServiceDeploysFinished deploys ->
@@ -64,9 +64,9 @@ update _ _ msg model =
 -- EFFECTS
 
 
-fetchServiceDeploys : AppContext -> ServiceName -> Cmd Msg
-fetchServiceDeploys appContext serviceName =
-    CloudApi.assignedServiceDeploys serviceName
+fetchServiceDeploys : AppContext -> ServiceId -> Cmd Msg
+fetchServiceDeploys appContext serviceId =
+    CloudApi.assignedServiceDeploys serviceId
         |> HttpApi.toRequest
             (Decode.list ServiceDeploy.decode)
             (RemoteData.fromResult >> FetchServiceDeploysFinished)
@@ -124,7 +124,7 @@ viewDeploys appContext deploys =
     div [ class "service-deploys-page_deploys" ] (List.map (viewDeploy appContext) deploys)
 
 
-view : AppContext -> ServiceName -> Model -> PageContent Msg
+view : AppContext -> ServiceId -> Model -> PageContent Msg
 view appContext _ model =
     let
         content =

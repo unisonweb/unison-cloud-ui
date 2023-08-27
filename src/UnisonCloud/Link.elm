@@ -13,7 +13,7 @@ module UnisonCloud.Link exposing (..)
 import Html exposing (Html, text)
 import UI.Click as Click exposing (Click)
 import UnisonCloud.Route as Route exposing (Route)
-import UnisonCloud.Service.ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
@@ -117,17 +117,17 @@ services =
     toClick Route.services
 
 
-service : ServiceName -> Click msg
+service : ServiceId -> Click msg
 service sName =
     toClick (Route.service sName)
 
 
-serviceActivity : ServiceName -> Click msg
+serviceActivity : ServiceId -> Click msg
 serviceActivity sName =
     toClick (Route.serviceActivity sName)
 
 
-serviceDeploysForService : ServiceName -> Click msg
+serviceDeploysForService : ServiceId -> Click msg
 serviceDeploysForService sName =
     toClick (Route.serviceDeploysForService sName)
 

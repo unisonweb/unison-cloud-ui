@@ -22,7 +22,7 @@ import UnisonCloud.Page.ServicePage.AssignedServiceDeploysPage as AssignedServic
 import UnisonCloud.Page.ServicePage.ServiceActivityPage as ServiceActivityPage
 import UnisonCloud.Route as Route exposing (ServiceRoute)
 import UnisonCloud.Service as Service exposing (Service)
-import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceHash as ServiceHash
 
 
@@ -41,27 +41,27 @@ type alias Model =
     }
 
 
-init : AppContext -> ServiceName -> ServiceRoute -> ( Model, Cmd Msg )
-init appContext serviceName serviceRoute =
+init : AppContext -> ServiceId -> ServiceRoute -> ( Model, Cmd Msg )
+init appContext serviceId serviceRoute =
     let
         ( subPage, subPageCmd ) =
             case serviceRoute of
                 Route.Activity ->
                     let
                         ( activity, activityCmd ) =
-                            ServiceActivityPage.init appContext serviceName
+                            ServiceActivityPage.init appContext serviceId
                     in
                     ( Activity activity, Cmd.map ServiceActivityPageMsg activityCmd )
 
                 Route.Deploys ->
                     let
                         ( deploys, deploysCmd ) =
-                            AssignedServiceDeploysPage.init appContext serviceName
+                            AssignedServiceDeploysPage.init appContext serviceId
                     in
                     ( Deploys deploys, Cmd.map AssignedServiceDeploysPageMsg deploysCmd )
     in
     ( { service = Loading, subPage = subPage }
-    , Cmd.batch [ fetchService appContext serviceName, subPageCmd ]
+    , Cmd.batch [ fetchService appContext serviceId, subPageCmd ]
     )
 
 
@@ -75,8 +75,8 @@ type Msg
     | AssignedServiceDeploysPageMsg AssignedServiceDeploysPage.Msg
 
 
-update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
-update appContext serviceName msg model =
+update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
+update appContext serviceId msg model =
     case ( msg, model.subPage ) of
         ( FetchServiceFinished service, _ ) ->
             ( { model | service = service }, Cmd.none )
@@ -85,7 +85,7 @@ update appContext serviceName msg model =
             let
                 ( activity_, activityCmd ) =
                     ServiceActivityPage.update appContext
-                        serviceName
+                        serviceId
                         activityMsg
                         activity
             in
@@ -97,7 +97,7 @@ update appContext serviceName msg model =
             let
                 ( deploys_, deploysCmd ) =
                     AssignedServiceDeploysPage.update appContext
-                        serviceName
+                        serviceId
                         deploysMsg
                         deploys
             in
@@ -113,9 +113,9 @@ update appContext serviceName msg model =
 -- EFFECTS
 
 
-fetchService : AppContext -> ServiceName -> Cmd Msg
-fetchService appContext serviceName =
-    CloudApi.service serviceName
+fetchService : AppContext -> ServiceId -> Cmd Msg
+fetchService appContext serviceId =
+    CloudApi.service serviceId
         |> HttpApi.toRequest
             Service.decode
             (RemoteData.fromResult >> FetchServiceFinished)
@@ -151,8 +151,8 @@ viewDescription content =
         content
 
 
-view : AppContext -> ServiceName -> Model -> AppDocument Msg
-view appContext serviceName model =
+view : AppContext -> ServiceId -> Model -> AppDocument Msg
+view appContext serviceId model =
     let
         loading_ =
             ( PageContent.oneColumn [ viewLoading model.subPage ]
@@ -164,13 +164,13 @@ view appContext serviceName model =
                 Activity _ ->
                     TabList.tabList
                         []
-                        (TabList.tab "Activity" (Link.serviceActivity serviceName))
-                        [ TabList.tab "Deploys" (Link.serviceDeploysForService serviceName) ]
+                        (TabList.tab "Activity" (Link.serviceActivity serviceId))
+                        [ TabList.tab "Deploys" (Link.serviceDeploysForService serviceId) ]
 
                 Deploys _ ->
                     TabList.tabList
-                        [ TabList.tab "Activity" (Link.serviceActivity serviceName) ]
-                        (TabList.tab "Deploys" (Link.serviceDeploysForService serviceName))
+                        [ TabList.tab "Activity" (Link.serviceActivity serviceId) ]
+                        (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
                         []
 
         ( content, pageTitleDescription ) =
@@ -201,11 +201,11 @@ view appContext serviceName model =
                             case model.subPage of
                                 Activity activity ->
                                     PageContent.map ServiceActivityPageMsg
-                                        (ServiceActivityPage.view appContext serviceName activity)
+                                        (ServiceActivityPage.view appContext serviceId activity)
 
                                 Deploys deploys ->
                                     PageContent.map AssignedServiceDeploysPageMsg
-                                        (AssignedServiceDeploysPage.view appContext serviceName deploys)
+                                        (AssignedServiceDeploysPage.view appContext serviceId deploys)
                     in
                     ( subPage, description )
 
@@ -213,7 +213,7 @@ view appContext serviceName model =
                     ( PageContent.oneColumn [ viewError e ], viewDescription [] )
 
         pageTitle =
-            PageTitle.title (ServiceName.toString serviceName)
+            PageTitle.title (ServiceId.toString serviceId)
                 |> PageTitle.withDescription_ pageTitleDescription
 
         page =
@@ -224,7 +224,7 @@ view appContext serviceName model =
                 (PageLayout.PageFooter [])
     in
     { pageId = "service-page"
-    , title = "Service: " ++ ServiceName.toString serviceName ++ " | Unison Cloud"
+    , title = "Service: " ++ ServiceId.toString serviceId ++ " | Unison Cloud"
     , announcement = Nothing
     , appHeader = Appheader.appHeader
     , pageHeader = Nothing

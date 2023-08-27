@@ -59,7 +59,7 @@ import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
-import UnisonCloud.Service.ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
@@ -68,7 +68,7 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 type LogBrowsingContext
-    = ServiceContext ServiceName
+    = ServiceContext ServiceId
     | ServiceDeployContext ServiceHash
 
 

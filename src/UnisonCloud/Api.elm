@@ -11,7 +11,7 @@ module UnisonCloud.Api exposing
 
 import Lib.HttpApi exposing (Endpoint(..))
 import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
-import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
@@ -25,9 +25,9 @@ services =
     GET { path = [ "services" ], queryParams = [] }
 
 
-service : ServiceName -> Endpoint
+service : ServiceId -> Endpoint
 service sName =
-    GET { path = [ "services", ServiceName.toString sName ], queryParams = [] }
+    GET { path = [ "services", ServiceId.toString sName ], queryParams = [] }
 
 
 serviceDeploy : ServiceHash -> Endpoint
@@ -35,10 +35,10 @@ serviceDeploy sh =
     GET { path = [ "deployments", ServiceHash.toApiString sh ], queryParams = [] }
 
 
-assignedServiceDeploys : ServiceName -> Endpoint
-assignedServiceDeploys serviceName =
+assignedServiceDeploys : ServiceId -> Endpoint
+assignedServiceDeploys serviceId =
     GET
-        { path = [ "services", ServiceName.toString serviceName, "deploys" ]
+        { path = [ "services", ServiceId.toString serviceId, "deploys" ]
         , queryParams = []
         }
 
@@ -48,13 +48,13 @@ unassignedServiceDeploys =
     GET { path = [ "unassigned" ], queryParams = [] }
 
 
-serviceLogs : ServiceName -> FetchLogParams -> Endpoint
+serviceLogs : ServiceId -> FetchLogParams -> Endpoint
 serviceLogs sName params =
     GET
         { path =
             [ "logs"
             , "services"
-            , ServiceName.toString sName
+            , ServiceId.toString sName
             ]
         , queryParams = FetchLogParams.toQueryParams params
         }
