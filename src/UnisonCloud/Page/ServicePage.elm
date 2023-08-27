@@ -23,6 +23,7 @@ import UnisonCloud.Page.ServicePage.ServiceActivityPage as ServiceActivityPage
 import UnisonCloud.Route as Route exposing (ServiceRoute)
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName as ServiceName
 import UnisonCloud.ServiceHash as ServiceHash
 
 
@@ -156,6 +157,7 @@ view appContext serviceId model =
     let
         loading_ =
             ( PageContent.oneColumn [ viewLoading model.subPage ]
+            , "Service Loading..."
             , viewDescription [ Placeholder.view Placeholder.text ]
             )
 
@@ -173,7 +175,7 @@ view appContext serviceId model =
                         (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
                         []
 
-        ( content, pageTitleDescription ) =
+        ( content, serviceTitle, pageTitleDescription ) =
             case model.service of
                 NotAsked ->
                     loading_
@@ -207,13 +209,13 @@ view appContext serviceId model =
                                     PageContent.map AssignedServiceDeploysPageMsg
                                         (AssignedServiceDeploysPage.view appContext serviceId deploys)
                     in
-                    ( subPage, description )
+                    ( subPage, ServiceName.toString service.name, description )
 
                 Failure e ->
-                    ( PageContent.oneColumn [ viewError e ], viewDescription [] )
+                    ( PageContent.oneColumn [ viewError e ], "Service: " ++ ServiceId.toString serviceId, viewDescription [] )
 
         pageTitle =
-            PageTitle.title (ServiceId.toString serviceId)
+            PageTitle.title serviceTitle
                 |> PageTitle.withDescription_ pageTitleDescription
 
         page =

@@ -38,7 +38,7 @@ serviceDeploy sh =
 assignedServiceDeploys : ServiceId -> Endpoint
 assignedServiceDeploys serviceId =
     GET
-        { path = [ "services", ServiceId.toString serviceId, "deploys" ]
+        { path = [ "services", ServiceId.toString serviceId, "deployments" ]
         , queryParams = []
         }
 
