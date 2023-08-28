@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicesPage exposing (..)
 
-import Html exposing (Html, div, h1, h2, p, text)
+import Html exposing (Html, div, h1, h2, i, p, text)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
@@ -197,33 +197,15 @@ viewUnassignedDeploys appContext hasServices deploys =
 viewGetStartedModal : Html Msg
 viewGetStartedModal =
     let
-        installDependencies =
-            """.> project.create helloWorld
-helloWorld/main> pull @unison/cloud/latest lib.cloud"""
-
-        program =
-            """helloWorld : '{IO, Exception} ServiceHash HttpRequest HttpResponse
-helloWorld = do
-  server : '{Route, Remote} ()
-  server =
-    getHello = do
-      _ = noCapture GET (s "" )
-      ok.text ("Hello World!")
-
-    getHello
-
-  Cloud.run do
-    env = Environment.create "hello-world-production"
-    deployHttp env (pool.wrap (Route.run server) )"""
-
-        runCmd =
-            "helloWorld/main> run helloWorld"
+        getStarted =
+            """.> project.create-empty
+amusing-giraffe/main> pull @unison/cloud-start/main
+amusing-giraffe/main> run examples.helloWorld.deploy"""
 
         content =
             div [ class "get-started-modal" ]
-                [ UI.codeBlock [] (text installDependencies)
-                , UI.codeBlock [] (text program)
-                , UI.codeBlock [] (text runCmd)
+                [ p [] [ text "Here's how to get started with a small ", i [] [ text "hello world" ], text " template service" ]
+                , UI.codeBlock [] (text getStarted)
                 ]
     in
     content
@@ -240,8 +222,30 @@ helloWorld = do
 viewAssignmentGuideModal : Html Msg
 viewAssignmentGuideModal =
     let
+        assignment =
+            """helloWorld : '{IO, Exception} ServiceHash HttpRequest HttpResponse
+helloWorld = do
+  server : '{Route, Remote} ()
+  server =
+    getHello = do
+      _ = noCapture GET (s "" )
+      ok.text ("Hello World!")
+
+    getHello
+
+  Cloud.run do
+    env = Environment.create "hello-world-production"
+    serviceName = ServiceName.create "hello-world"
+    serviceHash = deployHttp env (pool.wrap (Route.run server) )
+    ServiceName.assign serviceName serviceHash
+    serviceHash"""
+
         content =
-            div [ class "assignment-guide-modal" ] [ text "todo" ]
+            div [ class "assignment-guide-modal" ]
+                [ p [] [ text "Assigning service deployments to a name allows them to get a stable URL." ]
+                , p [] [ text "Here's how to assign a name to a small ", i [] [ text "hello world" ], text "service" ]
+                , UI.codeBlock [] (text assignment)
+                ]
     in
     content
         |> Modal.content
