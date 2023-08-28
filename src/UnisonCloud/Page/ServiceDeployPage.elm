@@ -15,11 +15,11 @@ import UI.Placeholder as Placeholder
 import UI.TabList as TabList
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
-import UnisonCloud.AppDocument as AppDocument exposing (AppDocument)
+import UnisonCloud.AppDocument exposing (AppDocument)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Log as Log
-import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
+import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
@@ -28,7 +28,7 @@ import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
 type alias Model =
-    { deploy : WebData ServiceDeploy
+    { deploy : WebData ServiceDeploySummary
     , log : Log.Model
     }
 
@@ -49,7 +49,7 @@ init appContext serviceHash =
 
 
 type Msg
-    = FetchServiceDeployFinished (WebData ServiceDeploy)
+    = FetchServiceDeployFinished (WebData ServiceDeploySummary)
     | LogMsg Log.Msg
 
 
@@ -78,7 +78,7 @@ fetchServiceDeploy : AppContext -> ServiceHash -> Cmd Msg
 fetchServiceDeploy appContext sh =
     CloudApi.serviceDeploy sh
         |> HttpApi.toRequest
-            ServiceDeploy.decode
+            ServiceDeploy.decodeSummary
             (RemoteData.fromResult >> FetchServiceDeployFinished)
         |> HttpApi.perform appContext.api
 

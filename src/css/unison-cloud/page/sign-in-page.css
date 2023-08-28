@@ -2,5 +2,41 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  margin-top: 3.5rem;
 }
+
+.sign-in-page .unison-cloud-box {
+  position: relative;
+  background: var(--color-blue-2);
+  border-radius: 1rem;
+  padding: 3.5rem 2rem;
+  color: var(--color-gray-lighten-100);
+  width: 32rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.sign-in-page .unison-cloud-box .button {
+  position: relative;
+  z-index: 2;
+}
+
+.sign-in-page .unison-cloud-box h1 {
+  font-size: 3rem;
+}
+
+.sign-in-page .unison-cloud-box h2 {
+  font-size: 1.5rem;
+  color: var(--color-blue-1);
+  margin-bottom: 2rem;
+}
+
+.sign-in-page .unison-cloud-box .unison-cloud-wordmark_cloud {
+  color: var(--color-orange-4);
+}
+

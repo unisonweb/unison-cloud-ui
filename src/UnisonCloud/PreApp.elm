@@ -162,21 +162,6 @@ viewAppError _ =
         ]
 
 
-viewUnisonCloudBox : List (Html Msg) -> Html Msg
-viewUnisonCloudBox content =
-    div
-        [ class "unison-cloud-box" ]
-        [ div []
-            (h1 [ class "unison-cloud-wordmark" ]
-                [ text "Unison "
-                , span [ class "unison-cloud-wordmark_cloud" ] [ text "Cloud" ]
-                ]
-                :: content
-            )
-        , CloudsBackground.view
-        ]
-
-
 view : Model -> Browser.Document Msg
 view model =
     case model of
@@ -199,15 +184,20 @@ view model =
                     [ PageLayout.view
                         (PageLayout.centeredLayout
                             (PageContent.oneColumn
-                                [ viewUnisonCloudBox
-                                    [ h2 [] [ text "Write code. Hit run. The cloud computes." ]
-                                    , Button.iconThenLabel_
-                                        Link.login
-                                        Icon.cloud
-                                        "Sign In"
-                                        |> Button.large
-                                        |> Button.emphasized
-                                        |> Button.view
+                                [ div
+                                    [ class "unison-cloud-box" ]
+                                    [ div []
+                                        [ h1 [ class "unison-cloud-wordmark" ]
+                                            [ text "Unison "
+                                            , span [ class "unison-cloud-wordmark_cloud" ] [ text "Cloud" ]
+                                            ]
+                                        , h2 [] [ text "Write code. Hit run. The cloud computes." ]
+                                        , Button.iconThenLabel_ Link.login Icon.cloud "Sign In"
+                                            |> Button.large
+                                            |> Button.emphasized
+                                            |> Button.view
+                                        ]
+                                    , CloudsBackground.view
                                     ]
                                 ]
                             )

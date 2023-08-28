@@ -17,7 +17,7 @@ import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Link as Link
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
-import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
+import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash
 
 
@@ -26,7 +26,7 @@ import UnisonCloud.ServiceHash as ServiceHash
 
 
 type alias Model =
-    { deploys : WebData (List ServiceDeploy)
+    { deploys : WebData (List ServiceDeploySummary)
     }
 
 
@@ -42,7 +42,7 @@ init appContext serviceId =
 
 
 type Msg
-    = FetchServiceDeploysFinished (WebData (List ServiceDeploy))
+    = FetchServiceDeploysFinished (WebData (List ServiceDeploySummary))
 
 
 update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
@@ -69,7 +69,7 @@ fetchServiceDeploys : AppContext -> ServiceId -> Cmd Msg
 fetchServiceDeploys appContext serviceId =
     CloudApi.assignedServiceDeploys serviceId
         |> HttpApi.toRequest
-            (Decode.list ServiceDeploy.decode)
+            (Decode.list ServiceDeploy.decodeSummary)
             (RemoteData.fromResult >> FetchServiceDeploysFinished)
         |> HttpApi.perform appContext.api
 
@@ -108,7 +108,7 @@ viewError _ =
         |> Card.view
 
 
-viewDeploy : AppContext -> ServiceId -> ServiceDeploy -> Html msg
+viewDeploy : AppContext -> ServiceId -> ServiceDeploySummary -> Html msg
 viewDeploy appContext serviceId deploy =
     let
         byAt =
@@ -120,7 +120,7 @@ viewDeploy appContext serviceId deploy =
         ]
 
 
-viewDeploys : AppContext -> ServiceId -> List ServiceDeploy -> Html msg
+viewDeploys : AppContext -> ServiceId -> List ServiceDeploySummary -> Html msg
 viewDeploys appContext serviceId deploys =
     div [ class "service-deploys-page_deploys" ] (List.map (viewDeploy appContext serviceId) deploys)
 

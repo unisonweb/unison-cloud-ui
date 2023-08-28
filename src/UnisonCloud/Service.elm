@@ -6,14 +6,14 @@ import Lib.UserHandle as UserHandle
 import Set exposing (Set)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
-import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
+import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import Url exposing (Url)
 
 
 type alias Service =
     { id : ServiceId
     , name : ServiceName
-    , latestDeploy : Maybe ServiceDeploy
+    , latestDeploy : Maybe ServiceDeploySummary
     , tags : Set String
     }
 
@@ -63,5 +63,5 @@ decode =
     Decode.succeed makeService
         |> required "id" ServiceId.decode
         |> required "name" ServiceName.decode
-        |> optional "latestServiceDeploy" (Decode.map Just ServiceDeploy.decode) Nothing
+        |> optional "latestServiceDeploy" (Decode.map Just ServiceDeploy.decodeSummary) Nothing
         |> optional "tags" (Decode.list string) []

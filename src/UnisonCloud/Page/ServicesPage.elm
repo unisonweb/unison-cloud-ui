@@ -32,7 +32,7 @@ import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName
-import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
+import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash
 
 
@@ -48,7 +48,7 @@ type ServicesModal
 
 type alias Model =
     { services : WebData (List Service)
-    , unassignedDeploys : WebData (List ServiceDeploy)
+    , unassignedDeploys : WebData (List ServiceDeploySummary)
     , modal : ServicesModal
     }
 
@@ -69,7 +69,7 @@ init appContext =
 
 type Msg
     = FetchServicesFinished (WebData (List Service))
-    | FetchUnassignedDeploysFinished (WebData (List ServiceDeploy))
+    | FetchUnassignedDeploysFinished (WebData (List ServiceDeploySummary))
     | ShowGetStartedModal
     | ShowAssignmentGuideModal
     | CloseModal
@@ -120,7 +120,7 @@ fetchUnassignedDeploys : AppContext -> Cmd Msg
 fetchUnassignedDeploys appContext =
     CloudApi.unassignedServiceDeploys
         |> HttpApi.toRequest
-            (Decode.list ServiceDeploy.decode)
+            (Decode.list ServiceDeploy.decodeSummary)
             (RemoteData.fromResult >> FetchUnassignedDeploysFinished)
         |> HttpApi.perform appContext.api
 
@@ -162,7 +162,7 @@ viewService appContext service =
         |> Card.view
 
 
-viewUnassignedDeploys : AppContext -> Bool -> List ServiceDeploy -> Html Msg
+viewUnassignedDeploys : AppContext -> Bool -> List ServiceDeploySummary -> Html Msg
 viewUnassignedDeploys appContext hasServices deploys =
     let
         viewUnassignedDeploy d =
