@@ -24,8 +24,6 @@ class SupportChatWidget extends HTMLElement {
         user_id: handle,
         avatar: avatar,
       });
-
-      window.Intercom("showMessages");
     });
   }
 
