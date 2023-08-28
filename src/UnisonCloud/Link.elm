@@ -73,7 +73,7 @@ docs =
 
 cloudDocs : Click msg
 cloudDocs =
-    Click.externalHref "https://share.unison-lang.com/@unison/cloud"
+    Click.externalHref "https://share.unison-lang.org/@unison/cloud"
 
 
 tour : Click msg
