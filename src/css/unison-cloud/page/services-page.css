@@ -5,7 +5,7 @@
 }
 
 .get-started-modal code,
-.assignment-guide-modal {
+.assignment-guide-modal code {
   display: flex;
   background: var(--u-color_element_emphasized);
   border-radius: var(--border-radius-base);
