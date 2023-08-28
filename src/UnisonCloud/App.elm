@@ -218,14 +218,5 @@ view model =
 
                 NotFound ->
                     NotFoundPage.view
-
-        appDocumentWithSupportChatWidget =
-            { appDocument
-                | page =
-                    div []
-                        [ appDocument.page
-                        , SupportChatWidget.view model.appContext.session
-                        ]
-            }
     in
-    AppDocument.view appDocumentWithSupportChatWidget
+    AppDocument.view_ appDocument [ SupportChatWidget.view model.appContext.session ]
