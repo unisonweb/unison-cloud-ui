@@ -1,9 +1,9 @@
 module UnisonCloud.Page.OverviewPage exposing (..)
 
 import Html exposing (text)
-import UI.AppDocument exposing (AppDocument)
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
+import UnisonCloud.AppDocument exposing (AppDocument)
 import UnisonCloud.AppHeader as Appheader
 
 
@@ -17,9 +17,7 @@ view =
     in
     { pageId = "overview-page"
     , title = "Overview | Unison Cloud"
-    , announcement = Nothing
     , appHeader = Appheader.appHeader
-    , pageHeader = Nothing
     , page = PageLayout.view page
     , modal = Nothing
     }

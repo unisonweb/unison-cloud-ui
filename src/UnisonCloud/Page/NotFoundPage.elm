@@ -1,12 +1,12 @@
 module UnisonCloud.Page.NotFoundPage exposing (..)
 
 import Html exposing (text)
-import UI.AppDocument exposing (AppDocument)
 import UI.Card as Card
 import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
+import UnisonCloud.AppDocument exposing (AppDocument)
 import UnisonCloud.AppHeader as AppHeader
 import UnisonCloud.PageFooter as PageFooter
 
@@ -28,9 +28,7 @@ view =
     in
     { pageId = "not-found"
     , title = "Page not found"
-    , announcement = Nothing
     , appHeader = AppHeader.appHeader
-    , pageHeader = Nothing
     , page = PageLayout.view page
     , modal = Nothing
     }

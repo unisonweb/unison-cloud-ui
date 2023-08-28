@@ -9,7 +9,6 @@ import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import Set
 import UI
-import UI.AppDocument exposing (AppDocument)
 import UI.Button as Button
 import UI.ByAt as ByAt
 import UI.Card as Card
@@ -28,6 +27,7 @@ import UI.StatusBanner as StatusBanner
 import UI.Tag as Tag
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
+import UnisonCloud.AppDocument exposing (AppDocument)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
@@ -199,7 +199,7 @@ viewGetStartedModal =
     let
         getStarted =
             """.> project.create-empty
-amusing-giraffe/main> pull @unison/cloud-start/main
+amusing-giraffe/main> pull @unison/cloud-start/latest
 amusing-giraffe/main> run examples.helloWorld.deploy"""
 
         content =
@@ -373,9 +373,7 @@ view appContext model =
     in
     { pageId = "services-page"
     , title = "Services | Unison Cloud"
-    , announcement = Nothing
     , appHeader = Appheader.appHeader
-    , pageHeader = Nothing
     , page = PageLayout.view page
     , modal = modal
     }

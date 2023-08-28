@@ -2,9 +2,10 @@ module UnisonCloud.App exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import UI.AppDocument as AppDocument
 import UnisonCloud.AppContext exposing (AppContext)
+import UnisonCloud.AppDocument as AppDocument
 import UnisonCloud.AppError exposing (AppError)
+import UnisonCloud.AppHeader as AppHeader
 import UnisonCloud.Page.ErrorPage as ErrorPage
 import UnisonCloud.Page.NotFoundPage as NotFoundPage
 import UnisonCloud.Page.OverviewPage as OverviewPage
@@ -38,6 +39,7 @@ type AppModal
 type alias Model =
     { page : Page
     , appContext : AppContext
+    , openedAppHeaderMenu : AppHeader.OpenedAppHeaderMenu
     , appModal : AppModal
     }
 
@@ -78,7 +80,11 @@ init appContext route =
                     ( NotFound, Cmd.none )
 
         model =
-            { page = page, appContext = appContext, appModal = NoModal }
+            { page = page
+            , appContext = appContext
+            , openedAppHeaderMenu = AppHeader.NoneOpened
+            , appModal = NoModal
+            }
     in
     ( model, cmd )
 
@@ -91,6 +97,8 @@ type Msg
     = NoOp
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
+    | ToggleHelpAndResourcesMenu
+    | ToggleAccountMenu
     | ServiceDeployPageMsg ServiceDeployPage.Msg
     | ServicesPageMsg ServicesPage.Msg
     | ServicePageMsg ServicePage.Msg
@@ -148,6 +156,28 @@ update msg model =
             in
             ( m, c )
 
+        ( _, ToggleHelpAndResourcesMenu ) ->
+            let
+                openedAppHeaderMenu =
+                    if model.openedAppHeaderMenu == AppHeader.HelpAndResourcesMenu then
+                        AppHeader.NoneOpened
+
+                    else
+                        AppHeader.HelpAndResourcesMenu
+            in
+            ( { model | openedAppHeaderMenu = openedAppHeaderMenu }, Cmd.none )
+
+        ( _, ToggleAccountMenu ) ->
+            let
+                openedAppHeaderMenu =
+                    if model.openedAppHeaderMenu == AppHeader.AccountMenu then
+                        AppHeader.NoneOpened
+
+                    else
+                        AppHeader.AccountMenu
+            in
+            ( { model | openedAppHeaderMenu = openedAppHeaderMenu }, Cmd.none )
+
         ( Services services, ServicesPageMsg spMsg ) ->
             let
                 ( services_, servicesCmd ) =
@@ -192,6 +222,13 @@ view model =
         appContext =
             model.appContext
 
+        appHeaderContext =
+            { session = model.appContext.session
+            , openedAppHeaderMenu = model.openedAppHeaderMenu
+            , toggleHelpAndResourcesMenuMsg = ToggleHelpAndResourcesMenu
+            , toggleAccountMenuMsg = ToggleAccountMenu
+            }
+
         appDocument =
             case model.page of
                 Overview ->
@@ -218,4 +255,7 @@ view model =
                 NotFound ->
                     NotFoundPage.view
     in
-    AppDocument.view_ appDocument [ SupportChatWidget.view model.appContext.session ]
+    AppDocument.view
+        appHeaderContext
+        appDocument
+        [ SupportChatWidget.view model.appContext.session ]

@@ -5,7 +5,6 @@ import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
-import UI.AppDocument exposing (AppDocument)
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.ErrorCard as ErrorCard
@@ -16,6 +15,7 @@ import UI.Placeholder as Placeholder
 import UI.TabList as TabList
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
+import UnisonCloud.AppDocument exposing (AppDocument)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Page.ServicePage.AssignedServiceDeployPage as AssignedServiceDeployPage
@@ -275,9 +275,7 @@ view appContext serviceId model =
     in
     { pageId = "service-page"
     , title = "Service: " ++ ServiceId.toString serviceId ++ " | Unison Cloud"
-    , announcement = Nothing
     , appHeader = Appheader.appHeader
-    , pageHeader = Nothing
     , page = PageLayout.view page
     , modal = Nothing
     }

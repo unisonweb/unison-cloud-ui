@@ -17,6 +17,22 @@ body:has(#modal-overlay) {
   overflow: clip;
 }
 
+#app-header .account-menu-trigger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2rem;
+  padding-left: 0.25rem;
+  padding-right: 0.375rem;
+  border-radius: 1rem;
+  transition: all 0.2s;
+}
+
+#app-header .account-menu .action-menu .action-menu_sheet {
+  width: 11.5rem;
+}
+
 /* -- App Error ------------------------------------------------------------ */
 
 .app-error {

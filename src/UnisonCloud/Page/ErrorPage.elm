@@ -2,13 +2,13 @@ module UnisonCloud.Page.ErrorPage exposing (..)
 
 import Html exposing (br, p, text)
 import Html.Attributes exposing (class)
-import UI.AppDocument exposing (AppDocument)
 import UI.Button as Button
 import UI.Card as Card
 import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.StatusMessage as StatusMessage
+import UnisonCloud.AppDocument exposing (AppDocument)
 import UnisonCloud.AppError exposing (AppError(..))
 import UnisonCloud.AppHeader as AppHeader
 import UnisonCloud.Link as Link
@@ -49,9 +49,7 @@ view appError =
     in
     { pageId = "error-page"
     , title = "Something went wrong 😞"
-    , announcement = Nothing
     , appHeader = AppHeader.appHeader
-    , pageHeader = Nothing
     , page = PageLayout.view page
     , modal = Nothing
     }
