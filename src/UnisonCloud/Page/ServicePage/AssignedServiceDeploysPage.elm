@@ -108,25 +108,25 @@ viewError _ =
         |> Card.view
 
 
-viewDeploy : AppContext -> ServiceDeploy -> Html msg
-viewDeploy appContext deploy =
+viewDeploy : AppContext -> ServiceId -> ServiceDeploy -> Html msg
+viewDeploy appContext serviceId deploy =
     let
         byAt =
             ByAt.byAt deploy.deployedBy deploy.deployedAt
     in
     div [ class "service-deploys-page_deploy" ]
-        [ Link.view (ServiceHash.toShortString deploy.hash) (Link.serviceDeploy deploy.hash)
+        [ Link.view (ServiceHash.toShortString deploy.hash) (Link.serviceDeployForService serviceId deploy.hash)
         , ByAt.view appContext.timeZone appContext.now byAt
         ]
 
 
-viewDeploys : AppContext -> List ServiceDeploy -> Html msg
-viewDeploys appContext deploys =
-    div [ class "service-deploys-page_deploys" ] (List.map (viewDeploy appContext) deploys)
+viewDeploys : AppContext -> ServiceId -> List ServiceDeploy -> Html msg
+viewDeploys appContext serviceId deploys =
+    div [ class "service-deploys-page_deploys" ] (List.map (viewDeploy appContext serviceId) deploys)
 
 
 view : AppContext -> ServiceId -> Model -> PageContent Msg
-view appContext _ model =
+view appContext serviceId model =
     let
         content =
             case model.deploys of
@@ -137,7 +137,7 @@ view appContext _ model =
                     viewLoading
 
                 Success deploys ->
-                    viewDeploys appContext deploys
+                    viewDeploys appContext serviceId deploys
 
                 Failure e ->
                     viewError e
