@@ -1,0 +1,36 @@
+.clouds-background {
+  position: absolute;
+  bottom: -3rem;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  height: 30rem;
+  z-index: 1;
+}
+
+.clouds-background .clouds {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.clouds-background .clouds.foreground {
+  bottom: -10rem;
+  left: -1rem;
+  color: var(--color-gray-lighten-100);
+  width: 110%;
+}
+
+.clouds-background .clouds.middleground {
+  bottom: -11rem;
+  left: 0;
+  color: var(--color-blue-4);
+  width: 120%;
+}
+
+.clouds-background .clouds.background {
+  bottom: -17rem;
+  left: -2rem;
+  color: var(--color-blue-3);
+  width: 170%;
+}

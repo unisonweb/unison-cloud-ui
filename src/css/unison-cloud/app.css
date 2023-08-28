@@ -17,23 +17,42 @@ body:has(#modal-overlay) {
   overflow: clip;
 }
 
-#app-header .account-menu-trigger {
+/* -- PreApp --------------------------------------------------------------- */
+
+.unison-cloud-box {
+  position: relative;
+  background: var(--color-blue-2);
+  border-radius: 1rem;
+  padding: 3.5rem 2rem;
+  color: var(--color-gray-lighten-100);
+  width: 32rem;
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  height: 2rem;
-  padding-left: 0.25rem;
-  padding-right: 0.375rem;
-  border-radius: 1rem;
-  transition: all 0.2s;
+  text-align: center;
+  text-wrap: balance;
 }
 
-#app-header .account-menu .action-menu .action-menu_sheet {
-  width: 11.5rem;
+.unison-cloud-box .button {
+  position: relative;
+  z-index: 2;
 }
 
-/* -- App Error ------------------------------------------------------------ */
+.unison-cloud-box h1 {
+  font-size: 3rem;
+}
+
+.unison-cloud-box h2 {
+  font-size: 1.5rem;
+  color: var(--color-blue-1);
+  margin-bottom: 2rem;
+}
+
+.unison-cloud-box .unison-cloud-wordmark_cloud {
+  color: var(--color-orange-4);
+}
 
 .app-error {
   display: flex;
@@ -56,4 +75,22 @@ body:has(#modal-overlay) {
     --app-header-height: 7rem;
     --c-height_announcement: 4rem;
   }
+}
+
+/* -- AppHeader ------------------------------------------------------------ */
+
+#app-header .account-menu-trigger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2rem;
+  padding-left: 0.25rem;
+  padding-right: 0.375rem;
+  border-radius: 1rem;
+  transition: all 0.2s;
+}
+
+#app-header .account-menu .action-menu .action-menu_sheet {
+  width: 11.5rem;
 }

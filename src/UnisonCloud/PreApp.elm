@@ -2,7 +2,7 @@ module UnisonCloud.PreApp exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, div, p, text)
+import Html exposing (Html, div, h1, h2, p, span, text)
 import Html.Attributes exposing (class, id)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
@@ -16,7 +16,7 @@ import UI.PageLayout as PageLayout
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.App as App
 import UnisonCloud.AppContext as AppContext exposing (Flags)
-import UnisonCloud.AppHeader as AppHeader
+import UnisonCloud.CloudsBackground as CloudsBackground
 import UnisonCloud.Link as Link
 import UnisonCloud.PageFooter as PageFooter
 import UnisonCloud.Route as Route exposing (Route)
@@ -137,8 +137,7 @@ subscriptions model =
 viewAppLoading : Html msg
 viewAppLoading =
     div [ id "app" ]
-        [ AppHeader.viewBlank
-        , PageLayout.view
+        [ PageLayout.view
             (PageLayout.centeredLayout
                 PageContent.empty
                 PageFooter.pageFooter
@@ -149,8 +148,7 @@ viewAppLoading =
 viewAppError : AppError -> Html msg
 viewAppError _ =
     div [ id "app" ]
-        [ AppHeader.viewBlank
-        , PageLayout.view
+        [ PageLayout.view
             (PageLayout.centeredLayout
                 (PageContent.oneColumn
                     [ div [ class "app-error" ]
@@ -164,6 +162,21 @@ viewAppError _ =
         ]
 
 
+viewUnisonCloudBox : List (Html Msg) -> Html Msg
+viewUnisonCloudBox content =
+    div
+        [ class "unison-cloud-box" ]
+        [ div []
+            (h1 [ class "unison-cloud-wordmark" ]
+                [ text "Unison "
+                , span [ class "unison-cloud-wordmark_cloud" ] [ text "Cloud" ]
+                ]
+                :: content
+            )
+        , CloudsBackground.view
+        ]
+
+
 view : Model -> Browser.Document Msg
 view model =
     case model of
@@ -174,21 +187,28 @@ view model =
 
         InitializationError _ error ->
             { title = "Application Error | Unison Cloud"
-            , body = [ viewAppError error ]
+            , body =
+                [ viewAppError error
+                ]
             }
 
         NotSignedIn _ ->
             { title = "Unison Cloud"
             , body =
                 [ div [ id "app", class "sign-in-page" ]
-                    [ AppHeader.viewBlank
-                    , PageLayout.view
+                    [ PageLayout.view
                         (PageLayout.centeredLayout
                             (PageContent.oneColumn
-                                [ Button.iconThenLabel_ Link.login Icon.cloud "Sign In to Unison Cloud"
-                                    |> Button.large
-                                    |> Button.decorativeBlue
-                                    |> Button.view
+                                [ viewUnisonCloudBox
+                                    [ h2 [] [ text "Write code. Hit run. The cloud computes." ]
+                                    , Button.iconThenLabel_
+                                        Link.login
+                                        Icon.cloud
+                                        "Sign In"
+                                        |> Button.large
+                                        |> Button.emphasized
+                                        |> Button.view
+                                    ]
                                 ]
                             )
                             PageFooter.pageFooter
