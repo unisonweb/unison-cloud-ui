@@ -204,7 +204,7 @@ amusing-giraffe/main> run examples.helloWorld.deploy"""
 
         content =
             div [ class "get-started-modal" ]
-                [ p [] [ text "Here's how to get started with a small ", i [] [ text "hello world" ], text " template service" ]
+                [ p [] [ text "Here's how to get started with a small ", i [] [ text "hello world" ], text " template service:" ]
                 , UI.codeBlock [] (text getStarted)
                 ]
     in
@@ -243,7 +243,7 @@ helloWorld = do
         content =
             div [ class "assignment-guide-modal" ]
                 [ p [] [ text "Assigning service deployments to a name allows them to get a stable URL." ]
-                , p [] [ text "Here's how to assign a name to a small ", i [] [ text "hello world" ], text " service" ]
+                , p [] [ text "Here's how to assign a name to a small ", i [] [ text "hello world" ], text " service:" ]
                 , UI.codeBlock [] (text assignment)
                 ]
     in
