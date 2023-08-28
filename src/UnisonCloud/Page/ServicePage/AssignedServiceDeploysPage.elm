@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicePage.AssignedServiceDeploysPage exposing (..)
 
-import Html exposing (Html, div, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
@@ -15,6 +15,7 @@ import UI.PageContent as PageContent exposing (PageContent)
 import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
+import UnisonCloud.Link as Link
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy)
 import UnisonCloud.ServiceHash as ServiceHash
@@ -114,7 +115,7 @@ viewDeploy appContext deploy =
             ByAt.byAt deploy.deployedBy deploy.deployedAt
     in
     div [ class "service-deploys-page_deploy" ]
-        [ text (ServiceHash.toShortString deploy.hash)
+        [ Link.view (ServiceHash.toShortString deploy.hash) (Link.serviceDeploy deploy.hash)
         , ByAt.view appContext.timeZone appContext.now byAt
         ]
 
