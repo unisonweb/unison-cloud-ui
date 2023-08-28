@@ -84,6 +84,9 @@ update msg model =
                 Http.BadStatus 401 ->
                     ( NotSignedIn preAppContext, Cmd.none )
 
+                Http.BadStatus 404 ->
+                    ( NotSignedIn preAppContext, Cmd.none )
+
                 _ ->
                     ( InitializationError preAppContext (NetworkError e), Cmd.none )
 
