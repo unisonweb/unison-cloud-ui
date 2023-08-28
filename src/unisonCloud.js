@@ -5,6 +5,7 @@ import "ui-core/UI/CopyOnClick"; // Web components
 import "ui-core/UI/CopyrightYear"; // Web components
 import "ui-core/UI/FormatDateTime"; // Web component
 import "ui-core/Lib/OnClickOutside"; // Web components
+import "
 import detectOs from "ui-core/Lib/detectOs";
 import preventDefaultGlobalKeyboardEvents from "ui-core/Lib/preventDefaultGlobalKeyboardEvents";
 import * as Sentry from "@sentry/browser";

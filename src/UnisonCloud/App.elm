@@ -2,6 +2,7 @@ module UnisonCloud.App exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
+import Html exposing (div)
 import UI.AppDocument as AppDocument
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppError exposing (AppError)
@@ -14,6 +15,7 @@ import UnisonCloud.Page.ServicesPage as ServicesPage
 import UnisonCloud.Route as Route exposing (Route)
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
+import UnisonCloud.SupportChatWidget as SupportChatWidget
 import Url exposing (Url)
 
 
@@ -216,5 +218,14 @@ view model =
 
                 NotFound ->
                     NotFoundPage.view
+
+        appDocumentWithSupportChatWidget =
+            { appDocument
+                | page =
+                    div []
+                        [ appDocument.page
+                        , SupportChatWidget.view model.appContext.session
+                        ]
+            }
     in
-    AppDocument.view appDocument
+    AppDocument.view appDocumentWithSupportChatWidget
