@@ -128,8 +128,13 @@ serviceActivity sName =
 
 
 serviceDeploysForService : ServiceId -> Click msg
-serviceDeploysForService sName =
-    toClick (Route.serviceDeploysForService sName)
+serviceDeploysForService sid =
+    toClick (Route.serviceDeploysForService sid)
+
+
+serviceDeployForService : ServiceId -> ServiceHash -> Click msg
+serviceDeployForService sid hash =
+    toClick (Route.serviceDeployForService sid hash)
 
 
 serviceDeploy : ServiceHash -> Click msg

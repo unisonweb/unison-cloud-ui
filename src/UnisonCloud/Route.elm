@@ -15,6 +15,7 @@ module UnisonCloud.Route exposing
     , service
     , serviceActivity
     , serviceDeploy
+    , serviceDeployForService
     , serviceDeploysForService
     , services
     , toRoute
@@ -45,6 +46,7 @@ type Route
 
 type ServiceRoute
     = Activity
+    | Deploy ServiceHash
     | Deploys
 
 
@@ -71,13 +73,18 @@ service =
 
 
 serviceActivity : ServiceId -> Route
-serviceActivity name =
-    Service name Activity
+serviceActivity sid =
+    Service sid Activity
 
 
 serviceDeploysForService : ServiceId -> Route
-serviceDeploysForService name =
-    Service name Deploys
+serviceDeploysForService sid =
+    Service sid Deploys
+
+
+serviceDeployForService : ServiceId -> ServiceHash -> Route
+serviceDeployForService sid sh =
+    Service sid (Deploy sh)
 
 
 serviceDeploy : ServiceHash -> Route
@@ -131,9 +138,17 @@ serviceIdParser =
 
 serviceParser : Parser Route
 serviceParser =
+    let
+        makeService subRoute id =
+            Service id subRoute
+
+        makeDeploy id hash =
+            Service id (Deploy hash)
+    in
     oneOf
-        [ b (succeed (\n -> Service n Activity) |. slash |. s "services" |. slash |= serviceIdParser |. end)
-        , b (succeed (\n -> Service n Deploys) |. slash |. s "services" |. slash |= serviceIdParser |. slash |. s "deploys" |. end)
+        [ b (succeed (makeService Activity) |. slash |. s "services" |. slash |= serviceIdParser |. end)
+        , b (succeed makeDeploy |. slash |. s "services" |. slash |= serviceIdParser |. slash |. s "deploys" |. slash |= serviceHashParser |. end)
+        , b (succeed (makeService Deploys) |. slash |. s "services" |. slash |= serviceIdParser |. slash |. s "deploys" |. end)
         ]
 
 
@@ -235,6 +250,9 @@ toUrlPattern r =
         Service _ Activity ->
             "services/:service-id"
 
+        Service _ (Deploy _) ->
+            "services/:service-id/deploys/:service-hash"
+
         Service _ Deploys ->
             "services/:service-id/deploys"
 
@@ -261,6 +279,9 @@ toUrlString route =
 
                 Service name Activity ->
                     ( [ "services", ServiceId.toString name ], [] )
+
+                Service name (Deploy hash) ->
+                    ( [ "services", ServiceId.toString name, "deploys", ServiceHash.toString hash ], [] )
 
                 Service name Deploys ->
                     ( [ "services", ServiceId.toString name, "deploys" ], [] )

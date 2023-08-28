@@ -18,13 +18,14 @@ import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
+import UnisonCloud.Page.ServicePage.AssignedServiceDeployPage as AssignedServiceDeployPage
 import UnisonCloud.Page.ServicePage.AssignedServiceDeploysPage as AssignedServiceDeploysPage
 import UnisonCloud.Page.ServicePage.ServiceActivityPage as ServiceActivityPage
 import UnisonCloud.Route as Route exposing (ServiceRoute)
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName
-import UnisonCloud.ServiceHash as ServiceHash
+import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
 
@@ -33,6 +34,7 @@ import UnisonCloud.ServiceHash as ServiceHash
 
 type SubPage
     = Activity ServiceActivityPage.Model
+    | Deploy ServiceHash AssignedServiceDeployPage.Model
     | Deploys AssignedServiceDeploysPage.Model
 
 
@@ -54,6 +56,13 @@ init appContext serviceId serviceRoute =
                     in
                     ( Activity activity, Cmd.map ServiceActivityPageMsg activityCmd )
 
+                Route.Deploy hash ->
+                    let
+                        ( deploy, deployCmd ) =
+                            AssignedServiceDeployPage.init appContext serviceId hash
+                    in
+                    ( Deploy hash deploy, Cmd.map AssignedServiceDeployPageMsg deployCmd )
+
                 Route.Deploys ->
                     let
                         ( deploys, deploysCmd ) =
@@ -73,6 +82,7 @@ init appContext serviceId serviceRoute =
 type Msg
     = FetchServiceFinished (WebData Service)
     | ServiceActivityPageMsg ServiceActivityPage.Msg
+    | AssignedServiceDeployPageMsg AssignedServiceDeployPage.Msg
     | AssignedServiceDeploysPageMsg AssignedServiceDeploysPage.Msg
 
 
@@ -92,6 +102,19 @@ update appContext serviceId msg model =
             in
             ( { model | subPage = Activity activity_ }
             , Cmd.map ServiceActivityPageMsg activityCmd
+            )
+
+        ( AssignedServiceDeployPageMsg deployMsg, Deploy serviceHash deploy ) ->
+            let
+                ( deploy_, deployCmd ) =
+                    AssignedServiceDeployPage.update appContext
+                        serviceId
+                        serviceHash
+                        deployMsg
+                        deploy
+            in
+            ( { model | subPage = Deploy serviceHash deploy_ }
+            , Cmd.map AssignedServiceDeployPageMsg deployCmd
             )
 
         ( AssignedServiceDeploysPageMsg deploysMsg, Deploys deploys ) ->
@@ -133,6 +156,9 @@ viewLoading subPage =
         Activity _ ->
             ServiceActivityPage.viewLoading
 
+        Deploy _ _ ->
+            AssignedServiceDeployPage.viewLoading
+
         Deploys _ ->
             AssignedServiceDeploysPage.viewLoading
 
@@ -169,6 +195,12 @@ view appContext serviceId model =
                         (TabList.tab "Activity" (Link.serviceActivity serviceId))
                         [ TabList.tab "Deploys" (Link.serviceDeploysForService serviceId) ]
 
+                Deploy _ _ ->
+                    TabList.tabList
+                        [ TabList.tab "Activity" (Link.serviceActivity serviceId) ]
+                        (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
+                        []
+
                 Deploys _ ->
                     TabList.tabList
                         [ TabList.tab "Activity" (Link.serviceActivity serviceId) ]
@@ -196,20 +228,36 @@ view appContext serviceId model =
                                 Nothing ->
                                     []
 
-                        description =
+                        description_ =
                             viewDescription latestDeploy
 
-                        subPage =
+                        ( subPage, title, description ) =
                             case model.subPage of
                                 Activity activity ->
-                                    PageContent.map ServiceActivityPageMsg
+                                    ( PageContent.map ServiceActivityPageMsg
                                         (ServiceActivityPage.view appContext serviceId activity)
+                                    , ServiceName.toString service.name
+                                    , description_
+                                    )
+
+                                Deploy hash deploy ->
+                                    let
+                                        ( content_, desc ) =
+                                            AssignedServiceDeployPage.view appContext serviceId hash deploy
+                                    in
+                                    ( PageContent.map AssignedServiceDeployPageMsg content_
+                                    , ServiceName.toString service.name ++ " > " ++ ServiceHash.toShortString hash
+                                    , desc
+                                    )
 
                                 Deploys deploys ->
-                                    PageContent.map AssignedServiceDeploysPageMsg
+                                    ( PageContent.map AssignedServiceDeploysPageMsg
                                         (AssignedServiceDeploysPage.view appContext serviceId deploys)
+                                    , ServiceName.toString service.name
+                                    , description_
+                                    )
                     in
-                    ( subPage, ServiceName.toString service.name, description )
+                    ( subPage, title, description )
 
                 Failure e ->
                     ( PageContent.oneColumn [ viewError e ], "Service: " ++ ServiceId.toString serviceId, viewDescription [] )
