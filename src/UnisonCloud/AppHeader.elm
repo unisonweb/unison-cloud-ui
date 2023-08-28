@@ -73,7 +73,7 @@ view ctx appHeader_ =
     let
         helpAndResources =
             ActionMenu.items
-                (ActionMenu.optionItem Icon.docs "Cloud Docs" Link.docs)
+                (ActionMenu.optionItem Icon.docs "Cloud Docs" Link.cloudDocs)
                 [ ActionMenu.optionItem Icon.unfoldedMap "Code of Conduct" Link.codeOfConduct
                 , ActionMenu.optionItem Icon.unisonMark "Unison Website" Link.website
                 , ActionMenu.optionItem Icon.github "Unison on GitHub" Link.github
