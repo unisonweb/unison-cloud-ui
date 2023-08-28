@@ -2,7 +2,6 @@ module UnisonCloud.App exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (div)
 import UI.AppDocument as AppDocument
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppError exposing (AppError)
