@@ -590,15 +590,20 @@ view appContext model =
                         |> LogEntries.fromLines timeZone
                         |> List.map (viewKeyedEntry timeZone model)
             in
-            div [ class "log" ]
-                [ Html.Keyed.node "div"
-                    [ id "log-entries"
-                    , on "scroll" (ScrollEvent.decodeToMsg Scroll)
-                    , class "log-entries"
-                    ]
-                    lines
-                , offscreenLines
-                ]
+            case lines of
+                [] ->
+                    text "Nothing logged yet..."
+
+                _ ->
+                    div [ class "log" ]
+                        [ Html.Keyed.node "div"
+                            [ id "log-entries"
+                            , on "scroll" (ScrollEvent.decodeToMsg Scroll)
+                            , class "log-entries"
+                            ]
+                            lines
+                        , offscreenLines
+                        ]
 
         Failure _ ->
             div [] [ text "Something went wrong in fetching the logs" ]

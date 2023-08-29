@@ -16,4 +16,5 @@
   gap: 0.5rem;
   font-size: var(--font-size-medium);
   color: var(--u-color_text_subdued);
+  height: 1.25rem;
 }
