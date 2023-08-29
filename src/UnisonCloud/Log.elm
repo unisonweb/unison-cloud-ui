@@ -575,7 +575,11 @@ viewEmptyState =
         |> EmptyState.withContent
             [ h2 [] [ text "Nothing's been logged yet" ]
             , p [] [ text "Logs will show up here as the service is called." ]
-            , Button.iconThenLabel ShowGetStartedWithLoggingModal Icon.graduationCap "Get started with logging"
+            , Button.iconThenLabel
+                ShowGetStartedWithLoggingModal
+                Icon.graduationCap
+                "Get started with logging"
+                |> Button.decorativeBlue
                 |> Button.view
             ]
         |> EmptyStateCard.view_ Card.SurfaceBackground

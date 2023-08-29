@@ -179,7 +179,7 @@ viewUnassignedDeploys appContext hasServices deploys =
             if hasServices then
                 p [ class "unassigned-deploys_learn-how-to-organize" ]
                     [ text "Organize your deploys by assigning them to a named service."
-                    , Button.button ShowAssignmentGuideModal "Learn how"
+                    , Button.iconThenLabel ShowAssignmentGuideModal Icon.graduationCap "Learn how"
                         |> Button.small
                         |> Button.view
                     ]
