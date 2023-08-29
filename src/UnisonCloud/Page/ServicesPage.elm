@@ -142,7 +142,7 @@ viewService appContext service =
                         [ StatusBanner.good (ServiceHash.toShortString d.hash)
                         , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
-                        (Link.serviceDeploy d.hash)
+                        (Link.serviceDeployForService service.id d.hash)
 
                 Nothing ->
                     text "🐣 No deploys yet"
