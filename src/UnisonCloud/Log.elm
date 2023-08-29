@@ -30,7 +30,7 @@ module UnisonCloud.Log exposing (..)
 
 import Browser.Dom as Dom
 import Dict
-import Html exposing (Html, div, hr, table, tbody, td, text, th, tr)
+import Html exposing (Html, div, h2, hr, p, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (on)
 import Html.Keyed
@@ -48,8 +48,12 @@ import Task
 import Time
 import UI
 import UI.Button as Button
+import UI.Card as Card
 import UI.DateTime as DateTime exposing (DateTime)
+import UI.EmptyState as EmptyState
+import UI.EmptyStateCard as EmptyStateCard
 import UI.Icon as Icon
+import UI.Modal as Modal
 import UI.Nudge as Nudge
 import UI.Placeholder as Placeholder
 import UI.Sizing as Sizing
@@ -57,6 +61,7 @@ import UI.Tooltip as Tooltip
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
+import UnisonCloud.Link as Link
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
@@ -73,8 +78,9 @@ type LogBrowsingContext
     | ServiceDeployContext ServiceHash
 
 
-
--- WHERE IS BOOKMARK?
+type Modal
+    = NoModal
+    | GetStartedWithLoggingModal
 
 
 type alias Log =
@@ -87,7 +93,7 @@ type alias Log =
 
 
 type alias Model =
-    { log : Log }
+    { log : Log, modal : Modal }
 
 
 init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
@@ -99,6 +105,7 @@ init appContext logBrowsingContext =
             , newestLogLines = NotAsked
             , offScreenNewestLogLines = NotAsked
             }
+      , modal = NoModal
       }
     , fetchInitialLogLines appContext logBrowsingContext
     )
@@ -128,10 +135,12 @@ type Msg
     | FetchInitialLogLinesFinished (WebData (List LogLine))
     | FetchOlderLogLinesFinished (WebData (List LogLine))
     | FetchNewestLogLinesFinished (WebData (List LogLine))
+    | RequestToFetchNewestLogLines
     | Scroll ScrollEvent
     | ToggleLogLine LogLine
     | RevealNewOffscreenLogLines
-    | RequestToFetchNewestLogLines
+    | ShowGetStartedWithLoggingModal
+    | CloseModal
 
 
 update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
@@ -282,6 +291,12 @@ update appContext logBrowsingContext msg model =
                         |> Task.attempt (always NoOp)
             in
             ( { model | log = log_ }, cmd )
+
+        ShowGetStartedWithLoggingModal ->
+            ( { model | modal = GetStartedWithLoggingModal }, Cmd.none )
+
+        CloseModal ->
+            ( { model | modal = NoModal }, Cmd.none )
 
 
 
@@ -553,18 +568,75 @@ viewLoading =
         ]
 
 
-view : AppContext -> Model -> Html Msg
+viewEmptyState : Html Msg
+viewEmptyState =
+    EmptyState.iconCloud
+        (EmptyState.CircleCenterPiece (text "🪵"))
+        |> EmptyState.withContent
+            [ h2 [] [ text "Nothing's been logged yet" ]
+            , p [] [ text "Logs will show up here as the service is called." ]
+            , Button.iconThenLabel ShowGetStartedWithLoggingModal Icon.graduationCap "Get started with logging"
+                |> Button.view
+            ]
+        |> EmptyStateCard.view_ Card.SurfaceBackground
+
+
+viewGetStartedWithLoggingModal : Modal.Modal Msg
+viewGetStartedWithLoggingModal =
+    let
+        getStarted =
+            """info "beginning transmogrification..." []
+warn "operation failed, ignoring" [("name", "bob"), ("fruit", "🍍")]
+"""
+
+        content =
+            div []
+                [ p []
+                    [ text "Log messages can be arbitrary JSON, using the low level functions "
+                    , UI.inlineCode [] (text "Log.json")
+                    , text "and"
+                    , UI.inlineCode [] (text "Log.lazyJson")
+                    , text "but there are convenience functions for common cases. Unison Cloud's log viewer is set up to nicely render these. Here's a short example:"
+                    ]
+                , UI.codeBlock [] (text getStarted)
+                ]
+    in
+    content
+        |> Modal.content
+        |> Modal.modal "log_get-started-with-logging-modal" CloseModal
+        |> Modal.withHeader "Get started with logging"
+        |> Modal.withLeftSideFooter
+            [ div []
+                [ text "Learn more in the "
+                , Link.view "Cloud project documentation." Link.cloudDocs
+                ]
+            ]
+        |> Modal.withActions
+            [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It"
+                |> Button.emphasized
+            ]
+
+
+view : AppContext -> Model -> ( Html Msg, Maybe (Modal.Modal Msg) )
 view appContext model =
     let
         timeZone =
             appContext.timeZone
+
+        modal =
+            case model.modal of
+                NoModal ->
+                    Nothing
+
+                GetStartedWithLoggingModal ->
+                    Just viewGetStartedWithLoggingModal
     in
     case model.log.logLines of
         NotAsked ->
-            viewLoading
+            ( viewLoading, Nothing )
 
         Loading ->
-            viewLoading
+            ( viewLoading, Nothing )
 
         Success _ ->
             let
@@ -592,10 +664,10 @@ view appContext model =
             in
             case lines of
                 [] ->
-                    text "Nothing logged yet..."
+                    ( viewEmptyState, modal )
 
                 _ ->
-                    div [ class "log" ]
+                    ( div [ class "log" ]
                         [ Html.Keyed.node "div"
                             [ id "log-entries"
                             , on "scroll" (ScrollEvent.decodeToMsg Scroll)
@@ -604,6 +676,8 @@ view appContext model =
                             lines
                         , offscreenLines
                         ]
+                    , modal
+                    )
 
         Failure _ ->
-            div [] [ text "Something went wrong in fetching the logs" ]
+            ( div [] [ text "Something went wrong in fetching the logs" ], Nothing )

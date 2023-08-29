@@ -1,6 +1,7 @@
 module UnisonCloud.Page.ServicePage.ServiceActivityPage exposing (..)
 
 import Html exposing (Html)
+import UI.Modal as Modal
 import UI.PageContent as PageContent exposing (PageContent)
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
@@ -58,10 +59,12 @@ viewLoading =
     Log.viewLoading
 
 
-view : AppContext -> ServiceId -> Model -> PageContent Msg
+view : AppContext -> ServiceId -> Model -> ( PageContent Msg, Maybe (Modal.Modal Msg) )
 view appContext _ model =
     let
-        log =
+        ( log, modal ) =
             Log.view appContext model.log
     in
-    PageContent.oneColumn [ Html.map LogMsg log ]
+    ( PageContent.oneColumn [ Html.map LogMsg log ]
+    , Maybe.map (Modal.map LogMsg) modal
+    )

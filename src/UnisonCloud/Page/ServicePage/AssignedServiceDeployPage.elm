@@ -8,6 +8,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.ErrorCard as ErrorCard
+import UI.Modal as Modal
 import UI.PageContent as PageContent exposing (PageContent)
 import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
@@ -102,15 +103,21 @@ viewDescription serviceHash content =
         (text (ServiceHash.toShortString serviceHash) :: content)
 
 
-view : AppContext -> ServiceId -> ServiceHash -> Model -> ( PageContent Msg, Html msg )
+view :
+    AppContext
+    -> ServiceId
+    -> ServiceHash
+    -> Model
+    -> ( PageContent Msg, Html msg, Maybe (Modal.Modal Msg) )
 view appContext _ serviceHash model =
     let
         loading_ =
             ( viewLoading
             , viewDescription serviceHash [ Placeholder.view Placeholder.text ]
+            , Nothing
             )
 
-        ( content, description ) =
+        ( content, description, modal ) =
             case model.deploy of
                 NotAsked ->
                     loading_
@@ -120,7 +127,7 @@ view appContext _ serviceHash model =
 
                 Success deploy ->
                     let
-                        log =
+                        ( log, logModal ) =
                             Log.view appContext model.log
 
                         byAt =
@@ -130,9 +137,10 @@ view appContext _ serviceHash model =
                     , viewDescription serviceHash
                         [ ByAt.view appContext.timeZone appContext.now byAt
                         ]
+                    , Maybe.map (Modal.map LogMsg) logModal
                     )
 
                 Failure e ->
-                    ( viewError e, viewDescription serviceHash [] )
+                    ( viewError e, viewDescription serviceHash [], Nothing )
     in
-    ( PageContent.oneColumn [ content ], description )
+    ( PageContent.oneColumn [ content ], description, modal )

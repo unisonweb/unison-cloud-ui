@@ -8,6 +8,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.ErrorCard as ErrorCard
+import UI.Modal as Modal
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
@@ -182,10 +183,11 @@ view : AppContext -> ServiceId -> Model -> AppDocument Msg
 view appContext serviceId model =
     let
         loading_ =
-            ( PageContent.oneColumn [ viewLoading model.subPage ]
-            , "Service Loading..."
-            , viewDescription [ Placeholder.view Placeholder.text ]
-            )
+            { content = PageContent.oneColumn [ viewLoading model.subPage ]
+            , serviceTitle = "Service Loading..."
+            , description = viewDescription [ Placeholder.view Placeholder.text ]
+            , modal = Nothing
+            }
 
         tabList =
             case model.subPage of
@@ -207,7 +209,7 @@ view appContext serviceId model =
                         (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
                         []
 
-        ( content, serviceTitle, pageTitleDescription ) =
+        { content, serviceTitle, description, modal } =
             case model.service of
                 NotAsked ->
                     loading_
@@ -230,41 +232,49 @@ view appContext serviceId model =
 
                         description_ =
                             viewDescription latestDeploy
-
-                        ( subPage, title, description ) =
-                            case model.subPage of
-                                Activity activity ->
-                                    ( PageContent.map ServiceActivityPageMsg
-                                        (ServiceActivityPage.view appContext serviceId activity)
-                                    , ServiceName.toString service.name
-                                    , description_
-                                    )
-
-                                Deploy hash deploy ->
-                                    let
-                                        ( content_, desc ) =
-                                            AssignedServiceDeployPage.view appContext serviceId hash deploy
-                                    in
-                                    ( PageContent.map AssignedServiceDeployPageMsg content_
-                                    , ServiceName.toString service.name ++ " > " ++ ServiceHash.toShortString hash
-                                    , desc
-                                    )
-
-                                Deploys deploys ->
-                                    ( PageContent.map AssignedServiceDeploysPageMsg
-                                        (AssignedServiceDeploysPage.view appContext serviceId deploys)
-                                    , ServiceName.toString service.name
-                                    , description_
-                                    )
                     in
-                    ( subPage, title, description )
+                    case model.subPage of
+                        Activity activity ->
+                            let
+                                ( serviceActivityPage, activityModal ) =
+                                    ServiceActivityPage.view appContext serviceId activity
+                            in
+                            { content = PageContent.map ServiceActivityPageMsg serviceActivityPage
+                            , serviceTitle = ServiceName.toString service.name
+                            , description = description_
+                            , modal = Maybe.map (Modal.map ServiceActivityPageMsg) activityModal
+                            }
+
+                        Deploy hash deploy ->
+                            let
+                                ( content_, desc, deployModal ) =
+                                    AssignedServiceDeployPage.view appContext serviceId hash deploy
+                            in
+                            { content = PageContent.map AssignedServiceDeployPageMsg content_
+                            , serviceTitle = ServiceName.toString service.name ++ " > " ++ ServiceHash.toShortString hash
+                            , description = desc
+                            , modal = Maybe.map (Modal.map AssignedServiceDeployPageMsg) deployModal
+                            }
+
+                        Deploys deploys ->
+                            { content =
+                                PageContent.map AssignedServiceDeploysPageMsg
+                                    (AssignedServiceDeploysPage.view appContext serviceId deploys)
+                            , serviceTitle = ServiceName.toString service.name
+                            , description = description_
+                            , modal = Nothing
+                            }
 
                 Failure e ->
-                    ( PageContent.oneColumn [ viewError e ], "Service: " ++ ServiceId.toString serviceId, viewDescription [] )
+                    { content = PageContent.oneColumn [ viewError e ]
+                    , serviceTitle = "Service: " ++ ServiceId.toString serviceId
+                    , description = viewDescription []
+                    , modal = Nothing
+                    }
 
         pageTitle =
             PageTitle.title serviceTitle
-                |> PageTitle.withDescription_ pageTitleDescription
+                |> PageTitle.withDescription_ description
 
         page =
             PageLayout.tabbedLayout
@@ -277,5 +287,5 @@ view appContext serviceId model =
     , title = "Service: " ++ ServiceId.toString serviceId ++ " | Unison Cloud"
     , appHeader = Appheader.appHeader
     , page = PageLayout.view page
-    , modal = Nothing
+    , modal = Maybe.map Modal.view modal
     }
