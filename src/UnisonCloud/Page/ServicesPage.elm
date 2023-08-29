@@ -212,6 +212,12 @@ amusing-giraffe/main> run examples.helloWorld.deploy"""
         |> Modal.content
         |> Modal.modal "get-started-modal" CloseModal
         |> Modal.withHeader "Get started with Unison Cloud services"
+        |> Modal.withLeftSideFooter
+            [ div []
+                [ text "Learn more in the "
+                , Link.view "Cloud Start project documentation." Link.cloudStartDocs
+                ]
+            ]
         |> Modal.withActions
             [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It"
                 |> Button.emphasized
@@ -355,7 +361,7 @@ view appContext model =
         modal =
             case model.modal of
                 NoModal ->
-                    Nothing
+                    Just viewGetStartedModal
 
                 GetStartedModal ->
                     Just viewGetStartedModal
