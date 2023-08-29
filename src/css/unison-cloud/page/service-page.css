@@ -17,3 +17,15 @@
   font-size: var(--font-size-medium);
   color: var(--u-color_text_subdued);
 }
+
+.service-page .assigned-service-deploys-page_deploys {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.service-page .assigned-service-deploys-page_deploy {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}

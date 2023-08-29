@@ -114,7 +114,7 @@ viewDeploy appContext serviceId deploy =
         byAt =
             ByAt.byAt deploy.deployedBy deploy.deployedAt
     in
-    div [ class "service-deploys-page_deploy" ]
+    div [ class "assigned-service-deploys-page_deploy" ]
         [ Link.view (ServiceHash.toShortString deploy.hash) (Link.serviceDeployForService serviceId deploy.hash)
         , ByAt.view appContext.timeZone appContext.now byAt
         ]
@@ -122,7 +122,8 @@ viewDeploy appContext serviceId deploy =
 
 viewDeploys : AppContext -> ServiceId -> List ServiceDeploySummary -> Html msg
 viewDeploys appContext serviceId deploys =
-    div [ class "service-deploys-page_deploys" ] (List.map (viewDeploy appContext serviceId) deploys)
+    div [ class "assigned-service-deploys-page_deploys" ]
+        (List.map (viewDeploy appContext serviceId) deploys)
 
 
 view : AppContext -> ServiceId -> Model -> PageContent Msg
