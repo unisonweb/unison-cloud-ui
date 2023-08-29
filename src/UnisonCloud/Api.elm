@@ -53,7 +53,7 @@ serviceLogs sName params =
     GET
         { path =
             [ "logs"
-            , "services"
+            , "service"
             , ServiceId.toString sName
             ]
         , queryParams = FetchLogParams.toQueryParams params
