@@ -361,7 +361,7 @@ view appContext model =
         modal =
             case model.modal of
                 NoModal ->
-                    Just viewGetStartedModal
+                    Nothing
 
                 GetStartedModal ->
                     Just viewGetStartedModal
