@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicesPage exposing (..)
 
-import Html exposing (Html, div, h1, h2, i, p, text)
+import Html exposing (Html, div, h1, h2, i, p, span, text)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
@@ -23,7 +23,6 @@ import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
 import UI.Placeholder as Placeholder
-import UI.StatusBanner as StatusBanner
 import UI.Tag as Tag
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
@@ -139,7 +138,7 @@ viewService appContext service =
             case service.latestDeploy of
                 Just d ->
                     Click.view [ class "latest-deploy" ]
-                        [ StatusBanner.good (ServiceHash.toShortString d.hash)
+                        [ div [ class "latest-deploy_active-hash" ] [ text (ServiceHash.toShortString d.hash) ]
                         , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
                         (Link.serviceDeployForService service.id d.hash)
@@ -158,6 +157,7 @@ viewService appContext service =
                     |> Tag.viewTags
     in
     Card.card [ h2 [] [ heading ], tags, latestDeploy ]
+        |> Card.withClassName "named-service"
         |> Card.asContained
         |> Card.view
 
@@ -166,14 +166,11 @@ viewUnassignedDeploys : AppContext -> Bool -> List ServiceDeploySummary -> Html 
 viewUnassignedDeploys appContext hasServices deploys =
     let
         viewUnassignedDeploy d =
-            Card.card
-                [ Click.view []
-                    [ h2 [] [ text (ServiceHash.toShortString d.hash) ] ]
-                    (Link.serviceDeploy d.hash)
+            Click.view [ class "unassigned-deploy-row" ]
+                [ span [ class "unassigned-deploy-row_hash" ] [ text (ServiceHash.toShortString d.hash) ]
                 , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
-                |> Card.asContained
-                |> Card.view
+                (Link.serviceDeploy d.hash)
 
         howToOrganizeBlurb =
             if hasServices then
@@ -188,10 +185,14 @@ viewUnassignedDeploys appContext hasServices deploys =
                 UI.nothing
     in
     div [ class "unassigned-deploys" ]
-        (div [ class "unassigned-deploys_header" ]
-            [ h1 [] [ text "Ad-hoc Service Deploys" ], howToOrganizeBlurb ]
-            :: List.map viewUnassignedDeploy deploys
-        )
+        [ div [ class "unassigned-deploys_header" ]
+            [ h1 [] [ text "Ad-hoc Service Deploys" ]
+            , howToOrganizeBlurb
+            ]
+        , Card.card (List.map viewUnassignedDeploy deploys)
+            |> Card.asContained
+            |> Card.view
+        ]
 
 
 viewGetStartedModal : Html Msg

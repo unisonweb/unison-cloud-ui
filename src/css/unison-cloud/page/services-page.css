@@ -12,11 +12,61 @@
   padding: 0.75rem 1rem;
 }
 
+.services-page .named-service h2 {
+  /* todo: font size */
+  font-size: 1.125rem;
+}
+
+.services-page .named-service h2 a {
+  color: var(--u-color_text);
+}
+
+.services-page .named-service h2 a:hover {
+  color: var(--u-color_interactive);
+}
+
+.services-page .latest-deploy {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.services-page .latest-deploy .latest-deploy_active-hash {
+  font-weight: bold;
+  font-size: var(--font-size-small);
+  color: var(--u-color_text_subdued);
+  transition: all 0.2s;
+}
+
+.services-page .latest-deploy:hover .latest-deploy_active-hash {
+  color: var(--u-color_interactive);
+}
+
+/* -- Unassigned deploys ---------------------------------------------------- */
+
 .services-page .unassigned-deploys {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   margin-top: 3rem;
+}
+
+.services-page .unassigned-deploys .unassigned-deploy-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.services-page .unassigned-deploys .unassigned-deploy-row_hash {
+  font-size: var(--font-size-medium);
+  width: 6rem;
+  font-weight: bold;
+  color: var(--u-color_text);
+}
+
+.services-page .unassigned-deploys .unassigned-deploy-row:hover .unassigned-deploy-row_hash {
+  color: var(--u-color_interactive);
 }
 
 .services-page .unassigned-deploys .unassigned-deploys_header {
@@ -32,17 +82,3 @@
   margin: 0;
 }
 
-.services-page .latest-deploy {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.services-page .latest-deploy .status-banner {
-  font-weight: bold;
-}
-
-.services-page .latest-deploy .status-banner.status-banner_good {
-  color: var(--u-color_positive_element);
-}
