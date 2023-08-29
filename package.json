@@ -13,6 +13,7 @@
     "test": "elm-test",
     "check": "elm-test; elm-review; ui-core-check-css; prettier --check .",
     "review": "elm-review",
+    "repl": "elm repl",
     "ui-core-check-css": "ui-core-check-css",
     "ui-core-install": "ui-core-install",
     "ui-core-update": "ui-core-update",

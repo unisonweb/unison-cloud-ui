@@ -281,7 +281,7 @@ toUrlString route =
                     ( [ "services", ServiceId.toString name ], [] )
 
                 Service name (Deploy hash) ->
-                    ( [ "services", ServiceId.toString name, "deploys", ServiceHash.toString hash ], [] )
+                    ( [ "services", ServiceId.toString name, "deploys", ServiceHash.toUrlString hash ], [] )
 
                 Service name Deploys ->
                     ( [ "services", ServiceId.toString name, "deploys" ], [] )
