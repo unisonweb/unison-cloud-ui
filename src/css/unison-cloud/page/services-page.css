@@ -65,7 +65,10 @@
   color: var(--u-color_text);
 }
 
-.services-page .unassigned-deploys .unassigned-deploy-row:hover .unassigned-deploy-row_hash {
+.services-page
+  .unassigned-deploys
+  .unassigned-deploy-row:hover
+  .unassigned-deploy-row_hash {
   color: var(--u-color_interactive);
 }
 
@@ -81,4 +84,3 @@
   gap: 0.5rem;
   margin: 0;
 }
-
