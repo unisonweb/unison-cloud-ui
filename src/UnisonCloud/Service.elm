@@ -4,6 +4,7 @@ import Json.Decode as Decode exposing (string)
 import Json.Decode.Pipeline exposing (optional, required)
 import Lib.UserHandle as UserHandle
 import Set exposing (Set)
+import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
@@ -25,19 +26,22 @@ isExposed serv =
         |> Maybe.withDefault False
 
 
-exposedUrl : Service -> Maybe Url
-exposedUrl serv =
+exposedUrl : AppContext -> Service -> Maybe Url
+exposedUrl appContext serv =
     let
+        makeUrl d =
+            Url.fromString
+                ("https://"
+                    ++ UserHandle.toUnprefixedString d.deployedBy.handle
+                    ++ "."
+                    ++ appContext.exposedServiceDomain
+                    ++ "/s/"
+                    ++ ServiceName.toString serv.name
+                )
+
         withDeploy d =
             if ServiceDeploy.isExposed d then
-                [ ServiceName.toString serv.name
-                , UserHandle.toUnprefixedString d.deployedBy.handle
-                , "services"
-                , "unison"
-                , "cloud"
-                ]
-                    |> String.join "."
-                    |> Url.fromString
+                makeUrl d
 
             else
                 Nothing

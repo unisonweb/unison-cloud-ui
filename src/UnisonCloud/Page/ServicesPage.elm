@@ -17,6 +17,7 @@ import UI.DateTime as DateTime
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
 import UI.ErrorCard as ErrorCard
+import UI.ExternalLinkIcon as ExternalLinkIcon
 import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.PageContent as PageContent
@@ -33,6 +34,7 @@ import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash
+import Url
 
 
 
@@ -134,6 +136,15 @@ viewService appContext service =
         heading =
             Link.view (ServiceName.toString service.name) (Link.service service.id)
 
+        exposedLink =
+            case Service.exposedUrl appContext service of
+                Just url ->
+                    ExternalLinkIcon.view
+                        (Click.externalHref (Url.toString url))
+
+                Nothing ->
+                    UI.nothing
+
         latestDeploy =
             case service.latestDeploy of
                 Just d ->
@@ -156,7 +167,7 @@ viewService appContext service =
                     |> List.map Tag.tag
                     |> Tag.viewTags
     in
-    Card.card [ h2 [] [ heading ], tags, latestDeploy ]
+    Card.card [ h2 [] [ heading, exposedLink ], tags, latestDeploy ]
         |> Card.withClassName "named-service"
         |> Card.asContained
         |> Card.view
@@ -165,9 +176,21 @@ viewService appContext service =
 viewUnassignedDeploys : AppContext -> Bool -> List ServiceDeploySummary -> Html Msg
 viewUnassignedDeploys appContext hasServices deploys =
     let
+        exposedLink d =
+            case ServiceDeploy.exposedUrl appContext d of
+                Just url ->
+                    ExternalLinkIcon.view
+                        (Click.externalHref (Url.toString url))
+
+                Nothing ->
+                    UI.nothing
+
         viewUnassignedDeploy d =
             Click.view [ class "unassigned-deploy-row" ]
-                [ span [ class "unassigned-deploy-row_hash" ] [ text (ServiceHash.toShortString d.hash) ]
+                [ span [ class "unassigned-deploy-row_hash" ]
+                    [ text (ServiceHash.toShortString d.hash)
+                    , exposedLink d
+                    ]
                 , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
                 (Link.serviceDeploy d.hash)

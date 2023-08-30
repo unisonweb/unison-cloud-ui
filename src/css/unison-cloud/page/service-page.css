@@ -8,7 +8,7 @@
   margin-bottom: 0;
 }
 
-.service-page .service_description {
+.service-page .service-description {
   margin-top: 0.75rem;
   display: flex;
   flex-direction: row;
@@ -16,7 +16,11 @@
   gap: 0.5rem;
   font-size: var(--font-size-medium);
   color: var(--u-color_text_subdued);
-  height: 1.25rem;
+  height: 1.5rem;
+}
+
+.service-page .service-description_hash {
+  font-family: var(--font-monospace);
 }
 
 .service-page .assigned-service-deploys-page_deploys {

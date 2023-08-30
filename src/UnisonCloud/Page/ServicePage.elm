@@ -175,7 +175,7 @@ viewError _ =
 
 viewDescription : List (Html msg) -> Html msg
 viewDescription content =
-    div [ class "service_description" ]
+    div [ class "service-description" ]
         content
 
 
@@ -222,7 +222,7 @@ view appContext serviceId model =
                         latestDeploy =
                             case service.latestDeploy of
                                 Just deploy ->
-                                    [ text (ServiceHash.toShortString deploy.hash)
+                                    [ div [ class "service-description_hash" ] [ text (ServiceHash.toShortString deploy.hash) ]
                                     , ByAt.byAt deploy.deployedBy deploy.deployedAt
                                         |> ByAt.view appContext.timeZone appContext.now
                                     ]

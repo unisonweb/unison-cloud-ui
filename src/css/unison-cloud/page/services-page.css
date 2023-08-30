@@ -15,6 +15,10 @@
 .services-page .named-service h2 {
   /* todo: font size */
   font-size: 1.125rem;
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .services-page .named-service h2 a {
@@ -37,6 +41,7 @@
   font-size: var(--font-size-small);
   color: var(--u-color_text_subdued);
   transition: all 0.2s;
+  font-family: var(--font-monospace);
 }
 
 .services-page .latest-deploy:hover .latest-deploy_active-hash {
@@ -55,14 +60,18 @@
 .services-page .unassigned-deploys .unassigned-deploy-row {
   display: flex;
   flex-direction: row;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .services-page .unassigned-deploys .unassigned-deploy-row_hash {
   font-size: var(--font-size-medium);
-  width: 6rem;
   font-weight: bold;
   color: var(--u-color_text);
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  align-items: center;
+  font-family: var(--font-monospace);
 }
 
 .services-page

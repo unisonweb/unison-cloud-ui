@@ -14,6 +14,7 @@ type alias AppContext =
     , basePath : String
     , api : HttpApi
     , websiteApi : HttpApi
+    , exposedServiceDomain : String
     , navKey : Nav.Key
     , now : DateTime
     , timeZone : Time.Zone
@@ -41,6 +42,7 @@ init flags navKey now timeZone session =
     , basePath = flags.basePath
     , api = api
     , websiteApi = HttpApi.httpApi False flags.websiteUrl Nothing
+    , exposedServiceDomain = "unison-services.cloud"
     , navKey = navKey
     , now = now
     , timeZone = timeZone

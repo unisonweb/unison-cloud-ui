@@ -113,6 +113,12 @@ logout =
     Click.externalHref "https://api.unison.cloud/logout"
 
 
+exposedService : Click msg
+exposedService =
+    -- TODO: Use Env.apiUrl
+    Click.externalHref "https://api.unison.cloud/logout"
+
+
 
 -- INTERNAL URLS
 

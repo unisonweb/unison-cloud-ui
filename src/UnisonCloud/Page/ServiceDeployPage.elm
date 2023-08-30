@@ -5,9 +5,12 @@ import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
+import UI
 import UI.ByAt as ByAt
 import UI.Card as Card
+import UI.Click as Click
 import UI.ErrorCard as ErrorCard
+import UI.ExternalLinkIcon as ExternalLinkIcon
 import UI.Modal as Modal
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
@@ -22,6 +25,7 @@ import UnisonCloud.Link as Link
 import UnisonCloud.Log as Log
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
+import Url
 
 
 
@@ -102,10 +106,38 @@ viewError _ =
         |> Card.view
 
 
-viewDescription : ServiceHash -> List (Html msg) -> Html msg
-viewDescription serviceHash content =
+viewDescription : AppContext -> ServiceDeploySummary -> List (Html msg) -> Html msg
+viewDescription appContext deploy content =
+    let
+        hash =
+            ServiceHash.toShortString deploy.hash
+
+        exposedLink =
+            case ServiceDeploy.exposedUrl appContext deploy of
+                Just u ->
+                    ExternalLinkIcon.view (Click.externalHref (Url.toString u))
+
+                Nothing ->
+                    UI.nothing
+    in
     div [ class "service-deploy_description" ]
-        (text (ServiceHash.toShortString serviceHash) :: content)
+        (div [ class "service-deploy_description_hash" ]
+            [ text hash, exposedLink ]
+            :: content
+        )
+
+
+viewSimpleDescription : ServiceHash -> List (Html msg) -> Html msg
+viewSimpleDescription serviceHash content =
+    let
+        hash =
+            ServiceHash.toShortString serviceHash
+    in
+    div [ class "service-deploy_description" ]
+        (div [ class "service-deploy_description_hash" ]
+            [ text hash ]
+            :: content
+        )
 
 
 view : AppContext -> ServiceHash -> Model -> AppDocument Msg
@@ -113,7 +145,7 @@ view appContext sh model =
     let
         loading_ =
             ( [ viewLoading ]
-            , viewDescription sh [ Placeholder.view Placeholder.text ]
+            , viewSimpleDescription sh [ Placeholder.view Placeholder.text ]
             , Nothing
             )
 
@@ -134,14 +166,15 @@ view appContext sh model =
                             ByAt.byAt deploy.deployedBy deploy.deployedAt
                     in
                     ( [ Html.map LogMsg log ]
-                    , viewDescription sh
+                    , viewDescription appContext
+                        deploy
                         [ ByAt.view appContext.timeZone appContext.now byAt
                         ]
                     , Maybe.map (Modal.map LogMsg) logModal
                     )
 
                 Failure e ->
-                    ( [ viewError e ], viewDescription sh [], Nothing )
+                    ( [ viewError e ], viewSimpleDescription sh [], Nothing )
 
         pageTitle =
             PageTitle.title "Service Deploy"
