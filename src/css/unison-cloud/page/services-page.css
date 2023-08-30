@@ -72,6 +72,7 @@
   gap: 0.25rem;
   align-items: center;
   font-family: var(--font-monospace);
+  width: 7rem;
 }
 
 .services-page
