@@ -50,6 +50,16 @@
 .service-page
   .assigned-service-deploys-page_deploy
   .assigned-service-deploy_hash {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  align-items: center;
+  width: 7rem;
+}
+
+.service-page
+  .assigned-service-deploys-page_deploy
+  .assigned-service-deploy_hash a {
   font-family: var(--font-monospace);
   color: var(--u-color_text);
   font-size: var(--font-size-medium);
@@ -58,6 +68,6 @@
 
 .service-page
   .assigned-service-deploys-page_deploy
-  .assigned-service-deploy_hash:hover {
+  .assigned-service-deploy_hash a:hover {
   color: var(--u-color_interactive);
 }

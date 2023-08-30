@@ -78,6 +78,10 @@
   color: var(--u-color_text);
 }
 
+.services-page .unassigned-deploys .unassigned-deploy-row_hash a:hover {
+  color: var(--u-color_interactive);
+}
+
 .services-page
   .unassigned-deploys
   .unassigned-deploy-row:hover

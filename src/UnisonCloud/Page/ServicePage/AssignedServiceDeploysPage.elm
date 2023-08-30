@@ -7,11 +7,13 @@ import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
+import UI
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.Click as Click
 import UI.DateTime as DateTime
 import UI.ErrorCard as ErrorCard
+import UI.ExternalLinkIcon as ExternalLinkIcon
 import UI.PageContent as PageContent exposing (PageContent)
 import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
@@ -20,6 +22,7 @@ import UnisonCloud.Link as Link
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash
+import Url
 
 
 
@@ -112,11 +115,25 @@ viewError _ =
 viewDeploy : AppContext -> ServiceId -> ServiceDeploySummary -> Html msg
 viewDeploy appContext serviceId deploy =
     let
+        exposedLink =
+            case ServiceDeploy.exposedUrl appContext deploy of
+                Just url ->
+                    ExternalLinkIcon.view
+                        (Click.externalHref (Url.toString url))
+
+                Nothing ->
+                    UI.nothing
+
         byAt =
             ByAt.byAt deploy.deployedBy deploy.deployedAt
     in
     div [ class "assigned-service-deploys-page_deploy" ]
-        [ Click.view [ class "assigned-service-deploy_hash" ] [ text (ServiceHash.toShortString deploy.hash) ] (Link.serviceDeployForService serviceId deploy.hash)
+        [ div [ class "assigned-service-deploy_hash" ]
+            [ Click.view []
+                [ text (ServiceHash.toShortString deploy.hash) ]
+                (Link.serviceDeployForService serviceId deploy.hash)
+            , exposedLink
+            ]
         , ByAt.view appContext.timeZone appContext.now byAt
         ]
 
