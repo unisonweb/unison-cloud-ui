@@ -52,6 +52,8 @@
   .assigned-service-deploy_hash {
   font-family: var(--font-monospace);
   color: var(--u-color_text);
+  font-size: var(--font-size-medium);
+  font-weight: bold;
 }
 
 .service-page
