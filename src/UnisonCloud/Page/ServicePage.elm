@@ -260,14 +260,20 @@ view appContext serviceId model =
 
                         Deploy hash deploy ->
                             let
-                                ( content_, desc, deployModal ) =
+                                deploy_ =
                                     AssignedServiceDeployPage.view appContext serviceId hash deploy
+
+                                exposedDeployLink =
+                                    deploy_.exposedUrl
+                                        |> Maybe.map Url.toString
+                                        |> Maybe.map Click.externalHref
+                                        |> Maybe.map ExternalLinkIcon.view
                             in
-                            { content = PageContent.map AssignedServiceDeployPageMsg content_
+                            { content = PageContent.map AssignedServiceDeployPageMsg deploy_.content
                             , serviceTitle = ServiceName.toString service.name ++ " > " ++ ServiceHash.toShortString hash
-                            , description = desc
-                            , exposedLink = exposedLink_
-                            , modal = Maybe.map (Modal.map AssignedServiceDeployPageMsg) deployModal
+                            , description = deploy_.description
+                            , exposedLink = exposedDeployLink
+                            , modal = Maybe.map (Modal.map AssignedServiceDeployPageMsg) deploy_.modal
                             }
 
                         Deploys deploys ->
