@@ -21,6 +21,10 @@
 
 .service-page .service-description_hash {
   font-family: var(--font-monospace);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .service-page .assigned-service-deploys-page_deploys {
