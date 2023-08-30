@@ -66,13 +66,16 @@
 .services-page .unassigned-deploys .unassigned-deploy-row_hash {
   font-size: var(--font-size-medium);
   font-weight: bold;
-  color: var(--u-color_text);
   display: flex;
   flex-direction: row;
   gap: 0.25rem;
   align-items: center;
   font-family: var(--font-monospace);
   width: 7rem;
+}
+
+.services-page .unassigned-deploys .unassigned-deploy-row_hash a {
+  color: var(--u-color_text);
 }
 
 .services-page

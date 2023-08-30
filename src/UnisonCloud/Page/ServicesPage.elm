@@ -186,9 +186,9 @@ viewUnassignedDeploys appContext hasServices deploys =
                     UI.nothing
 
         viewUnassignedDeploy d =
-            div []
+            div [ class "unassigned-deploy-row" ]
                 [ span [ class "unassigned-deploy-row_hash" ]
-                    [ Click.view [ class "unassigned-deploy-row" ]
+                    [ Click.view []
                         [ text (ServiceHash.toShortString d.hash)
                         ]
                         (Link.serviceDeploy d.hash)
