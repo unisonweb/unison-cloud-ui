@@ -99,7 +99,7 @@ viewError _ =
 
 viewDescription : List (Html msg) -> Html msg
 viewDescription content =
-    div [ class "service_description" ] content
+    div [ class "service-description" ] content
 
 
 view :

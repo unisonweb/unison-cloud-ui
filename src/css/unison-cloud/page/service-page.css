@@ -46,3 +46,16 @@
   gap: 0.5rem;
   align-items: center;
 }
+
+.service-page
+  .assigned-service-deploys-page_deploy
+  .assigned-service-deploy_hash {
+  font-family: var(--font-monospace);
+  color: var(--u-color_text);
+}
+
+.service-page
+  .assigned-service-deploys-page_deploy
+  .assigned-service-deploy_hash:hover {
+  color: var(--u-color_interactive);
+}

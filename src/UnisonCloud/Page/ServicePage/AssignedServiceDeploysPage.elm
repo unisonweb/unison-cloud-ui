@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicePage.AssignedServiceDeploysPage exposing (..)
 
-import Html exposing (Html, div)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
@@ -9,6 +9,7 @@ import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import UI.ByAt as ByAt
 import UI.Card as Card
+import UI.Click as Click
 import UI.DateTime as DateTime
 import UI.ErrorCard as ErrorCard
 import UI.PageContent as PageContent exposing (PageContent)
@@ -115,7 +116,7 @@ viewDeploy appContext serviceId deploy =
             ByAt.byAt deploy.deployedBy deploy.deployedAt
     in
     div [ class "assigned-service-deploys-page_deploy" ]
-        [ Link.view (ServiceHash.toShortString deploy.hash) (Link.serviceDeployForService serviceId deploy.hash)
+        [ Click.view [ class "assigned-service-deploy_hash" ] [ text (ServiceHash.toShortString deploy.hash) ] (Link.serviceDeployForService serviceId deploy.hash)
         , ByAt.view appContext.timeZone appContext.now byAt
         ]
 
