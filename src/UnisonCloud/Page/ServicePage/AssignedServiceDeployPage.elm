@@ -16,6 +16,7 @@ import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
 import UnisonCloud.Service exposing (Service)
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
@@ -31,7 +32,7 @@ type alias Model =
     }
 
 
-init : AppContext -> ServiceId -> ServiceHash -> ( Model, Cmd Msg )
+init : AppContext -> ServiceName -> ServiceHash -> ( Model, Cmd Msg )
 init appContext _ serviceHash =
     let
         ( log, logCmd ) =
@@ -51,7 +52,7 @@ type Msg
     | LogMsg Log.Msg
 
 
-update : AppContext -> ServiceId -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
+update : AppContext -> ServiceName -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
 update appContext _ serviceHash msg model =
     case msg of
         FetchServiceDeployFinished deploy ->

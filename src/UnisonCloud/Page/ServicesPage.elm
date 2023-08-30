@@ -192,7 +192,7 @@ viewService : AppContext -> Service -> Html msg
 viewService appContext service =
     let
         heading =
-            Link.view (ServiceName.toString service.name) (Link.service service.id)
+            Link.view (ServiceName.toString service.name) (Link.service service.name)
 
         exposedLink =
             case Service.exposedUrl appContext service of
@@ -210,7 +210,7 @@ viewService appContext service =
                         [ div [ class "active-deploy_active-hash" ] [ text (ServiceHash.toShortString d.hash) ]
                         , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
-                        (Link.serviceDeployForService service.id d.hash)
+                        (Link.serviceDeployForService service.name d.hash)
 
                 Nothing ->
                     div [ class "no-deploys-yet" ] [ text "🐣 No deploys yet" ]

@@ -27,8 +27,7 @@ import UnisonCloud.Page.ServicePage.AssignedServiceDeploysPage as AssignedServic
 import UnisonCloud.Page.ServicePage.ServiceActivityPage as ServiceActivityPage
 import UnisonCloud.Route as Route exposing (ServiceRoute)
 import UnisonCloud.Service as Service exposing (Service)
-import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
-import UnisonCloud.Service.ServiceName as ServiceName
+import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url
 
@@ -49,34 +48,34 @@ type alias Model =
     }
 
 
-init : AppContext -> ServiceId -> ServiceRoute -> ( Model, Cmd Msg )
-init appContext serviceId serviceRoute =
+init : AppContext -> ServiceName -> ServiceRoute -> ( Model, Cmd Msg )
+init appContext serviceName serviceRoute =
     let
         ( subPage, subPageCmd ) =
             case serviceRoute of
                 Route.Activity ->
                     let
                         ( activity, activityCmd ) =
-                            ServiceActivityPage.init appContext serviceId
+                            ServiceActivityPage.init appContext serviceName
                     in
                     ( Activity activity, Cmd.map ServiceActivityPageMsg activityCmd )
 
                 Route.Deploy hash ->
                     let
                         ( deploy, deployCmd ) =
-                            AssignedServiceDeployPage.init appContext serviceId hash
+                            AssignedServiceDeployPage.init appContext serviceName hash
                     in
                     ( Deploy hash deploy, Cmd.map AssignedServiceDeployPageMsg deployCmd )
 
                 Route.Deploys ->
                     let
                         ( deploys, deploysCmd ) =
-                            AssignedServiceDeploysPage.init appContext serviceId
+                            AssignedServiceDeploysPage.init appContext serviceName
                     in
                     ( Deploys deploys, Cmd.map AssignedServiceDeploysPageMsg deploysCmd )
     in
     ( { service = Loading, subPage = subPage }
-    , Cmd.batch [ fetchService appContext serviceId, subPageCmd ]
+    , Cmd.batch [ fetchService appContext serviceName, subPageCmd ]
     )
 
 
@@ -91,8 +90,8 @@ type Msg
     | AssignedServiceDeploysPageMsg AssignedServiceDeploysPage.Msg
 
 
-update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
-update appContext serviceId msg model =
+update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
+update appContext serviceName msg model =
     case ( msg, model.subPage ) of
         ( FetchServiceFinished service, _ ) ->
             ( { model | service = service }, Cmd.none )
@@ -101,7 +100,7 @@ update appContext serviceId msg model =
             let
                 ( activity_, activityCmd ) =
                     ServiceActivityPage.update appContext
-                        serviceId
+                        serviceName
                         activityMsg
                         activity
             in
@@ -113,7 +112,7 @@ update appContext serviceId msg model =
             let
                 ( deploy_, deployCmd ) =
                     AssignedServiceDeployPage.update appContext
-                        serviceId
+                        serviceName
                         serviceHash
                         deployMsg
                         deploy
@@ -126,7 +125,7 @@ update appContext serviceId msg model =
             let
                 ( deploys_, deploysCmd ) =
                     AssignedServiceDeploysPage.update appContext
-                        serviceId
+                        serviceName
                         deploysMsg
                         deploys
             in
@@ -142,9 +141,9 @@ update appContext serviceId msg model =
 -- EFFECTS
 
 
-fetchService : AppContext -> ServiceId -> Cmd Msg
-fetchService appContext serviceId =
-    CloudApi.service serviceId
+fetchService : AppContext -> ServiceName -> Cmd Msg
+fetchService appContext serviceName =
+    CloudApi.service appContext.session.handle serviceName
         |> HttpApi.toRequest
             Service.decode
             (RemoteData.fromResult >> FetchServiceFinished)
@@ -183,8 +182,8 @@ viewDescription content =
         content
 
 
-view : AppContext -> ServiceId -> Model -> AppDocument Msg
-view appContext serviceId model =
+view : AppContext -> ServiceName -> Model -> AppDocument Msg
+view appContext serviceName model =
     let
         loading_ =
             { content = PageContent.oneColumn [ viewLoading model.subPage ]
@@ -199,24 +198,24 @@ view appContext serviceId model =
                 Activity _ ->
                     TabList.tabList
                         []
-                        (TabList.tab "Activity" (Link.serviceActivity serviceId))
-                        [ TabList.tab "Deploys" (Link.serviceDeploysForService serviceId) ]
+                        (TabList.tab "Activity" (Link.serviceActivity serviceName))
+                        [ TabList.tab "Deploys" (Link.serviceDeploysForService serviceName) ]
 
                 Deploy serviceHash _ ->
                     TabList.tabList
-                        [ TabList.tab "Activity" (Link.serviceActivity serviceId)
-                        , TabList.tab "Deploys" (Link.serviceDeploysForService serviceId)
+                        [ TabList.tab "Activity" (Link.serviceActivity serviceName)
+                        , TabList.tab "Deploys" (Link.serviceDeploysForService serviceName)
                         ]
                         (TabList.tab
                             ("Deploy " ++ ServiceHash.toShortString serviceHash)
-                            (Link.serviceDeployForService serviceId serviceHash)
+                            (Link.serviceDeployForService serviceName serviceHash)
                         )
                         []
 
                 Deploys _ ->
                     TabList.tabList
-                        [ TabList.tab "Activity" (Link.serviceActivity serviceId) ]
-                        (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
+                        [ TabList.tab "Activity" (Link.serviceActivity serviceName) ]
+                        (TabList.tab "Deploys" (Link.serviceDeploysForService serviceName))
                         []
 
         { content, serviceTitle, description, exposedLink, modal } =
@@ -254,7 +253,7 @@ view appContext serviceId model =
                         Activity activity ->
                             let
                                 ( serviceActivityPage, activityModal ) =
-                                    ServiceActivityPage.view appContext serviceId activity
+                                    ServiceActivityPage.view appContext serviceName activity
                             in
                             { content = PageContent.map ServiceActivityPageMsg serviceActivityPage
                             , serviceTitle = ServiceName.toString service.name
@@ -293,7 +292,7 @@ view appContext serviceId model =
 
                 Failure e ->
                     { content = PageContent.oneColumn [ viewError e ]
-                    , serviceTitle = "Service: " ++ ServiceId.toString serviceId
+                    , serviceTitle = "Service: " ++ ServiceName.toString serviceName
                     , description = viewDescription []
                     , exposedLink = Nothing
                     , modal = Nothing

@@ -29,7 +29,7 @@ import Code.HashQualified exposing (HashQualified(..))
 import Code.UrlParsers exposing (b, s, slash)
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import UnisonCloud.AppError as AppError exposing (AppError)
-import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url exposing (Url)
 import Url.Builder exposing (relative, string)
@@ -38,7 +38,7 @@ import Url.Builder exposing (relative, string)
 type Route
     = Overview
     | Services
-    | Service ServiceId ServiceRoute
+    | Service ServiceName ServiceRoute
     | ServiceDeploy ServiceHash
     | Error AppError
     | NotFound String
@@ -67,24 +67,24 @@ services =
     Services
 
 
-service : ServiceId -> Route
+service : ServiceName -> Route
 service =
     serviceActivity
 
 
-serviceActivity : ServiceId -> Route
-serviceActivity sid =
-    Service sid Activity
+serviceActivity : ServiceName -> Route
+serviceActivity serviceName =
+    Service serviceName Activity
 
 
-serviceDeploysForService : ServiceId -> Route
-serviceDeploysForService sid =
-    Service sid Deploys
+serviceDeploysForService : ServiceName -> Route
+serviceDeploysForService serviceName =
+    Service serviceName Deploys
 
 
-serviceDeployForService : ServiceId -> ServiceHash -> Route
-serviceDeployForService sid sh =
-    Service sid (Deploy sh)
+serviceDeployForService : ServiceName -> ServiceHash -> Route
+serviceDeployForService serviceName sh =
+    Service serviceName (Deploy sh)
 
 
 serviceDeploy : ServiceHash -> Route
@@ -119,8 +119,8 @@ servicesParser =
     succeed Services |. slash |. s "services" |. end
 
 
-serviceIdParser : Parser ServiceId
-serviceIdParser =
+serviceNameParser : Parser ServiceName
+serviceNameParser =
     let
         parseMaybe mid =
             case mid of
@@ -128,11 +128,11 @@ serviceIdParser =
                     Parser.succeed s_
 
                 Nothing ->
-                    Parser.problem "Invalid ServiceId"
+                    Parser.problem "Invalid ServiceName"
     in
     Parser.chompUntilEndOr "/"
         |> Parser.getChompedString
-        |> Parser.map ServiceId.fromString
+        |> Parser.map ServiceName.fromString
         |> Parser.andThen parseMaybe
 
 
@@ -146,9 +146,9 @@ serviceParser =
             Service id (Deploy hash)
     in
     oneOf
-        [ b (succeed (makeService Activity) |. slash |. s "services" |. slash |= serviceIdParser |. end)
-        , b (succeed makeDeploy |. slash |. s "services" |. slash |= serviceIdParser |. slash |. s "deploys" |. slash |= serviceHashParser |. end)
-        , b (succeed (makeService Deploys) |. slash |. s "services" |. slash |= serviceIdParser |. slash |. s "deploys" |. end)
+        [ b (succeed (makeService Activity) |. slash |. s "services" |. slash |= serviceNameParser |. end)
+        , b (succeed makeDeploy |. slash |. s "services" |. slash |= serviceNameParser |. slash |. s "deploys" |. slash |= serviceHashParser |. end)
+        , b (succeed (makeService Deploys) |. slash |. s "services" |. slash |= serviceNameParser |. slash |. s "deploys" |. end)
         ]
 
 
@@ -278,13 +278,13 @@ toUrlString route =
                     ( [ "services" ], [] )
 
                 Service name Activity ->
-                    ( [ "services", ServiceId.toString name ], [] )
+                    ( [ "services", ServiceName.toString name ], [] )
 
                 Service name (Deploy hash) ->
-                    ( [ "services", ServiceId.toString name, "deploys", ServiceHash.toUrlString hash ], [] )
+                    ( [ "services", ServiceName.toString name, "deploys", ServiceHash.toUrlString hash ], [] )
 
                 Service name Deploys ->
-                    ( [ "services", ServiceId.toString name, "deploys" ], [] )
+                    ( [ "services", ServiceName.toString name, "deploys" ], [] )
 
                 ServiceDeploy sh ->
                     ( [ "service-deploys", ServiceHash.toUrlString sh ], [] )

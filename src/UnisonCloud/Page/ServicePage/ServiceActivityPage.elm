@@ -5,7 +5,7 @@ import UI.Modal as Modal
 import UI.PageContent as PageContent exposing (PageContent)
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
-import UnisonCloud.Service.ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName exposing (ServiceName)
 
 
 
@@ -17,11 +17,11 @@ type alias Model =
     }
 
 
-init : AppContext -> ServiceId -> ( Model, Cmd Msg )
-init appContext serviceId =
+init : AppContext -> ServiceName -> ( Model, Cmd Msg )
+init appContext serviceName =
     let
         ( log, logCmd ) =
-            Log.init appContext (Log.ServiceContext serviceId)
+            Log.init appContext (Log.ServiceContext serviceName)
     in
     ( { log = log }
     , Cmd.map LogMsg logCmd
@@ -36,14 +36,14 @@ type Msg
     = LogMsg Log.Msg
 
 
-update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
-update appContext serviceId msg model =
+update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
+update appContext serviceName msg model =
     case msg of
         LogMsg logMsg ->
             let
                 ( log, logCmd ) =
                     Log.update appContext
-                        (Log.ServiceContext serviceId)
+                        (Log.ServiceContext serviceName)
                         logMsg
                         model.log
             in
@@ -59,7 +59,7 @@ viewLoading =
     Log.viewLoading
 
 
-view : AppContext -> ServiceId -> Model -> ( PageContent Msg, Maybe (Modal.Modal Msg) )
+view : AppContext -> ServiceName -> Model -> ( PageContent Msg, Maybe (Modal.Modal Msg) )
 view appContext _ model =
     let
         ( log, modal ) =

@@ -13,7 +13,7 @@ import UnisonCloud.Page.ServiceDeployPage as ServiceDeployPage
 import UnisonCloud.Page.ServicePage as ServicePage
 import UnisonCloud.Page.ServicesPage as ServicesPage
 import UnisonCloud.Route as Route exposing (Route)
-import UnisonCloud.Service.ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 import UnisonCloud.SupportChatWidget as SupportChatWidget
 import Url exposing (Url)
@@ -26,7 +26,7 @@ import Url exposing (Url)
 type Page
     = Overview
     | Services ServicesPage.Model
-    | Service ServiceId ServicePage.Model
+    | Service ServiceName ServicePage.Model
     | ServiceDeploy ServiceHash ServiceDeployPage.Model
     | Error AppError
     | NotFound
@@ -134,12 +134,12 @@ update msg model =
                             in
                             ( { model | page = Services services }, Cmd.map ServicesPageMsg servicesCmd )
 
-                        Route.Service serviceId serviceRoute ->
+                        Route.Service serviceName serviceRoute ->
                             let
                                 ( service, serviceCmd ) =
-                                    ServicePage.init model.appContext serviceId serviceRoute
+                                    ServicePage.init model.appContext serviceName serviceRoute
                             in
-                            ( { model | page = Service serviceId service }, Cmd.map ServicePageMsg serviceCmd )
+                            ( { model | page = Service serviceName service }, Cmd.map ServicePageMsg serviceCmd )
 
                         Route.ServiceDeploy serviceHash ->
                             let
@@ -185,12 +185,12 @@ update msg model =
             in
             ( { model | page = Services services_ }, Cmd.map ServicesPageMsg servicesCmd )
 
-        ( Service serviceId service, ServicePageMsg spMsg ) ->
+        ( Service serviceName service, ServicePageMsg spMsg ) ->
             let
                 ( service_, serviceCmd ) =
-                    ServicePage.update model.appContext serviceId spMsg service
+                    ServicePage.update model.appContext serviceName spMsg service
             in
-            ( { model | page = Service serviceId service_ }, Cmd.map ServicePageMsg serviceCmd )
+            ( { model | page = Service serviceName service_ }, Cmd.map ServicePageMsg serviceCmd )
 
         ( ServiceDeploy sh serviceDeploy, ServiceDeployPageMsg spMsg ) ->
             let
@@ -239,10 +239,10 @@ view model =
                         ServicesPageMsg
                         (ServicesPage.view appContext services)
 
-                Service serviceId service ->
+                Service serviceName service ->
                     AppDocument.map
                         ServicePageMsg
-                        (ServicePage.view appContext serviceId service)
+                        (ServicePage.view appContext serviceName service)
 
                 ServiceDeploy serviceHash service ->
                     AppDocument.map
