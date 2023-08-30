@@ -186,14 +186,16 @@ viewUnassignedDeploys appContext hasServices deploys =
                     UI.nothing
 
         viewUnassignedDeploy d =
-            Click.view [ class "unassigned-deploy-row" ]
+            div []
                 [ span [ class "unassigned-deploy-row_hash" ]
-                    [ text (ServiceHash.toShortString d.hash)
+                    [ Click.view [ class "unassigned-deploy-row" ]
+                        [ text (ServiceHash.toShortString d.hash)
+                        ]
+                        (Link.serviceDeploy d.hash)
                     , exposedLink d
                     ]
                 , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                 ]
-                (Link.serviceDeploy d.hash)
 
         howToOrganizeBlurb =
             if hasServices then
