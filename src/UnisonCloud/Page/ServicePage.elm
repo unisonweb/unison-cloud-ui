@@ -1,13 +1,16 @@
 module UnisonCloud.Page.ServicePage exposing (..)
 
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
+import UI
 import UI.ByAt as ByAt
 import UI.Card as Card
+import UI.Click as Click
 import UI.ErrorCard as ErrorCard
+import UI.ExternalLinkIcon as ExternalLinkIcon
 import UI.Modal as Modal
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
@@ -27,6 +30,7 @@ import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
+import Url
 
 
 
@@ -186,6 +190,7 @@ view appContext serviceId model =
             { content = PageContent.oneColumn [ viewLoading model.subPage ]
             , serviceTitle = "Service Loading..."
             , description = viewDescription [ Placeholder.view Placeholder.text ]
+            , exposedLink = Nothing
             , modal = Nothing
             }
 
@@ -209,7 +214,7 @@ view appContext serviceId model =
                         (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
                         []
 
-        { content, serviceTitle, description, modal } =
+        { content, serviceTitle, description, exposedLink, modal } =
             case model.service of
                 NotAsked ->
                     loading_
@@ -230,6 +235,13 @@ view appContext serviceId model =
                                 Nothing ->
                                     []
 
+                        exposedLink_ =
+                            service
+                                |> Service.exposedUrl appContext
+                                |> Maybe.map Url.toString
+                                |> Maybe.map Click.externalHref
+                                |> Maybe.map ExternalLinkIcon.view
+
                         description_ =
                             viewDescription latestDeploy
                     in
@@ -242,6 +254,7 @@ view appContext serviceId model =
                             { content = PageContent.map ServiceActivityPageMsg serviceActivityPage
                             , serviceTitle = ServiceName.toString service.name
                             , description = description_
+                            , exposedLink = exposedLink_
                             , modal = Maybe.map (Modal.map ServiceActivityPageMsg) activityModal
                             }
 
@@ -253,6 +266,7 @@ view appContext serviceId model =
                             { content = PageContent.map AssignedServiceDeployPageMsg content_
                             , serviceTitle = ServiceName.toString service.name ++ " > " ++ ServiceHash.toShortString hash
                             , description = desc
+                            , exposedLink = exposedLink_
                             , modal = Maybe.map (Modal.map AssignedServiceDeployPageMsg) deployModal
                             }
 
@@ -262,6 +276,7 @@ view appContext serviceId model =
                                     (AssignedServiceDeploysPage.view appContext serviceId deploys)
                             , serviceTitle = ServiceName.toString service.name
                             , description = description_
+                            , exposedLink = exposedLink_
                             , modal = Nothing
                             }
 
@@ -269,12 +284,18 @@ view appContext serviceId model =
                     { content = PageContent.oneColumn [ viewError e ]
                     , serviceTitle = "Service: " ++ ServiceId.toString serviceId
                     , description = viewDescription []
+                    , exposedLink = Nothing
                     , modal = Nothing
                     }
 
         pageTitle =
-            PageTitle.title serviceTitle
-                |> PageTitle.withDescription_ description
+            PageTitle.custom
+                [ h1 []
+                    [ text serviceTitle
+                    , Maybe.withDefault UI.nothing exposedLink
+                    ]
+                , p [ class "description" ] [ description ]
+                ]
 
         page =
             PageLayout.tabbedLayout
@@ -284,7 +305,7 @@ view appContext serviceId model =
                 (PageLayout.PageFooter [])
     in
     { pageId = "service-page"
-    , title = "Service: " ++ ServiceId.toString serviceId ++ " | Unison Cloud"
+    , title = serviceTitle ++ " | Unison Cloud"
     , appHeader = Appheader.appHeader
     , page = PageLayout.view page
     , modal = Maybe.map Modal.view modal

@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicePage.AssignedServiceDeployPage exposing (..)
 
-import Html exposing (Html, div, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi
@@ -16,7 +16,7 @@ import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
-import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
+import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 
@@ -97,10 +97,9 @@ viewError _ =
         |> Card.view
 
 
-viewDescription : ServiceHash -> List (Html msg) -> Html msg
-viewDescription serviceHash content =
-    div [ class "service_description" ]
-        (text (ServiceHash.toShortString serviceHash) :: content)
+viewDescription : List (Html msg) -> Html msg
+viewDescription content =
+    div [ class "service_description" ] content
 
 
 view :
@@ -109,11 +108,11 @@ view :
     -> ServiceHash
     -> Model
     -> ( PageContent Msg, Html msg, Maybe (Modal.Modal Msg) )
-view appContext _ serviceHash model =
+view appContext _ _ model =
     let
         loading_ =
             ( viewLoading
-            , viewDescription serviceHash [ Placeholder.view Placeholder.text ]
+            , viewDescription [ Placeholder.view Placeholder.text ]
             , Nothing
             )
 
@@ -134,13 +133,13 @@ view appContext _ serviceHash model =
                             ByAt.byAt deploy.deployedBy deploy.deployedAt
                     in
                     ( Html.map LogMsg log
-                    , viewDescription serviceHash
+                    , viewDescription
                         [ ByAt.view appContext.timeZone appContext.now byAt
                         ]
                     , Maybe.map (Modal.map LogMsg) logModal
                     )
 
                 Failure e ->
-                    ( viewError e, viewDescription serviceHash [], Nothing )
+                    ( viewError e, viewDescription [], Nothing )
     in
     ( PageContent.oneColumn [ content ], description, modal )

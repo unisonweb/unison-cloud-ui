@@ -4,6 +4,13 @@
   overflow: scroll;
 }
 
+.service-page .page-title h1 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .service-page .page-title p {
   margin-bottom: 0;
 }
