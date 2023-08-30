@@ -36,7 +36,7 @@ exposedUrl appContext d =
             ("https://"
                 ++ appContext.exposedServiceDomain
                 ++ "/h/"
-                ++ ServiceHash.toString d.hash
+                ++ ServiceHash.toUnprefixedString d.hash
             )
 
     else
