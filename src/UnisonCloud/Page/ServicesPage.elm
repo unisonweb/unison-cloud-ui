@@ -1,6 +1,6 @@
 module UnisonCloud.Page.ServicesPage exposing (..)
 
-import Html exposing (Html, div, h1, h2, i, p, span, text)
+import Html exposing (Html, div, h2, i, p, span, text)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode as Decode
@@ -24,6 +24,7 @@ import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.PageTitle as PageTitle
 import UI.Placeholder as Placeholder
+import UI.TabList as TabList
 import UI.Tag as Tag
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
@@ -47,16 +48,26 @@ type ServicesModal
     | AssignmentGuideModal
 
 
+type ActiveTab
+    = NamedServices
+    | AdHocDeploys
+
+
 type alias Model =
     { services : WebData (List Service)
     , unassignedDeploys : WebData (List ServiceDeploySummary)
+    , activeTab : ActiveTab
     , modal : ServicesModal
     }
 
 
 init : AppContext -> ( Model, Cmd Msg )
 init appContext =
-    ( { services = Loading, unassignedDeploys = Loading, modal = NoModal }
+    ( { services = Loading
+      , unassignedDeploys = Loading
+      , activeTab = NamedServices
+      , modal = NoModal
+      }
     , Cmd.batch
         [ fetchServices appContext
         , fetchUnassignedDeploys appContext
@@ -71,6 +82,7 @@ init appContext =
 type Msg
     = FetchServicesFinished (WebData (List Service))
     | FetchUnassignedDeploysFinished (WebData (List ServiceDeploySummary))
+    | SetActiveTab ActiveTab
     | ShowGetStartedModal
     | ShowAssignmentGuideModal
     | CloseModal
@@ -93,6 +105,9 @@ update _ msg model =
                             )
             in
             ( { model | unassignedDeploys = deploys_ }, Cmd.none )
+
+        SetActiveTab newActiveTab ->
+            ( { model | activeTab = newActiveTab }, Cmd.none )
 
         ShowGetStartedModal ->
             ( { model | modal = GetStartedModal }, Cmd.none )
@@ -155,7 +170,7 @@ viewService appContext service =
                         (Link.serviceDeployForService service.id d.hash)
 
                 Nothing ->
-                    text "🐣 No deploys yet"
+                    div [ class "no-deploys-yet" ] [ text "🐣 No deploys yet" ]
 
         tags =
             if Set.isEmpty service.tags then
@@ -211,9 +226,7 @@ viewUnassignedDeploys appContext hasServices deploys =
     in
     div [ class "unassigned-deploys" ]
         [ div [ class "unassigned-deploys_header" ]
-            [ h1 [] [ text "Ad-hoc Service Deploys" ]
-            , howToOrganizeBlurb
-            ]
+            [ howToOrganizeBlurb ]
         , Card.card (List.map viewUnassignedDeploy deploys)
             |> Card.asContained
             |> Card.view
@@ -336,6 +349,17 @@ viewServicesEmptyState =
         |> EmptyStateCard.view
 
 
+viewUnassignedDeploysEmptyState : Html Msg
+viewUnassignedDeploysEmptyState =
+    EmptyState.iconCloud
+        (EmptyState.CircleCenterPiece (text "🌤️"))
+        |> EmptyState.withContent
+            [ h2 [] [ text "Sunny, with a chance of clouds" ]
+            , p [] [ text "Ad hoc services are useful when testing out ideas, before they feel fully ready to be named." ]
+            ]
+        |> EmptyStateCard.view
+
+
 viewCompleteEmptyState : Html Msg
 viewCompleteEmptyState =
     EmptyState.iconCloud
@@ -367,19 +391,28 @@ view appContext model =
                     viewLoading
 
                 Success ( services, deploys ) ->
-                    case ( services, deploys ) of
-                        ( [], [] ) ->
-                            [ viewCompleteEmptyState ]
+                    case model.activeTab of
+                        NamedServices ->
+                            case ( services, deploys ) of
+                                ( [], [] ) ->
+                                    [ viewCompleteEmptyState ]
 
-                        ( [], _ ) ->
-                            [ viewServicesEmptyState, viewUnassignedDeploys appContext False deploys ]
+                                ( [], _ ) ->
+                                    [ viewServicesEmptyState ]
 
-                        ( _, [] ) ->
-                            List.map (viewService appContext) services
+                                _ ->
+                                    List.map (viewService appContext) services
 
-                        _ ->
-                            List.map (viewService appContext) services
-                                ++ [ viewUnassignedDeploys appContext True deploys ]
+                        AdHocDeploys ->
+                            case ( services, deploys ) of
+                                ( [], [] ) ->
+                                    [ viewCompleteEmptyState ]
+
+                                ( _, [] ) ->
+                                    [ viewUnassignedDeploysEmptyState ]
+
+                                _ ->
+                                    [ viewUnassignedDeploys appContext True deploys ]
 
                 Failure e ->
                     [ viewError e ]
@@ -395,16 +428,29 @@ view appContext model =
                 AssignmentGuideModal ->
                     Just viewAssignmentGuideModal
 
+        tabList =
+            case model.activeTab of
+                NamedServices ->
+                    TabList.tabList []
+                        (TabList.tab "Named Services" (Click.onClick (SetActiveTab NamedServices)))
+                        [ TabList.tab "Ad hoc deploys" (Click.onClick (SetActiveTab AdHocDeploys)) ]
+
+                AdHocDeploys ->
+                    TabList.tabList
+                        [ TabList.tab "Named Services" (Click.onClick (SetActiveTab NamedServices)) ]
+                        (TabList.tab "Ad hoc deploys" (Click.onClick (SetActiveTab AdHocDeploys)))
+                        []
+
         page =
-            PageLayout.centeredLayout
-                (PageContent.oneColumn content
-                    |> PageContent.withPageTitle (PageTitle.title "Services")
-                )
+            PageLayout.tabbedLayout
+                (PageTitle.title "Cloud Services")
+                tabList
+                (PageContent.oneColumn content)
                 (PageLayout.PageFooter [])
                 |> PageLayout.withSubduedBackground
     in
     { pageId = "services-page"
-    , title = "Services | Unison Cloud"
+    , title = "Cloud Services | Unison Cloud"
     , appHeader = Appheader.appHeader
     , page = PageLayout.view page
     , modal = modal

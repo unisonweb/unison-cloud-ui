@@ -48,13 +48,17 @@
   color: var(--u-color_interactive);
 }
 
+.services-page .no-deploys-yet {
+  font-size: var(--font-size-medium);
+  color: var(--u-color_text_subdued);
+}
+
 /* -- Unassigned deploys ---------------------------------------------------- */
 
 .services-page .unassigned-deploys {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-top: 3rem;
 }
 
 .services-page .unassigned-deploys .unassigned-deploy-row {
