@@ -59,7 +59,8 @@
 
 .service-page
   .assigned-service-deploys-page_deploy
-  .assigned-service-deploy_hash a {
+  .assigned-service-deploy_hash
+  a {
   font-family: var(--font-monospace);
   color: var(--u-color_text);
   font-size: var(--font-size-medium);
@@ -68,6 +69,7 @@
 
 .service-page
   .assigned-service-deploys-page_deploy
-  .assigned-service-deploy_hash a:hover {
+  .assigned-service-deploy_hash
+  a:hover {
   color: var(--u-color_interactive);
 }
