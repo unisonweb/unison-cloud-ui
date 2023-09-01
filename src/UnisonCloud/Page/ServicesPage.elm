@@ -34,6 +34,7 @@ import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
+import UnisonCloud.ServiceDeploySettings as ServiceDeploySettings
 import UnisonCloud.ServiceHash as ServiceHash
 import Url
 
@@ -58,6 +59,7 @@ type alias Model =
     , unassignedDeploys : WebData (List ServiceDeploySummary)
     , activeTab : ActiveTab
     , modal : ServicesModal
+    , serviceDeploySettings : ServiceDeploySettings.Model
     }
 
 
@@ -67,6 +69,7 @@ init appContext =
       , unassignedDeploys = Loading
       , activeTab = NamedServices
       , modal = NoModal
+      , serviceDeploySettings = ServiceDeploySettings.init
       }
     , Cmd.batch
         [ fetchServices appContext
@@ -85,11 +88,12 @@ type Msg
     | SetActiveTab ActiveTab
     | ShowGetStartedModal
     | ShowAssignmentGuideModal
+    | ServiceDeploySettingsMsg ServiceDeploySettings.Msg
     | CloseModal
 
 
 update : AppContext -> Msg -> Model -> ( Model, Cmd Msg )
-update _ msg model =
+update appContext msg model =
     case msg of
         FetchServicesFinished services ->
             ( { model | services = services }, Cmd.none )
@@ -103,6 +107,7 @@ update _ msg model =
                                 (.deployedAt >> DateTime.toISO8601)
                                 (Util.descending compare)
                             )
+                        |> RemoteData.map (List.filter ServiceDeploy.isLive)
             in
             ( { model | unassignedDeploys = deploys_ }, Cmd.none )
 
@@ -117,6 +122,30 @@ update _ msg model =
 
         CloseModal ->
             ( { model | modal = NoModal }, Cmd.none )
+
+        ServiceDeploySettingsMsg spMsg ->
+            let
+                ( serviceDeploySettings, cmd, out ) =
+                    ServiceDeploySettings.update
+                        appContext
+                        spMsg
+                        model.serviceDeploySettings
+
+                unassignedDeploys =
+                    case out of
+                        ServiceDeploySettings.UndeployedServiceDeploy sh ->
+                            model.unassignedDeploys
+                                |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
+
+                        _ ->
+                            model.unassignedDeploys
+            in
+            ( { model
+                | serviceDeploySettings = serviceDeploySettings
+                , unassignedDeploys = unassignedDeploys
+              }
+            , Cmd.map ServiceDeploySettingsMsg cmd
+            )
 
 
 
@@ -188,8 +217,13 @@ viewService appContext service =
         |> Card.view
 
 
-viewUnassignedDeploys : AppContext -> Bool -> List ServiceDeploySummary -> Html Msg
-viewUnassignedDeploys appContext hasServices deploys =
+viewUnassignedDeploys :
+    AppContext
+    -> Bool
+    -> List ServiceDeploySummary
+    -> ServiceDeploySettings.Model
+    -> Html Msg
+viewUnassignedDeploys appContext hasServices deploys _ =
     let
         exposedLink d =
             case ServiceDeploy.exposedUrl appContext d of
@@ -210,6 +244,13 @@ viewUnassignedDeploys appContext hasServices deploys =
                     , exposedLink d
                     ]
                 , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
+
+                {- , div [ class "unassigned-deploy-row_right-side" ]
+                   [ Html.map
+                       ServiceDeploySettingsMsg
+                       (ServiceDeploySettings.view d.hash serviceDeploySettings)
+                   ]
+                -}
                 ]
 
         howToOrganizeBlurb =
@@ -346,7 +387,7 @@ viewServicesEmptyState =
                 |> Button.decorativeBlue
                 |> Button.view
             ]
-        |> EmptyStateCard.view
+        |> EmptyStateCard.view_ Card.SurfaceBackground
 
 
 viewUnassignedDeploysEmptyState : Html Msg
@@ -357,7 +398,7 @@ viewUnassignedDeploysEmptyState =
             [ h2 [] [ text "Sunny, with a chance of clouds" ]
             , p [] [ text "Ad hoc services are useful when testing out ideas, before they feel fully ready to be named." ]
             ]
-        |> EmptyStateCard.view
+        |> EmptyStateCard.view_ Card.SurfaceBackground
 
 
 viewCompleteEmptyState : Html Msg
@@ -370,7 +411,7 @@ viewCompleteEmptyState =
                 |> Button.decorativeBlue
                 |> Button.view
             ]
-        |> EmptyStateCard.view
+        |> EmptyStateCard.view_ Card.SurfaceBackground
 
 
 view : AppContext -> Model -> AppDocument Msg
@@ -412,7 +453,7 @@ view appContext model =
                                     [ viewUnassignedDeploysEmptyState ]
 
                                 _ ->
-                                    [ viewUnassignedDeploys appContext True deploys ]
+                                    [ viewUnassignedDeploys appContext True deploys model.serviceDeploySettings ]
 
                 Failure e ->
                     [ viewError e ]

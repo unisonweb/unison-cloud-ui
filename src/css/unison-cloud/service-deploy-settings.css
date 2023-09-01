@@ -1,0 +1,49 @@
+.anchored-overlay_sheet:has(.service-deploy-settings_sheet) {
+  padding: 0.5rem 0.5rem;
+}
+
+.service-deploy-settings_sheet {
+  width: 5.5rem;
+}
+
+.anchored-overlay_sheet:has(.undeploy-confirm),
+.anchored-overlay_sheet:has(.undeploying) {
+  padding-left: 0.75rem;
+}
+
+.service-deploy-settings_sheet:has(.undeploy-confirm),
+.service-deploy-settings_sheet:has(.undeploying) {
+  width: 16rem;
+}
+
+.service-deploy-settings_sheet .undeploy {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--u-color_text);
+  font-size: var(--font-size-small);
+  line-height: 1;
+  height: 1.5rem;
+}
+
+.service-deploy-settings_sheet .undeploy-option {
+  gap: 0.5rem;
+  border-radius: var(--border-radius-base);
+  padding: 0 0.25rem;
+}
+
+.service-deploy-settings_sheet .undeploy-option:hover {
+  background: var(--color-gray-base);
+}
+
+.service-deploy-settings_sheet .undeploy-confirm {
+  justify-content: space-between;
+}
+
+.service-deploy-settings_sheet .undeploy-confirm-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+}

@@ -15,7 +15,9 @@ type alias ServiceDeploy sd =
         | hash : ServiceHash
         , deployedBy : UserSummary
         , deployedAt : DateTime
+        , undeployedAt : Maybe DateTime
         , exposedAt : Maybe DateTime
+        , unexposedAt : Maybe DateTime
         , tags : Set String
     }
 
@@ -27,6 +29,16 @@ type alias ServiceDeploySummary =
 isExposed : ServiceDeploy sd -> Bool
 isExposed d =
     d.exposedAt /= Nothing
+
+
+isLive : ServiceDeploy sd -> Bool
+isLive =
+    isUndeployed >> not
+
+
+isUndeployed : ServiceDeploy sd -> Bool
+isUndeployed d =
+    d.undeployedAt /= Nothing
 
 
 exposedUrl : AppContext -> ServiceDeploy sd -> Maybe Url
@@ -50,11 +62,13 @@ exposedUrl appContext d =
 decodeAssigned : Decode.Decoder ServiceDeploySummary
 decodeAssigned =
     let
-        makeServiceDeploy hash deployedBy deployedAt exposedAt tags =
+        makeServiceDeploy hash deployedBy deployedAt undeployedAt exposedAt unexposedAt tags =
             { hash = hash
             , deployedBy = deployedBy
             , deployedAt = deployedAt
+            , undeployedAt = undeployedAt
             , exposedAt = exposedAt
+            , unexposedAt = unexposedAt
             , tags = Set.fromList tags
             }
     in
@@ -62,18 +76,22 @@ decodeAssigned =
         |> required "hash" ServiceHash.decode
         |> required "deployedBy" User.decodeSummary
         |> required "deployedAt" DateTime.decode
+        |> optional "undeployedAt" (Decode.map Just DateTime.decode) Nothing
         |> optional "exposedAt" (Decode.map Just DateTime.decode) Nothing
+        |> optional "unexposedAt" (Decode.map Just DateTime.decode) Nothing
         |> optional "tags" (Decode.list string) []
 
 
 decodeSummary : Decode.Decoder ServiceDeploySummary
 decodeSummary =
     let
-        makeServiceDeploy hash deployedBy deployedAt exposedAt tags =
+        makeServiceDeploy hash deployedBy deployedAt undeployedAt exposedAt unexposedAt tags =
             { hash = hash
             , deployedBy = deployedBy
             , deployedAt = deployedAt
+            , undeployedAt = undeployedAt
             , exposedAt = exposedAt
+            , unexposedAt = unexposedAt
             , tags = Set.fromList tags
             }
     in
@@ -81,5 +99,7 @@ decodeSummary =
         |> required "hash" ServiceHash.decode
         |> required "deployedBy" User.decodeSummary
         |> required "deployedAt" DateTime.decode
+        |> optional "undeployedAt" (Decode.map Just DateTime.decode) Nothing
         |> optional "exposedAt" (Decode.map Just DateTime.decode) Nothing
+        |> optional "unexposedAt" (Decode.map Just DateTime.decode) Nothing
         |> optional "tags" (Decode.list string) []

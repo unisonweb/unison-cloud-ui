@@ -140,8 +140,11 @@ viewDeploy appContext serviceId deploy =
 
 viewDeploys : AppContext -> ServiceId -> List ServiceDeploySummary -> Html msg
 viewDeploys appContext serviceId deploys =
-    div [ class "assigned-service-deploys-page_deploys" ]
+    Card.card
         (List.map (viewDeploy appContext serviceId) deploys)
+        |> Card.withClassName "assigned-service-deploys-page_deploys"
+        |> Card.asContained
+        |> Card.view
 
 
 view : AppContext -> ServiceId -> Model -> PageContent Msg
