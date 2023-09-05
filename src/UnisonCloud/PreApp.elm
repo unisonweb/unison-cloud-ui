@@ -54,18 +54,18 @@ init flags url navKey =
             , navKey = navKey
             }
     in
-    ( Initializing preAppContext, Task.attempt FetchTimeAndZoneFinished (fetchTimeAndZone preAppContext) )
+    ( Initializing preAppContext, Task.attempt FetchPreReqsFinished (fetchPreReqs preAppContext) )
 
 
 type Msg
     = AppMsg App.Msg
-    | FetchTimeAndZoneFinished (HttpResult ( Time.Posix, Time.Zone, Session ))
+    | FetchPreReqsFinished (HttpResult ( Time.Posix, Time.Zone, Session ))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( model, msg ) of
-        ( Initializing preAppContext, FetchTimeAndZoneFinished (Ok ( now, timeZone, session )) ) ->
+        ( Initializing preAppContext, FetchPreReqsFinished (Ok ( now, timeZone, session )) ) ->
             let
                 appContext =
                     AppContext.init preAppContext.flags
@@ -79,7 +79,7 @@ update msg model =
             in
             ( Initialized app, Cmd.map AppMsg cmd )
 
-        ( Initializing preAppContext, FetchTimeAndZoneFinished (Err e) ) ->
+        ( Initializing preAppContext, FetchPreReqsFinished (Err e) ) ->
             case e of
                 Http.BadStatus 401 ->
                     ( NotSignedIn preAppContext, Cmd.none )
@@ -110,8 +110,8 @@ update msg model =
 -- EFFECTS
 
 
-fetchTimeAndZone : PreAppContext -> Task Http.Error ( Time.Posix, Time.Zone, Session )
-fetchTimeAndZone preAppContext =
+fetchPreReqs : PreAppContext -> Task Http.Error ( Time.Posix, Time.Zone, Session )
+fetchPreReqs preAppContext =
     Task.map3 (\n z s -> ( n, z, s )) Time.now Time.here (fetchSession preAppContext)
 
 

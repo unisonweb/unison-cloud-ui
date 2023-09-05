@@ -5,9 +5,36 @@ import Json.Decode.Pipeline exposing (optional, required)
 import Set exposing (Set)
 import UI.DateTime as DateTime exposing (DateTime)
 import UnisonCloud.AppContext exposing (AppContext)
+import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import UnisonCloud.User as User exposing (UserSummary)
 import Url exposing (Url)
+
+
+type Deployed
+    = Deployed { deployedBy : UserSummary, deployedAt : DateTime }
+    | Undeployed
+        { originallDeployedBt : UserSummary
+        , originallyDeployedAt : DateTime
+        , undeployedAt : DateTime
+        }
+
+
+type Exposed
+    = Exposed { exposedAt : DateTime }
+    | Unexposed
+        { originallyExposedAt : DateTime
+        , unexposedAt : DateTime
+        }
+
+
+type Assigned
+    = Assigned { assignedAt : DateTime, assignedTo : ServiceId }
+    | Unassigned
+        { originallAssignedAt : DateTime
+        , originallyAssignedTo : ServiceId
+        , unassignedAt : DateTime
+        }
 
 
 type alias ServiceDeploy sd =
