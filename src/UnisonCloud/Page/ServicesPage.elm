@@ -124,28 +124,34 @@ update appContext msg model =
             ( { model | modal = NoModal }, Cmd.none )
 
         ServiceDeploySettingsMsg spMsg ->
-            let
-                ( serviceDeploySettings, cmd, out ) =
-                    ServiceDeploySettings.update
-                        appContext
-                        spMsg
-                        model.serviceDeploySettings
+            case model.services of
+                Success services ->
+                    let
+                        ( serviceDeploySettings, cmd, out ) =
+                            ServiceDeploySettings.update
+                                appContext
+                                services
+                                spMsg
+                                model.serviceDeploySettings
 
-                unassignedDeploys =
-                    case out of
-                        ServiceDeploySettings.UndeployedServiceDeploy sh ->
-                            model.unassignedDeploys
-                                |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
+                        unassignedDeploys =
+                            case out of
+                                ServiceDeploySettings.UndeployedServiceDeploy sh ->
+                                    model.unassignedDeploys
+                                        |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
 
-                        _ ->
-                            model.unassignedDeploys
-            in
-            ( { model
-                | serviceDeploySettings = serviceDeploySettings
-                , unassignedDeploys = unassignedDeploys
-              }
-            , Cmd.map ServiceDeploySettingsMsg cmd
-            )
+                                _ ->
+                                    model.unassignedDeploys
+                    in
+                    ( { model
+                        | serviceDeploySettings = serviceDeploySettings
+                        , unassignedDeploys = unassignedDeploys
+                      }
+                    , Cmd.map ServiceDeploySettingsMsg cmd
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 
@@ -223,7 +229,7 @@ viewUnassignedDeploys :
     -> List ServiceDeploySummary
     -> ServiceDeploySettings.Model
     -> Html Msg
-viewUnassignedDeploys appContext hasServices deploys _ =
+viewUnassignedDeploys appContext hasServices deploys serviceDeploySettings =
     let
         exposedLink d =
             case ServiceDeploy.exposedUrl appContext d of
@@ -235,6 +241,10 @@ viewUnassignedDeploys appContext hasServices deploys _ =
                     UI.nothing
 
         viewUnassignedDeploy d =
+            let
+                settingsMenu =
+                    ServiceDeploySettings.viewMenu d.hash serviceDeploySettings
+            in
             div [ class "unassigned-deploy-row" ]
                 [ span [ class "unassigned-deploy-row_hash" ]
                     [ Click.view []
@@ -244,13 +254,9 @@ viewUnassignedDeploys appContext hasServices deploys _ =
                     , exposedLink d
                     ]
                 , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
-
-                {- , div [ class "unassigned-deploy-row_right-side" ]
-                   [ Html.map
-                       ServiceDeploySettingsMsg
-                       (ServiceDeploySettings.view d.hash serviceDeploySettings)
-                   ]
-                -}
+                , div [ class "unassigned-deploy-row_right-side" ]
+                    [ Html.map ServiceDeploySettingsMsg settingsMenu
+                    ]
                 ]
 
         howToOrganizeBlurb =
@@ -461,7 +467,15 @@ view appContext model =
         modal =
             case model.modal of
                 NoModal ->
-                    Nothing
+                    case model.services of
+                        Success services ->
+                            model.serviceDeploySettings
+                                |> ServiceDeploySettings.viewModal services
+                                |> Maybe.map (Modal.map ServiceDeploySettingsMsg)
+                                |> Maybe.map Modal.view
+
+                        _ ->
+                            Nothing
 
                 GetStartedModal ->
                     Just viewGetStartedModal
