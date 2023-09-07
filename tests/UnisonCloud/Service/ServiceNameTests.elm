@@ -2,7 +2,7 @@ module UnisonCloud.Service.ServiceNameTests exposing (..)
 
 import Expect
 import Test exposing (..)
-import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
+import UnisonCloud.Service.ServiceName as ServiceName
 
 
 fromString : Test

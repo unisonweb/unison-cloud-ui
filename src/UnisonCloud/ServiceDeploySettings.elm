@@ -1,7 +1,7 @@
 module UnisonCloud.ServiceDeploySettings exposing (..)
 
 import Html exposing (Html, div, p, strong, text)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
 import Lib.Util as Util
@@ -235,7 +235,7 @@ updateAssignToForm f model =
         AssignToServiceModal serviceHash (AssignForm form) ->
             update_ serviceHash AssignForm form
 
-        AssignToServiceModal serviceHash (AssignFailure e form) ->
+        AssignToServiceModal serviceHash (AssignFailure _ form) ->
             update_ serviceHash AssignForm form
 
         _ ->

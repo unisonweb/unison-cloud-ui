@@ -2,7 +2,7 @@ module UnisonCloud.Service.ServiceIdTests exposing (..)
 
 import Expect
 import Test exposing (..)
-import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceId as ServiceId
 
 
 fromString : Test
