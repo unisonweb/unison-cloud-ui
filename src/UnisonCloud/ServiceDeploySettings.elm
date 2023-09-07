@@ -16,7 +16,7 @@ import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.StatusBanner as StatusBanner
 import UI.TabList as TabList
-import UnisonCloud.Api as ShareApi
+import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Service exposing (Service)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
@@ -264,14 +264,14 @@ assignToForm assignTo =
 
 assignToService : AppContext -> ServiceName -> ServiceHash -> Cmd Msg
 assignToService appContext serviceName serviceHash =
-    ShareApi.createServiceAssignment appContext.session.handle serviceName serviceHash
+    CloudApi.createServiceAssignment appContext.session.handle serviceName serviceHash
         |> HttpApi.toRequestWithEmptyResponse SaveAssignToFinished
         |> HttpApi.perform appContext.api
 
 
 undeployServiceDeploy : AppContext -> ServiceHash -> Cmd Msg
 undeployServiceDeploy appContext serviceHash =
-    ShareApi.undeployServiceDeploy serviceHash
+    CloudApi.undeployServiceDeploy serviceHash
         |> HttpApi.toRequestWithEmptyResponse UndeployServiceDeployFinished
         |> HttpApi.perform appContext.api
 
