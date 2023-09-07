@@ -4,6 +4,7 @@ import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class, classList)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
+import Lib.Util as Util
 import List.Nonempty as NEL
 import UI
 import UI.AnchoredOverlay as AnchoredOverlay exposing (AnchoredOverlay)
@@ -18,8 +19,7 @@ import UI.TabList as TabList
 import UnisonCloud.Api as ShareApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Service exposing (Service)
-import UnisonCloud.Service.ServiceId exposing (ServiceId)
-import UnisonCloud.Service.ServiceName as ServiceName
+import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
@@ -32,20 +32,27 @@ type AssignToTab
     | ExistingService
 
 
-type alias AssignTo =
+type alias AssignToForm =
     -- Why aren't the input fields behind the AssignToTab sum type? Simply to
     -- allow users to switch tab while keeping their input.
     { newServiceName : String
-    , selectedExistingServiceId : Maybe ServiceId
+    , selectedExistingServiceName : Maybe ServiceName
     , tab : AssignToTab
     }
+
+
+type AssignTo
+    = AssignForm AssignToForm
+    | Assigning AssignToForm
+    | Assigned AssignToForm
+    | AssignFailure Http.Error AssignToForm
 
 
 type Undeploy
     = NeedsConfirmation
     | Undeploying
-    | Success
-    | Failure Http.Error
+    | Undeployed
+    | UndeployFailure Http.Error
 
 
 type Modal
@@ -77,8 +84,10 @@ type Msg
     | CloseSheet
     | ShowAssignModal
     | ChangeAssignToTab AssignToTab
+    | SaveAssignTo
+    | SaveAssignToFinished (HttpResult ())
     | UpdateServiceName String
-    | UpdateSelectedExistingServiceId ServiceId
+    | UpdateSelectedExistingServiceName ServiceName
     | ShowUndeployConfirmationModal
     | UndeployConfirm
     | CloseModal
@@ -89,6 +98,7 @@ type OutMsg
     = None
     | UndeployedServiceDeploy ServiceHash
     | ShowAssignModalRequest ServiceHash
+    | AssignedToService ServiceHash
 
 
 update : AppContext -> List Service -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -107,10 +117,12 @@ update appContext existingServices msg model =
             ( { model
                 | modal =
                     AssignToServiceModal serviceHash
-                        { newServiceName = ""
-                        , selectedExistingServiceId = existingServices |> List.head |> Maybe.map .id
-                        , tab = NewService
-                        }
+                        (AssignForm
+                            { newServiceName = ""
+                            , selectedExistingServiceName = existingServices |> List.head |> Maybe.map .name
+                            , tab = NewService
+                            }
+                        )
                 , sheet = Closed
               }
             , Cmd.none
@@ -118,46 +130,57 @@ update appContext existingServices msg model =
             )
 
         ( ChangeAssignToTab newTab, _ ) ->
-            case model.modal of
-                AssignToServiceModal serviceHash assignTo ->
-                    ( { model
-                        | modal =
-                            AssignToServiceModal serviceHash
-                                { assignTo | tab = newTab }
-                      }
-                    , Cmd.none
-                    , None
-                    )
-
-                _ ->
-                    ( model, Cmd.none, None )
+            updateAssignToForm (\f -> { f | tab = newTab }) model
 
         ( UpdateServiceName newName, _ ) ->
+            updateAssignToForm (\f -> { f | newServiceName = newName }) model
+
+        ( UpdateSelectedExistingServiceName serviceName, _ ) ->
+            updateAssignToForm (\f -> { f | selectedExistingServiceName = Just serviceName }) model
+
+        ( SaveAssignTo, _ ) ->
             case model.modal of
                 AssignToServiceModal serviceHash assignTo ->
-                    ( { model
-                        | modal =
-                            AssignToServiceModal serviceHash
-                                { assignTo | newServiceName = newName }
-                      }
-                    , Cmd.none
-                    , None
-                    )
+                    let
+                        form =
+                            assignToForm assignTo
+
+                        newModel =
+                            { model | modal = AssignToServiceModal serviceHash (Assigning form) }
+                    in
+                    case ( form.tab, form.selectedExistingServiceName ) of
+                        ( NewService, _ ) ->
+                            case ServiceName.fromString form.newServiceName of
+                                Just serviceName ->
+                                    ( newModel, assignToService appContext serviceName serviceHash, None )
+
+                                _ ->
+                                    ( model, Cmd.none, None )
+
+                        ( ExistingService, Just name ) ->
+                            ( newModel, assignToService appContext name serviceHash, None )
+
+                        ( ExistingService, Nothing ) ->
+                            ( model, Cmd.none, None )
 
                 _ ->
                     ( model, Cmd.none, None )
 
-        ( UpdateSelectedExistingServiceId serviceId, _ ) ->
+        ( SaveAssignToFinished result, _ ) ->
             case model.modal of
                 AssignToServiceModal serviceHash assignTo ->
-                    ( { model
-                        | modal =
-                            AssignToServiceModal serviceHash
-                                { assignTo | selectedExistingServiceId = Just serviceId }
-                      }
-                    , Cmd.none
-                    , None
-                    )
+                    case result of
+                        Ok _ ->
+                            ( { model | modal = AssignToServiceModal serviceHash (Assigned (assignToForm assignTo)) }
+                            , Util.delayMsg 1500 CloseModal
+                            , AssignedToService serviceHash
+                            )
+
+                        Err e ->
+                            ( { model | modal = AssignToServiceModal serviceHash (AssignFailure e (assignToForm assignTo)) }
+                            , Cmd.none
+                            , None
+                            )
 
                 _ ->
                     ( model, Cmd.none, None )
@@ -182,10 +205,13 @@ update appContext existingServices msg model =
         ( UndeployServiceDeployFinished r, _ ) ->
             case ( model.modal, r ) of
                 ( UndeployConfirmationModal h _, Ok () ) ->
-                    ( { model | modal = NoModal }, Cmd.none, UndeployedServiceDeploy h )
+                    ( { model | modal = UndeployConfirmationModal h Undeployed }
+                    , Util.delayMsg 1500 CloseModal
+                    , UndeployedServiceDeploy h
+                    )
 
                 ( UndeployConfirmationModal h _, Err e ) ->
-                    ( { model | modal = UndeployConfirmationModal h (Failure e) }, Cmd.none, None )
+                    ( { model | modal = UndeployConfirmationModal h (UndeployFailure e) }, Cmd.none, None )
 
                 _ ->
                     ( model, Cmd.none, None )
@@ -194,8 +220,53 @@ update appContext existingServices msg model =
             ( model, Cmd.none, None )
 
 
+updateAssignToForm : (AssignToForm -> AssignToForm) -> Model -> ( Model, Cmd Msg, OutMsg )
+updateAssignToForm f model =
+    let
+        update_ serviceHash ctor form_ =
+            ( { model
+                | modal = AssignToServiceModal serviceHash (ctor (f form_))
+              }
+            , Cmd.none
+            , None
+            )
+    in
+    case model.modal of
+        AssignToServiceModal serviceHash (AssignForm form) ->
+            update_ serviceHash AssignForm form
+
+        AssignToServiceModal serviceHash (AssignFailure e form) ->
+            update_ serviceHash AssignForm form
+
+        _ ->
+            ( model, Cmd.none, None )
+
+
+assignToForm : AssignTo -> AssignToForm
+assignToForm assignTo =
+    case assignTo of
+        AssignForm f ->
+            f
+
+        Assigning f ->
+            f
+
+        Assigned f ->
+            f
+
+        AssignFailure _ f ->
+            f
+
+
 
 -- EFFECTS
+
+
+assignToService : AppContext -> ServiceName -> ServiceHash -> Cmd Msg
+assignToService appContext serviceName serviceHash =
+    ShareApi.createServiceAssignment appContext.session.handle serviceName serviceHash
+        |> HttpApi.toRequestWithEmptyResponse SaveAssignToFinished
+        |> HttpApi.perform appContext.api
 
 
 undeployServiceDeploy : AppContext -> ServiceHash -> Cmd Msg
@@ -212,27 +283,42 @@ undeployServiceDeploy appContext serviceHash =
 viewAssignToServiceModal : List Service -> AssignTo -> Modal.Modal Msg
 viewAssignToServiceModal existingServices assignTo =
     let
+        ( form, dimOverlay, status ) =
+            case assignTo of
+                AssignForm f ->
+                    ( f, False, UI.nothing )
+
+                Assigning f ->
+                    ( f, True, StatusBanner.working "Saving..." )
+
+                Assigned f ->
+                    ( f, True, StatusBanner.good "Successfully saved" )
+
+                AssignFailure _ f ->
+                    ( f, False, StatusBanner.bad "Couldn't save" )
+
         newServiceContent =
             [ TextField.fieldWithoutLabel
                 UpdateServiceName
                 "Service Name"
-                assignTo.newServiceName
-                |> TextField.withHelpText "Must exist of letters and numbers only. No spaces, and no symbols."
+                form.newServiceName
+                |> TextField.withHelpText "Must exist of letters, numbers, or dashes. No spaces, and no other symbols."
+                |> TextField.withIsValid ServiceName.isValidName
                 |> TextField.withAutofocus
                 |> TextField.view
             ]
 
         options =
             existingServices
-                |> List.map (\s -> RadioField.option_ (ServiceName.toString s.name) s.id)
+                |> List.map (\s -> RadioField.option_ (ServiceName.toString s.name) s.name)
                 |> NEL.fromList
 
         existingServiceTabContent =
-            case ( assignTo.selectedExistingServiceId, options ) of
+            case ( form.selectedExistingServiceName, options ) of
                 ( Just selected, Just options_ ) ->
                     [ RadioField.field
                         "Choose a service"
-                        UpdateSelectedExistingServiceId
+                        UpdateSelectedExistingServiceName
                         options_
                         selected
                         |> RadioField.view
@@ -251,7 +337,7 @@ viewAssignToServiceModal existingServices assignTo =
             }
 
         ( tabList, tabContent ) =
-            case assignTo.tab of
+            case form.tab of
                 NewService ->
                     ( TabList.tabList []
                         tabs.newService
@@ -275,11 +361,16 @@ viewAssignToServiceModal existingServices assignTo =
     content
         |> Modal.content
         |> Modal.modal "assign-to-service-modal" CloseModal
+        |> Modal.withAttributes
+            [ classList
+                [ ( "assign-to-service-modal_dim-overlay", dimOverlay ) ]
+            ]
         |> Modal.withHeader "Assign deployment to a service"
+        |> Modal.withLeftSideFooter [ status ]
         |> Modal.withActions
             [ Button.button CloseModal "Cancel"
                 |> Button.subdued
-            , Button.button CloseModal "Save"
+            , Button.button SaveAssignTo "Save"
                 |> Button.emphasized
             ]
 
@@ -295,10 +386,10 @@ viewUndeployConfirmationModal serviceHash undeploy =
                 Undeploying ->
                     ( StatusBanner.working "Undeploying..", True )
 
-                Success ->
-                    ( StatusBanner.working "Successfully performed undeploy", True )
+                Undeployed ->
+                    ( StatusBanner.good "Successfully undeployed", True )
 
-                Failure _ ->
+                UndeployFailure _ ->
                     ( StatusBanner.bad
                         "Something broke on our end and we couldn't undeploy. Please try again."
                     , False
@@ -350,18 +441,18 @@ viewModal existingServices model =
 viewSheet : Html Msg
 viewSheet =
     let
-        {- assignOption =
-           Click.view [ class "option assign assign-option" ]
-               [ Icon.view Icon.writingPad, text "Assign to Service" ]
-               (Click.onClick ShowAssignModal)
-        -}
+        assignOption =
+            Click.view [ class "option assign assign-option" ]
+                [ Icon.view Icon.writingPad, text "Assign to Service" ]
+                (Click.onClick ShowAssignModal)
+
         undeployOption =
             Click.view [ class "option undeploy undeploy-option" ]
                 [ Icon.view Icon.trash, text "Undeploy" ]
                 (Click.onClick ShowUndeployConfirmationModal)
     in
     div [ class "service-deploy-settings_sheet" ]
-        [ undeployOption ]
+        [ assignOption, undeployOption ]
 
 
 toAnchoredOverlay : ServiceHash -> Model -> AnchoredOverlay Msg

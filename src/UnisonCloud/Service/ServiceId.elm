@@ -34,7 +34,7 @@ isValidId raw =
     let
         re =
             Maybe.withDefault Regex.never <|
-                Regex.fromString "[a-zA-Z0-9]"
+                Regex.fromString "^[a-zA-Z0-9-]*$"
     in
     Regex.contains re raw
 

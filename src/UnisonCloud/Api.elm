@@ -15,6 +15,7 @@ module UnisonCloud.Api exposing
 
 import Http
 import Lib.HttpApi exposing (Endpoint(..))
+import Lib.UserHandle as UserHandle exposing (UserHandle)
 import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
@@ -45,10 +46,16 @@ createService serviceName =
         }
 
 
-createServiceAssignment : ServiceId -> ServiceHash -> Endpoint
-createServiceAssignment serviceId serviceHash =
+createServiceAssignment : UserHandle -> ServiceName -> ServiceHash -> Endpoint
+createServiceAssignment handle serviceName serviceHash =
     POST
-        { path = [ "services", ServiceId.toString serviceId, "assign", ServiceHash.toUnprefixedString serviceHash ]
+        { path =
+            [ "users"
+            , UserHandle.toUnprefixedString handle
+            , "assign"
+            , ServiceName.toString serviceName
+            , ServiceHash.toUnprefixedString serviceHash
+            ]
         , queryParams = []
         , body = Http.emptyBody
         }

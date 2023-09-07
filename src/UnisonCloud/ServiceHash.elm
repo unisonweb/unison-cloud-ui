@@ -75,7 +75,7 @@ isValidHash raw =
     let
         re =
             Maybe.withDefault Regex.never <|
-                Regex.fromString "[a-zA-Z0-9_]"
+                Regex.fromString "^[a-zA-Z0-9-_]*$"
     in
     Regex.contains re raw
 

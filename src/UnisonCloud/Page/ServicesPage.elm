@@ -134,20 +134,28 @@ update appContext msg model =
                                 spMsg
                                 model.serviceDeploySettings
 
-                        unassignedDeploys =
+                        ( unassignedDeploys, outCmd ) =
                             case out of
                                 ServiceDeploySettings.UndeployedServiceDeploy sh ->
-                                    model.unassignedDeploys
+                                    ( model.unassignedDeploys
                                         |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
+                                    , Cmd.none
+                                    )
+
+                                ServiceDeploySettings.AssignedToService sh ->
+                                    ( model.unassignedDeploys
+                                        |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
+                                    , fetchServices appContext
+                                    )
 
                                 _ ->
-                                    model.unassignedDeploys
+                                    ( model.unassignedDeploys, Cmd.none )
                     in
                     ( { model
                         | serviceDeploySettings = serviceDeploySettings
                         , unassignedDeploys = unassignedDeploys
                       }
-                    , Cmd.map ServiceDeploySettingsMsg cmd
+                    , Cmd.batch [ Cmd.map ServiceDeploySettingsMsg cmd, outCmd ]
                     )
 
                 _ ->
@@ -377,7 +385,7 @@ viewError _ =
         "Couldn't load services"
         "Something unexpected happened on our end when loading services and we can't display them."
         |> ErrorCard.toCard
-        |> Card.asContainedWithFade
+        |> Card.asContainedWithFade_ Card.SurfaceBackground
         |> Card.view
 
 

@@ -38,3 +38,21 @@
 .assign-to-service-modal .tab-content {
   margin-top: 1.5rem;
 }
+
+.undeploy-confirmation-modal_dim-overlay:after,
+.assign-to-service-modal_dim-overlay:after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-modal-bg);
+  opacity: 0.85;
+  content: " ";
+  border-radius: var(--border-radius-base);
+}
+
+.modal .status-banner {
+  position: relative;
+  z-index: var(--layer-base);
+}

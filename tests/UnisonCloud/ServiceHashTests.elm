@@ -11,7 +11,7 @@ fromUrlString =
         [ test "parse a URL string into a ServiceHash" <|
             \_ ->
                 Expect.equal
-                    ("asdf"
+                    (rawHash
                         |> ServiceHash.fromUrlString
                         |> Maybe.map ServiceHash.toString
                         |> Maybe.withDefault "FAIL!"
@@ -26,7 +26,7 @@ fromApiString =
         [ test "parse an API string into a ServiceHash" <|
             \_ ->
                 Expect.equal
-                    ("asdf"
+                    (rawHash
                         |> ServiceHash.fromUrlString
                         |> Maybe.map ServiceHash.toString
                         |> Maybe.withDefault "FAIL!"
@@ -41,7 +41,7 @@ fromString =
         [ test "parse a # prefixed string into a ServiceHash" <|
             \_ ->
                 Expect.equal
-                    ("#asdf"
+                    ("#5vHxUSHKNwfcwHND999W-IuAoDDLIAVJ8iIGGY_1aHs"
                         |> ServiceHash.fromString
                         |> Maybe.map ServiceHash.toString
                         |> Maybe.withDefault "FAIL!"
@@ -55,7 +55,7 @@ toString =
     describe "ServiceHash.toString"
         [ test "render the hash as a string with a prefix" <|
             \_ ->
-                Expect.equal "#asdf" (ServiceHash.toString testHash)
+                Expect.equal ("#" ++ rawHash) (ServiceHash.toString testHash)
         ]
 
 
@@ -64,7 +64,7 @@ toUrlString =
     describe "ServiceHash.toUrlString"
         [ test "render the hash as a string without a prefix" <|
             \_ ->
-                Expect.equal "asdf" (ServiceHash.toUrlString testHash)
+                Expect.equal rawHash (ServiceHash.toUrlString testHash)
         ]
 
 
@@ -73,10 +73,15 @@ toApiString =
     describe "ServiceHash.toApiString"
         [ test "render the hash as a string without a prefix" <|
             \_ ->
-                Expect.equal "asdf" (ServiceHash.toUrlString testHash)
+                Expect.equal rawHash (ServiceHash.toUrlString testHash)
         ]
+
+
+rawHash : String
+rawHash =
+    "5vHxUSHKNwfcwHND999W-IuAoDDLIAVJ8iIGGY_1aHs"
 
 
 testHash : ServiceHash
 testHash =
-    ServiceHash.unsafeFromString "asdf"
+    ServiceHash.unsafeFromString rawHash
