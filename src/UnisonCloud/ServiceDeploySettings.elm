@@ -366,10 +366,7 @@ viewAssignToServiceModal existingServices serviceHash assignTo =
     content
         |> Modal.content
         |> Modal.modal "assign-to-service-modal" CloseModal
-        |> Modal.withAttributes
-            [ classList
-                [ ( "assign-to-service-modal_dim-overlay", dimOverlay ) ]
-            ]
+        |> Modal.withDimOverlay dimOverlay
         |> Modal.withHeader "Assign deployment to a service"
         |> Modal.withLeftSideFooter [ status ]
         |> Modal.withActions
@@ -412,10 +409,7 @@ viewUndeployConfirmationModal serviceHash undeploy =
     content
         |> Modal.content
         |> Modal.modal "undeploy-confirmation-modal" CloseModal
-        |> Modal.withAttributes
-            [ classList
-                [ ( "undeploy-confirmation-modal_dim-overlay", dimOverlay ) ]
-            ]
+        |> Modal.withDimOverlay dimOverlay
         |> Modal.withHeader "Are you sure you want to undeploy?"
         |> Modal.withActions
             [ Button.button CloseModal "Cancel"
