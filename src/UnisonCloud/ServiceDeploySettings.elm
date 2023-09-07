@@ -1,6 +1,6 @@
 module UnisonCloud.ServiceDeploySettings exposing (..)
 
-import Html exposing (Html, div, p, text)
+import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class, classList)
 import Http
 import Lib.HttpApi as HttpApi exposing (HttpResult)
@@ -280,8 +280,8 @@ undeployServiceDeploy appContext serviceHash =
 -- VIEW MODAL
 
 
-viewAssignToServiceModal : List Service -> AssignTo -> Modal.Modal Msg
-viewAssignToServiceModal existingServices assignTo =
+viewAssignToServiceModal : List Service -> ServiceHash -> AssignTo -> Modal.Modal Msg
+viewAssignToServiceModal existingServices serviceHash assignTo =
     let
         ( form, dimOverlay, status ) =
             case assignTo of
@@ -316,7 +316,12 @@ viewAssignToServiceModal existingServices assignTo =
         existingServiceTabContent =
             case ( form.selectedExistingServiceName, options ) of
                 ( Just selected, Just options_ ) ->
-                    [ RadioField.field
+                    [ p []
+                        [ text "Choosing an existing service, replaces its active deploy with "
+                        , strong [] [ text (ServiceHash.toShortString serviceHash) ]
+                        , text "."
+                        ]
+                    , RadioField.field
                         "Choose a service"
                         UpdateSelectedExistingServiceName
                         options_
@@ -399,7 +404,7 @@ viewUndeployConfirmationModal serviceHash undeploy =
             div [ class "undeploy-confirmation-modal" ]
                 [ p []
                     [ text "Undeploying this service ("
-                    , text (ServiceHash.toShortString serviceHash)
+                    , strong [] [ text (ServiceHash.toShortString serviceHash) ]
                     , text ") will render it unreachable."
                     ]
                 ]
@@ -427,8 +432,8 @@ viewModal existingServices model =
         NoModal ->
             Nothing
 
-        AssignToServiceModal _ assignTo ->
-            Just (viewAssignToServiceModal existingServices assignTo)
+        AssignToServiceModal serviceHash assignTo ->
+            Just (viewAssignToServiceModal existingServices serviceHash assignTo)
 
         UndeployConfirmationModal serviceHash undeploy ->
             Just (viewUndeployConfirmationModal serviceHash undeploy)
