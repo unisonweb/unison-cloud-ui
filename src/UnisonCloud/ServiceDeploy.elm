@@ -76,6 +76,7 @@ exposedUrl appContext d =
                 ++ appContext.exposedServiceDomain
                 ++ "/h/"
                 ++ ServiceHash.toUnprefixedString d.hash
+                ++ "/"
             )
 
     else

@@ -37,6 +37,7 @@ exposedUrl appContext serv =
                     ++ appContext.exposedServiceDomain
                     ++ "/s/"
                     ++ ServiceName.toString serv.name
+                    ++ "/"
                 )
 
         withDeploy d =
