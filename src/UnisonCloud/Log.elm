@@ -65,7 +65,7 @@ import UnisonCloud.Link as Link
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
-import UnisonCloud.Service.ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
@@ -74,7 +74,7 @@ import UnisonCloud.ServiceHash exposing (ServiceHash)
 
 
 type LogBrowsingContext
-    = ServiceContext ServiceId
+    = ServiceContext ServiceName
     | ServiceDeployContext ServiceHash
 
 
@@ -388,7 +388,7 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
         endpoint =
             case logBrowsingContext of
                 ServiceContext name ->
-                    CloudApi.serviceLogs name params_
+                    CloudApi.serviceLogs appContext.session.handle name params_
 
                 ServiceDeployContext sh ->
                     CloudApi.serviceDeployLogs sh params_

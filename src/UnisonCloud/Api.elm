@@ -1,8 +1,6 @@
 module UnisonCloud.Api exposing
     ( assignedServiceDeploys
-    , createService
     , createServiceAssignment
-    , deleteServiceAssignment
     , service
     , serviceDeploy
     , serviceDeployLogs
@@ -32,20 +30,6 @@ services =
     GET { path = [ "services" ], queryParams = [] }
 
 
-service : ServiceId -> Endpoint
-service serviceId =
-    GET { path = [ "services", ServiceId.toString serviceId ], queryParams = [] }
-
-
-createService : ServiceName -> Endpoint
-createService serviceName =
-    POST
-        { path = [ "services", ServiceName.toString serviceName ]
-        , queryParams = []
-        , body = Http.emptyBody
-        }
-
-
 createServiceAssignment : UserHandle -> ServiceName -> ServiceHash -> Endpoint
 createServiceAssignment handle serviceName serviceHash =
     POST
@@ -61,12 +45,16 @@ createServiceAssignment handle serviceName serviceHash =
         }
 
 
-deleteServiceAssignment : ServiceId -> Endpoint
-deleteServiceAssignment serviceId =
-    POST
-        { path = [ "services", ServiceId.toString serviceId, "unassign" ]
+service : UserHandle -> ServiceName -> Endpoint
+service handle name =
+    GET
+        { path =
+            [ "users"
+            , UserHandle.toUnprefixedString handle
+            , "services"
+            , ServiceName.toString name
+            ]
         , queryParams = []
-        , body = Http.emptyBody
         }
 
 
@@ -80,10 +68,16 @@ undeployServiceDeploy sh =
     DELETE { path = [ "deployments", ServiceHash.toApiString sh ], queryParams = [] }
 
 
-assignedServiceDeploys : ServiceId -> Endpoint
-assignedServiceDeploys serviceId =
+assignedServiceDeploys : UserHandle -> ServiceName -> Endpoint
+assignedServiceDeploys handle serviceName =
     GET
-        { path = [ "services", ServiceId.toString serviceId, "deployments" ]
+        { path =
+            [ "users"
+            , UserHandle.toUnprefixedString handle
+            , "services"
+            , ServiceName.toString serviceName
+            , "deployments"
+            ]
         , queryParams = []
         }
 
@@ -93,13 +87,15 @@ unassignedServiceDeploys =
     GET { path = [ "unassigned" ], queryParams = [] }
 
 
-serviceLogs : ServiceId -> FetchLogParams -> Endpoint
-serviceLogs sName params =
+serviceLogs : UserHandle -> ServiceName -> FetchLogParams -> Endpoint
+serviceLogs handle sName params =
     GET
         { path =
-            [ "logs"
+            [ "users"
+            , UserHandle.toUnprefixedString handle
+            , "logs"
             , "service"
-            , ServiceId.toString sName
+            , ServiceName.toString sName
             ]
         , queryParams = FetchLogParams.toQueryParams params
         }

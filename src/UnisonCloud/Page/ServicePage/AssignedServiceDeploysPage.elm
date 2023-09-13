@@ -23,6 +23,7 @@ import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
+import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash
 import Url
@@ -37,10 +38,10 @@ type alias Model =
     }
 
 
-init : AppContext -> ServiceId -> ( Model, Cmd Msg )
-init appContext serviceId =
+init : AppContext -> ServiceName -> ( Model, Cmd Msg )
+init appContext serviceName =
     ( { deploys = Loading }
-    , fetchServiceDeploys appContext serviceId
+    , fetchServiceDeploys appContext serviceName
     )
 
 
@@ -52,7 +53,7 @@ type Msg
     = FetchServiceDeploysFinished (WebData (List ServiceDeploySummary))
 
 
-update : AppContext -> ServiceId -> Msg -> Model -> ( Model, Cmd Msg )
+update : AppContext -> ServiceName -> Msg -> Model -> ( Model, Cmd Msg )
 update _ _ msg model =
     case msg of
         FetchServiceDeploysFinished deploys ->
@@ -72,9 +73,9 @@ update _ _ msg model =
 -- EFFECTS
 
 
-fetchServiceDeploys : AppContext -> ServiceId -> Cmd Msg
-fetchServiceDeploys appContext serviceId =
-    CloudApi.assignedServiceDeploys serviceId
+fetchServiceDeploys : AppContext -> ServiceName -> Cmd Msg
+fetchServiceDeploys appContext serviceName =
+    CloudApi.assignedServiceDeploys appContext.session.handle serviceName
         |> HttpApi.toRequest
             (Decode.list ServiceDeploy.decodeSummary)
             (RemoteData.fromResult >> FetchServiceDeploysFinished)
@@ -143,7 +144,7 @@ viewDeploy appContext service deploy =
         [ div [ class "assigned-service-deploy_hash" ]
             [ Click.view []
                 [ text (ServiceHash.toShortString deploy.hash) ]
-                (Link.serviceDeployForService service.id deploy.hash)
+                (Link.serviceDeployForService service.name deploy.hash)
             , exposedLink
             ]
         , activeTag
