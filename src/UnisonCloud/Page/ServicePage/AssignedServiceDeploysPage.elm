@@ -145,8 +145,8 @@ viewDeploy appContext service deploy =
                 [ text (ServiceHash.toShortString deploy.hash) ]
                 (Link.serviceDeployForService service.id deploy.hash)
             , exposedLink
-            , activeTag
             ]
+        , activeTag
         , ByAt.view appContext.timeZone appContext.now byAt
         ]
 
