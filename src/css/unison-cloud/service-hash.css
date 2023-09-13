@@ -4,7 +4,7 @@
   gap: 0.25rem;
   color: var(--u-color_text_subdued);
   font-weight: bold;
-  font-family: var(--font-family-monospace);
+  font-family: var(--font-monospace);
 }
 
 .service-hash .icon {
