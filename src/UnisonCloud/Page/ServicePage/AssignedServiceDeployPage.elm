@@ -14,6 +14,7 @@ import UI.Placeholder as Placeholder
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
+import UnisonCloud.Service exposing (Service)
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
@@ -105,7 +106,7 @@ viewDescription content =
 
 view :
     AppContext
-    -> ServiceId
+    -> Service
     -> ServiceHash
     -> Model
     ->

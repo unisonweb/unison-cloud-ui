@@ -7,21 +7,22 @@ import Set exposing (Set)
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
-import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
+import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploy, ServiceDeploySummary)
+import UnisonCloud.ServiceHash as ServiceHash
 import Url exposing (Url)
 
 
 type alias Service =
     { id : ServiceId
     , name : ServiceName
-    , latestDeploy : Maybe ServiceDeploySummary
+    , activeDeploy : Maybe ServiceDeploySummary
     , tags : Set String
     }
 
 
 isExposed : Service -> Bool
 isExposed serv =
-    serv.latestDeploy
+    serv.activeDeploy
         |> Maybe.map ServiceDeploy.isExposed
         |> Maybe.withDefault False
 
@@ -47,8 +48,16 @@ exposedUrl appContext serv =
             else
                 Nothing
     in
-    serv.latestDeploy
+    serv.activeDeploy
         |> Maybe.andThen withDeploy
+
+
+isActiveDeploy : Service -> ServiceDeploy a -> Bool
+isActiveDeploy serv depl =
+    serv.activeDeploy
+        |> Maybe.map .hash
+        |> Maybe.map (ServiceHash.equals depl.hash)
+        |> Maybe.withDefault False
 
 
 
@@ -58,10 +67,10 @@ exposedUrl appContext serv =
 decode : Decode.Decoder Service
 decode =
     let
-        makeService id_ name latestDeploy tags =
+        makeService id_ name activeDeploy tags =
             { id = id_
             , name = name
-            , latestDeploy = latestDeploy
+            , activeDeploy = activeDeploy
             , tags = Set.fromList tags
             }
     in

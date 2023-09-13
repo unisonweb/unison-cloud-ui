@@ -203,11 +203,11 @@ viewService appContext service =
                 Nothing ->
                     UI.nothing
 
-        latestDeploy =
-            case service.latestDeploy of
+        activeDeploy =
+            case service.activeDeploy of
                 Just d ->
-                    Click.view [ class "latest-deploy" ]
-                        [ div [ class "latest-deploy_active-hash" ] [ text (ServiceHash.toShortString d.hash) ]
+                    Click.view [ class "active-deploy" ]
+                        [ div [ class "active-deploy_active-hash" ] [ text (ServiceHash.toShortString d.hash) ]
                         , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
                         (Link.serviceDeployForService service.id d.hash)
@@ -225,7 +225,7 @@ viewService appContext service =
                     |> List.map Tag.tag
                     |> Tag.viewTags
     in
-    Card.card [ h2 [] [ heading, exposedLink ], tags, latestDeploy ]
+    Card.card [ h2 [] [ heading, exposedLink ], tags, activeDeploy ]
         |> Card.withClassName "named-service"
         |> Card.asContained
         |> Card.view

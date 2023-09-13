@@ -14,11 +14,14 @@ import UI.Click as Click
 import UI.DateTime as DateTime
 import UI.ErrorCard as ErrorCard
 import UI.ExternalLinkIcon as ExternalLinkIcon
+import UI.Icon as Icon
 import UI.PageContent as PageContent exposing (PageContent)
 import UI.Placeholder as Placeholder
+import UI.Tag as Tag
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Link as Link
+import UnisonCloud.Service as Service exposing (Service)
 import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash
@@ -112,8 +115,8 @@ viewError _ =
         |> Card.view
 
 
-viewDeploy : AppContext -> ServiceId -> ServiceDeploySummary -> Html msg
-viewDeploy appContext serviceId deploy =
+viewDeploy : AppContext -> Service -> ServiceDeploySummary -> Html msg
+viewDeploy appContext service deploy =
     let
         exposedLink =
             case ServiceDeploy.exposedUrl appContext deploy of
@@ -124,6 +127,15 @@ viewDeploy appContext serviceId deploy =
                 Nothing ->
                     UI.nothing
 
+        activeTag =
+            if Service.isActiveDeploy service deploy then
+                Tag.tag "Active Deploy"
+                    |> Tag.withIcon Icon.bolt
+                    |> Tag.view
+
+            else
+                UI.nothing
+
         byAt =
             ByAt.byAt deploy.deployedBy deploy.deployedAt
     in
@@ -131,24 +143,25 @@ viewDeploy appContext serviceId deploy =
         [ div [ class "assigned-service-deploy_hash" ]
             [ Click.view []
                 [ text (ServiceHash.toShortString deploy.hash) ]
-                (Link.serviceDeployForService serviceId deploy.hash)
+                (Link.serviceDeployForService service.id deploy.hash)
             , exposedLink
+            , activeTag
             ]
         , ByAt.view appContext.timeZone appContext.now byAt
         ]
 
 
-viewDeploys : AppContext -> ServiceId -> List ServiceDeploySummary -> Html msg
-viewDeploys appContext serviceId deploys =
+viewDeploys : AppContext -> Service -> List ServiceDeploySummary -> Html msg
+viewDeploys appContext service deploys =
     Card.card
-        (List.map (viewDeploy appContext serviceId) deploys)
+        (List.map (viewDeploy appContext service) deploys)
         |> Card.withClassName "assigned-service-deploys-page_deploys"
         |> Card.asContained
         |> Card.view
 
 
-view : AppContext -> ServiceId -> Model -> PageContent Msg
-view appContext serviceId model =
+view : AppContext -> Service -> Model -> PageContent Msg
+view appContext service model =
     let
         content =
             case model.deploys of
@@ -159,7 +172,7 @@ view appContext serviceId model =
                     viewLoading
 
                 Success deploys ->
-                    viewDeploys appContext serviceId deploys
+                    viewDeploys appContext service deploys
 
                 Failure e ->
                     viewError e

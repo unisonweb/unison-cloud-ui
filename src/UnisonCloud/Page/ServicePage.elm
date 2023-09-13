@@ -224,8 +224,8 @@ view appContext serviceId model =
 
                 Success service ->
                     let
-                        latestDeploy =
-                            case service.latestDeploy of
+                        activeDeploy =
+                            case service.activeDeploy of
                                 Just deploy ->
                                     [ div [ class "service-description_hash" ] [ text (ServiceHash.toShortString deploy.hash) ]
                                     , ByAt.byAt deploy.deployedBy deploy.deployedAt
@@ -243,7 +243,7 @@ view appContext serviceId model =
                                 |> Maybe.map ExternalLinkIcon.view
 
                         description_ =
-                            viewDescription latestDeploy
+                            viewDescription activeDeploy
                     in
                     case model.subPage of
                         Activity activity ->
@@ -261,7 +261,7 @@ view appContext serviceId model =
                         Deploy hash deploy ->
                             let
                                 deploy_ =
-                                    AssignedServiceDeployPage.view appContext serviceId hash deploy
+                                    AssignedServiceDeployPage.view appContext service hash deploy
 
                                 exposedDeployLink =
                                     deploy_.exposedUrl
@@ -279,7 +279,7 @@ view appContext serviceId model =
                         Deploys deploys ->
                             { content =
                                 PageContent.map AssignedServiceDeploysPageMsg
-                                    (AssignedServiceDeploysPage.view appContext serviceId deploys)
+                                    (AssignedServiceDeploysPage.view appContext service deploys)
                             , serviceTitle = ServiceName.toString service.name
                             , description = description_
                             , exposedLink = exposedLink_

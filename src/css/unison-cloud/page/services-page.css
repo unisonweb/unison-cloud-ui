@@ -29,14 +29,14 @@
   color: var(--u-color_interactive);
 }
 
-.services-page .latest-deploy {
+.services-page .active-deploy {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 0.75rem;
 }
 
-.services-page .latest-deploy .latest-deploy_active-hash {
+.services-page .active-deploy .active-deploy_active-hash {
   font-weight: bold;
   font-size: var(--font-size-small);
   color: var(--u-color_text_subdued);
@@ -44,7 +44,7 @@
   font-family: var(--font-monospace);
 }
 
-.services-page .latest-deploy:hover .latest-deploy_active-hash {
+.services-page .active-deploy:hover .active-deploy_active-hash {
   color: var(--u-color_interactive);
 }
 
