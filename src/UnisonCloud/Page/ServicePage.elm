@@ -202,10 +202,15 @@ view appContext serviceId model =
                         (TabList.tab "Activity" (Link.serviceActivity serviceId))
                         [ TabList.tab "Deploys" (Link.serviceDeploysForService serviceId) ]
 
-                Deploy _ _ ->
+                Deploy serviceHash _ ->
                     TabList.tabList
-                        [ TabList.tab "Activity" (Link.serviceActivity serviceId) ]
-                        (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
+                        [ TabList.tab "Activity" (Link.serviceActivity serviceId)
+                        , TabList.tab "Deploys" (Link.serviceDeploysForService serviceId)
+                        ]
+                        (TabList.tab
+                            ("Deploy " ++ ServiceHash.toShortString serviceHash)
+                            (Link.serviceDeployForService serviceId serviceHash)
+                        )
                         []
 
                 Deploys _ ->
