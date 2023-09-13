@@ -87,11 +87,13 @@ unassignedServiceDeploys =
     GET { path = [ "unassigned" ], queryParams = [] }
 
 
-serviceLogs : ServiceName -> FetchLogParams -> Endpoint
-serviceLogs sName params =
+serviceLogs : UserHandle -> ServiceName -> FetchLogParams -> Endpoint
+serviceLogs handle sName params =
     GET
         { path =
-            [ "logs"
+            [ "users"
+            , UserHandle.toUnprefixedString handle
+            , "logs"
             , "service"
             , ServiceName.toString sName
             ]

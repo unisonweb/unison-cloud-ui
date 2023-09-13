@@ -388,7 +388,7 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
         endpoint =
             case logBrowsingContext of
                 ServiceContext name ->
-                    CloudApi.serviceLogs name params_
+                    CloudApi.serviceLogs appContext.session.handle name params_
 
                 ServiceDeployContext sh ->
                     CloudApi.serviceDeployLogs sh params_
