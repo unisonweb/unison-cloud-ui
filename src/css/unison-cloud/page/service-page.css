@@ -18,12 +18,18 @@
 .service-page .service-description {
   margin-top: 0.75rem;
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.service-page .service-description_hash-and-by-at{
+  display: flex;
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
+  height: 1.5rem;
   font-size: var(--font-size-medium);
   color: var(--u-color_text_subdued);
-  height: 1.5rem;
 }
 
 .service-page .service-description_hash {

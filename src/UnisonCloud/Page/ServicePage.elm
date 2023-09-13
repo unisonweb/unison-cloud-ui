@@ -6,11 +6,13 @@ import Http
 import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
+import UI.Button as Button
 import UI.ByAt as ByAt
 import UI.Card as Card
 import UI.Click as Click
 import UI.ErrorCard as ErrorCard
 import UI.ExternalLinkIcon as ExternalLinkIcon
+import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
@@ -190,7 +192,6 @@ view appContext serviceId model =
             { content = PageContent.oneColumn [ viewLoading model.subPage ]
             , serviceTitle = "Service Loading..."
             , description = viewDescription [ Placeholder.view Placeholder.text ]
-            , exposedLink = Nothing
             , modal = Nothing
             }
 
@@ -219,7 +220,7 @@ view appContext serviceId model =
                         (TabList.tab "Deploys" (Link.serviceDeploysForService serviceId))
                         []
 
-        { content, serviceTitle, description, exposedLink, modal } =
+        { content, serviceTitle, description, modal } =
             case model.service of
                 NotAsked ->
                     loading_
@@ -229,23 +230,40 @@ view appContext serviceId model =
 
                 Success service ->
                     let
-                        activeDeploy =
-                            case service.activeDeploy of
-                                Just deploy ->
-                                    [ div [ class "service-description_hash" ] [ text (ServiceHash.toShortString deploy.hash) ]
-                                    , ByAt.byAt deploy.deployedBy deploy.deployedAt
-                                        |> ByAt.view appContext.timeZone appContext.now
-                                    ]
-
-                                Nothing ->
-                                    []
-
-                        exposedLink_ =
+                        external url =
                             service
                                 |> Service.exposedUrl appContext
                                 |> Maybe.map Url.toString
                                 |> Maybe.map Click.externalHref
                                 |> Maybe.map ExternalLinkIcon.view
+
+                        activeDeploy =
+                            case service.activeDeploy of
+                                Just deploy ->
+                                    let
+                                        toButton url =
+                                            Button.iconThenLabel_ (Click.externalHref url) Icon.arrowEscapeBox url
+                                                |> Button.subdued
+                                                |> Button.small
+
+                                        button =
+                                            service
+                                                |> Service.exposedUrl appContext
+                                                |> Maybe.map Url.toString
+                                                |> Maybe.map toButton
+                                                |> Maybe.map Button.view
+                                                |> Maybe.withDefault UI.nothing
+                                    in
+                                    [ button
+                                    , div [ class "service-description_hash-and-by-at" ]
+                                        [ div [ class "service-description_hash" ] [ text (ServiceHash.toShortString deploy.hash) ]
+                                        , ByAt.byAt deploy.deployedBy deploy.deployedAt
+                                            |> ByAt.view appContext.timeZone appContext.now
+                                        ]
+                                    ]
+
+                                Nothing ->
+                                    []
 
                         description_ =
                             viewDescription activeDeploy
@@ -259,7 +277,6 @@ view appContext serviceId model =
                             { content = PageContent.map ServiceActivityPageMsg serviceActivityPage
                             , serviceTitle = ServiceName.toString service.name
                             , description = description_
-                            , exposedLink = exposedLink_
                             , modal = Maybe.map (Modal.map ServiceActivityPageMsg) activityModal
                             }
 
@@ -277,7 +294,6 @@ view appContext serviceId model =
                             { content = PageContent.map AssignedServiceDeployPageMsg deploy_.content
                             , serviceTitle = ServiceName.toString service.name ++ " > " ++ ServiceHash.toShortString hash
                             , description = deploy_.description
-                            , exposedLink = exposedDeployLink
                             , modal = Maybe.map (Modal.map AssignedServiceDeployPageMsg) deploy_.modal
                             }
 
@@ -287,7 +303,6 @@ view appContext serviceId model =
                                     (AssignedServiceDeploysPage.view appContext service deploys)
                             , serviceTitle = ServiceName.toString service.name
                             , description = description_
-                            , exposedLink = exposedLink_
                             , modal = Nothing
                             }
 
@@ -295,16 +310,12 @@ view appContext serviceId model =
                     { content = PageContent.oneColumn [ viewError e ]
                     , serviceTitle = "Service: " ++ ServiceId.toString serviceId
                     , description = viewDescription []
-                    , exposedLink = Nothing
                     , modal = Nothing
                     }
 
         pageTitle =
             PageTitle.custom
-                [ h1 []
-                    [ text serviceTitle
-                    , Maybe.withDefault UI.nothing exposedLink
-                    ]
+                [ h1 [] [ text serviceTitle ]
                 , p [ class "description" ] [ description ]
                 ]
 
