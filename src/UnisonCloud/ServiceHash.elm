@@ -1,8 +1,13 @@
 module UnisonCloud.ServiceHash exposing (..)
 
+import Html exposing (Html, span, text)
+import Html.Attributes exposing (class)
 import Json.Decode as Decode
 import Lib.Util as Util
 import Regex
+import UI.CopyOnClick as CopyOnClick
+import UI.Icon as Icon
+import UI.Tooltip as Tooltip
 
 
 type ServiceHash
@@ -135,6 +140,27 @@ toApiString (ServiceHash h) =
 equals : ServiceHash -> ServiceHash -> Bool
 equals (ServiceHash a) (ServiceHash b) =
     a == b
+
+
+
+-- VIEW
+
+
+view : ServiceHash -> Html msg
+view hash =
+    let
+        view_ =
+            Tooltip.rich
+                (span [ class "service-hash_tooltip" ]
+                    [ Icon.view Icon.clipboard, text "Click to copy the full hash" ]
+                )
+                |> Tooltip.tooltip
+                |> Tooltip.view
+                    (span [ class "service-hash" ]
+                        [ Icon.view Icon.hash, text (toUnprefixedShortString hash) ]
+                    )
+    in
+    CopyOnClick.view (toString hash) view_
 
 
 

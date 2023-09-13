@@ -1,0 +1,18 @@
+.service-hash {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  color: var(--u-color_text_subdued);
+  font-weight: bold;
+  font-family: var(--font-family-monospace);
+}
+
+.service-hash .icon {
+  color: var(--u-color_text_subdued);
+}
+
+.service-hash_tooltip {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}

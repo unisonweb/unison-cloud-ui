@@ -207,7 +207,9 @@ viewService appContext service =
             case service.activeDeploy of
                 Just d ->
                     Click.view [ class "active-deploy" ]
-                        [ div [ class "active-deploy_active-hash" ] [ text (ServiceHash.toShortString d.hash) ]
+                        [ div [ class "active-deploy_active-hash" ]
+                            [ ServiceHash.view d.hash
+                            ]
                         , ByAt.view appContext.timeZone appContext.now (ByAt.byAt d.deployedBy d.deployedAt)
                         ]
                         (Link.serviceDeployForService service.id d.hash)
