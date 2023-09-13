@@ -22,7 +22,6 @@ import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Link as Link
 import UnisonCloud.Service as Service exposing (Service)
-import UnisonCloud.Service.ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
 import UnisonCloud.ServiceHash as ServiceHash

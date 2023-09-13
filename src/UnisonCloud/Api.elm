@@ -15,7 +15,6 @@ import Http
 import Lib.HttpApi exposing (Endpoint(..))
 import Lib.UserHandle as UserHandle exposing (UserHandle)
 import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
-import UnisonCloud.Service.ServiceId as ServiceId exposing (ServiceId)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
