@@ -62,4 +62,8 @@ if (app.ports) {
   app.ports.trackEvent?.subscribe((eventName) => {
     Metrics.track(eventName);
   });
+
+  app.ports.copyText?.subscribe((text) => {
+    navigator.clipboard.writeText(text);
+  });
 }

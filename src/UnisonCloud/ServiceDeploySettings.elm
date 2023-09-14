@@ -1,4 +1,4 @@
-module UnisonCloud.ServiceDeploySettings exposing (..)
+port module UnisonCloud.ServiceDeploySettings exposing (..)
 
 import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class)
@@ -25,6 +25,10 @@ import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
 -- MODEL
+
+
+type alias SheetConfig =
+    { isAssignable : Bool }
 
 
 type AssignToTab
@@ -82,16 +86,19 @@ init =
 type Msg
     = OpenSheet ServiceHash
     | CloseSheet
+    | CopyFullServiceHash
+      -- Assign
     | ShowAssignModal
     | ChangeAssignToTab AssignToTab
     | SaveAssignTo
     | SaveAssignToFinished (HttpResult ())
     | UpdateServiceName String
     | UpdateSelectedExistingServiceName ServiceName
+      -- Undeploy
     | ShowUndeployConfirmationModal
     | UndeployConfirm
-    | CloseModal
     | UndeployServiceDeployFinished (HttpResult ())
+    | CloseModal
 
 
 type OutMsg
@@ -112,6 +119,12 @@ update appContext existingServices msg model =
 
         ( CloseModal, _ ) ->
             ( { model | modal = NoModal }, Cmd.none, None )
+
+        ( CopyFullServiceHash, Open serviceHash ) ->
+            ( { model | sheet = Closed }
+            , copyText (ServiceHash.toUnprefixedString serviceHash)
+            , None
+            )
 
         ( ShowAssignModal, Open serviceHash ) ->
             ( { model
@@ -256,6 +269,13 @@ assignToForm assignTo =
 
         AssignFailure _ f ->
             f
+
+
+
+-- PORTS
+
+
+port copyText : String -> Cmd msg
 
 
 
@@ -437,9 +457,14 @@ viewModal existingServices model =
 -- VIEW MENU & SHEET
 
 
-viewSheet : Html Msg
-viewSheet =
+viewSheet : SheetConfig -> Html Msg
+viewSheet cfg =
     let
+        copyFullHashOption =
+            Click.view [ class "option copy-full-hash-option" ]
+                [ Icon.view Icon.writingPad, text "Copy full hash" ]
+                (Click.onClick CopyFullServiceHash)
+
         assignOption =
             Click.view [ class "option assign assign-option" ]
                 [ Icon.view Icon.writingPad, text "Assign to Service" ]
@@ -449,13 +474,19 @@ viewSheet =
             Click.view [ class "option undeploy undeploy-option" ]
                 [ Icon.view Icon.trash, text "Undeploy" ]
                 (Click.onClick ShowUndeployConfirmationModal)
+
+        options =
+            if cfg.isAssignable then
+                [ copyFullHashOption, assignOption, undeployOption ]
+
+            else
+                [ copyFullHashOption, undeployOption ]
     in
-    div [ class "service-deploy-settings_sheet" ]
-        [ assignOption, undeployOption ]
+    div [ class "service-deploy-settings_sheet" ] options
 
 
-toAnchoredOverlay : ServiceHash -> Model -> AnchoredOverlay Msg
-toAnchoredOverlay serviceHash model =
+toAnchoredOverlay : SheetConfig -> ServiceHash -> Model -> AnchoredOverlay Msg
+toAnchoredOverlay cfg serviceHash model =
     let
         ( toggleMsg, active ) =
             case model.sheet of
@@ -487,12 +518,12 @@ toAnchoredOverlay serviceHash model =
             if ServiceHash.equals sh serviceHash then
                 ao_ button
                     |> AnchoredOverlay.withSheetPosition AnchoredOverlay.BottomRight
-                    |> AnchoredOverlay.withSheet (AnchoredOverlay.sheet viewSheet)
+                    |> AnchoredOverlay.withSheet (AnchoredOverlay.sheet (viewSheet cfg))
 
             else
                 ao_ button
 
 
-viewMenu : ServiceHash -> Model -> Html Msg
-viewMenu serviceHash model =
-    AnchoredOverlay.view (toAnchoredOverlay serviceHash model)
+viewMenu : SheetConfig -> ServiceHash -> Model -> Html Msg
+viewMenu cfg serviceHash model =
+    AnchoredOverlay.view (toAnchoredOverlay cfg serviceHash model)
