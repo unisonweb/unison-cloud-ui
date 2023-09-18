@@ -200,7 +200,7 @@ view appContext sh model =
                         , div [ class "tab-settings" ]
                             [ Html.map ServiceDeploySettingsMsg
                                 (ServiceDeploySettings.viewMenu
-                                    { isAssignable = False, iconButton = False }
+                                    { isAssignable = True, iconButton = False }
                                     sh
                                     model.serviceDeploySettings
                                 )
