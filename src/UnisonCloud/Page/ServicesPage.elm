@@ -124,42 +124,36 @@ update appContext msg model =
             ( { model | modal = NoModal }, Cmd.none )
 
         ServiceDeploySettingsMsg spMsg ->
-            case model.services of
-                Success services ->
-                    let
-                        ( serviceDeploySettings, cmd, out ) =
-                            ServiceDeploySettings.update
-                                appContext
-                                services
-                                spMsg
-                                model.serviceDeploySettings
+            let
+                ( serviceDeploySettings, cmd, out ) =
+                    ServiceDeploySettings.update
+                        appContext
+                        spMsg
+                        model.serviceDeploySettings
 
-                        ( unassignedDeploys, outCmd ) =
-                            case out of
-                                ServiceDeploySettings.UndeployedServiceDeploy sh ->
-                                    ( model.unassignedDeploys
-                                        |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
-                                    , Cmd.none
-                                    )
+                ( unassignedDeploys, outCmd ) =
+                    case out of
+                        ServiceDeploySettings.UndeployedServiceDeploy sh ->
+                            ( model.unassignedDeploys
+                                |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
+                            , Cmd.none
+                            )
 
-                                ServiceDeploySettings.AssignedToService sh ->
-                                    ( model.unassignedDeploys
-                                        |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
-                                    , fetchServices appContext
-                                    )
+                        ServiceDeploySettings.AssignedToService sh ->
+                            ( model.unassignedDeploys
+                                |> RemoteData.map (List.filter (.hash >> ServiceHash.equals sh >> not))
+                            , fetchServices appContext
+                            )
 
-                                _ ->
-                                    ( model.unassignedDeploys, Cmd.none )
-                    in
-                    ( { model
-                        | serviceDeploySettings = serviceDeploySettings
-                        , unassignedDeploys = unassignedDeploys
-                      }
-                    , Cmd.batch [ Cmd.map ServiceDeploySettingsMsg cmd, outCmd ]
-                    )
-
-                _ ->
-                    ( model, Cmd.none )
+                        _ ->
+                            ( model.unassignedDeploys, Cmd.none )
+            in
+            ( { model
+                | serviceDeploySettings = serviceDeploySettings
+                , unassignedDeploys = unassignedDeploys
+              }
+            , Cmd.batch [ Cmd.map ServiceDeploySettingsMsg cmd, outCmd ]
+            )
 
 
 
@@ -475,15 +469,10 @@ view appContext model =
         modal =
             case model.modal of
                 NoModal ->
-                    case model.services of
-                        Success services ->
-                            model.serviceDeploySettings
-                                |> ServiceDeploySettings.viewModal services
-                                |> Maybe.map (Modal.map ServiceDeploySettingsMsg)
-                                |> Maybe.map Modal.view
-
-                        _ ->
-                            Nothing
+                    model.serviceDeploySettings
+                        |> ServiceDeploySettings.viewModal
+                        |> Maybe.map (Modal.map ServiceDeploySettingsMsg)
+                        |> Maybe.map Modal.view
 
                 GetStartedModal ->
                     Just viewGetStartedModal
