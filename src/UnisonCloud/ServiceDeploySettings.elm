@@ -564,7 +564,7 @@ viewSheet cfg =
     let
         copyFullHashOption =
             Click.view [ class "option copy-full-hash-option" ]
-                [ Icon.view Icon.writingPad, text "Copy full hash" ]
+                [ Icon.view Icon.clipboard, text "Copy full hash" ]
                 (Click.onClick CopyFullServiceHash)
 
         assignOption =
