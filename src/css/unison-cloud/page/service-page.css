@@ -16,6 +16,7 @@
 }
 
 .service-page .service-description {
+  position: relative;
   margin-top: 0.75rem;
   display: flex;
   flex-direction: row;
@@ -75,5 +76,7 @@
 }
 
 .service-page .tab-settings {
-
+  position: absolute;
+  right: 0;
+  bottom: -3.25rem;
 }
