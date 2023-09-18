@@ -27,6 +27,12 @@
   color: var(--u-color_text_subdued);
 }
 
+.service-page .tab-settings {
+  position: absolute;
+  right: 0;
+  bottom: -3.25rem;
+}
+
 .service-page .service-description_hash {
   font-family: var(--font-monospace);
   display: flex;
@@ -73,10 +79,4 @@
   .assigned-service-deploy_hash
   a:hover {
   color: var(--u-color_interactive);
-}
-
-.service-page .tab-settings {
-  position: absolute;
-  right: 0;
-  bottom: -3.25rem;
 }

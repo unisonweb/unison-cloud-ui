@@ -173,7 +173,11 @@ view appContext _ serviceHash model =
                     [ ByAt.view appContext.timeZone appContext.now byAt
                     , div [ class "tab-settings" ]
                         [ Html.map ServiceDeploySettingsMsg
-                            (ServiceDeploySettings.viewMenu { isAssignable = False } serviceHash model.serviceDeploySettings)
+                            (ServiceDeploySettings.viewMenu
+                                { isAssignable = False, iconButton = False }
+                                serviceHash
+                                model.serviceDeploySettings
+                            )
                         ]
                     ]
             , modal = modal

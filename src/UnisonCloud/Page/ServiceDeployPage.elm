@@ -4,6 +4,7 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Http
 import Lib.HttpApi as HttpApi
+import Maybe.Extra as MaybeE
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.ByAt as ByAt
@@ -24,6 +25,7 @@ import UnisonCloud.AppHeader as Appheader
 import UnisonCloud.Link as Link
 import UnisonCloud.Log as Log
 import UnisonCloud.ServiceDeploy as ServiceDeploy exposing (ServiceDeploySummary)
+import UnisonCloud.ServiceDeploySettings as ServiceDeploySettings
 import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 import Url
 
@@ -34,6 +36,7 @@ import Url
 
 type alias Model =
     { deploy : WebData ServiceDeploySummary
+    , serviceDeploySettings : ServiceDeploySettings.Model
     , log : Log.Model
     }
 
@@ -44,7 +47,10 @@ init appContext serviceHash =
         ( log, logCmd ) =
             Log.init appContext (Log.ServiceDeployContext serviceHash)
     in
-    ( { deploy = Loading, log = log }
+    ( { deploy = Loading
+      , log = log
+      , serviceDeploySettings = ServiceDeploySettings.init
+      }
     , Cmd.batch [ fetchServiceDeploy appContext serviceHash, Cmd.map LogMsg logCmd ]
     )
 
@@ -55,6 +61,7 @@ init appContext serviceHash =
 
 type Msg
     = FetchServiceDeployFinished (WebData ServiceDeploySummary)
+    | ServiceDeploySettingsMsg ServiceDeploySettings.Msg
     | LogMsg Log.Msg
 
 
@@ -63,6 +70,18 @@ update appContext serviceHash msg model =
     case msg of
         FetchServiceDeployFinished deploy ->
             ( { model | deploy = deploy }, Cmd.none )
+
+        ServiceDeploySettingsMsg spMsg ->
+            let
+                ( serviceDeploySettings, cmd, _ ) =
+                    ServiceDeploySettings.update
+                        appContext
+                        spMsg
+                        model.serviceDeploySettings
+            in
+            ( { model | serviceDeploySettings = serviceDeploySettings }
+            , Cmd.map ServiceDeploySettingsMsg cmd
+            )
 
         LogMsg logMsg ->
             let
@@ -164,13 +183,30 @@ view appContext sh model =
 
                         byAt =
                             ByAt.byAt deploy.deployedBy deploy.deployedAt
+
+                        modal_ =
+                            logModal
+                                |> Maybe.map (Modal.map LogMsg)
+                                |> MaybeE.orElse
+                                    (model.serviceDeploySettings
+                                        |> ServiceDeploySettings.viewModal
+                                        |> Maybe.map (Modal.map ServiceDeploySettingsMsg)
+                                    )
                     in
                     ( [ Html.map LogMsg log ]
                     , viewDescription appContext
                         deploy
                         [ ByAt.view appContext.timeZone appContext.now byAt
+                        , div [ class "tab-settings" ]
+                            [ Html.map ServiceDeploySettingsMsg
+                                (ServiceDeploySettings.viewMenu
+                                    { isAssignable = False, iconButton = False }
+                                    sh
+                                    model.serviceDeploySettings
+                                )
+                            ]
                         ]
-                    , Maybe.map (Modal.map LogMsg) logModal
+                    , modal_
                     )
 
                 Failure e ->

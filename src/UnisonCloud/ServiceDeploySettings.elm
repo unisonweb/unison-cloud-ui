@@ -29,8 +29,10 @@ import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 -- MODEL
 
 
-type alias SheetConfig =
-    { isAssignable : Bool }
+type alias Config =
+    { isAssignable : Bool
+    , iconButton : Bool
+    }
 
 
 type AssignToTab
@@ -557,7 +559,7 @@ viewModal model =
 -- VIEW MENU & SHEET
 
 
-viewSheet : SheetConfig -> Html Msg
+viewSheet : Config -> Html Msg
 viewSheet cfg =
     let
         copyFullHashOption =
@@ -585,7 +587,7 @@ viewSheet cfg =
     div [ class "service-deploy-settings_sheet" ] options
 
 
-toAnchoredOverlay : SheetConfig -> ServiceHash -> Model -> AnchoredOverlay Msg
+toAnchoredOverlay : Config -> ServiceHash -> Model -> AnchoredOverlay Msg
 toAnchoredOverlay cfg serviceHash model =
     let
         ( toggleMsg, active ) =
@@ -600,10 +602,17 @@ toAnchoredOverlay cfg serviceHash model =
                     else
                         ( OpenSheet serviceHash, False )
 
+        button_ =
+            if cfg.iconButton then
+                Button.icon toggleMsg Icon.cog
+
+            else
+                Button.iconThenLabel toggleMsg Icon.cog "Settings"
+
         button =
-            Button.icon toggleMsg Icon.cog
-                |> Button.small
+            button_
                 |> Button.subdued
+                |> Button.small
                 |> Button.withIsActive active
                 |> Button.view
 
@@ -624,6 +633,6 @@ toAnchoredOverlay cfg serviceHash model =
                 ao_ button
 
 
-viewMenu : SheetConfig -> ServiceHash -> Model -> Html Msg
+viewMenu : Config -> ServiceHash -> Model -> Html Msg
 viewMenu cfg serviceHash model =
     AnchoredOverlay.view (toAnchoredOverlay cfg serviceHash model)

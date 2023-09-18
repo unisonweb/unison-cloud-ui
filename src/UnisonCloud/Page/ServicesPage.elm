@@ -245,7 +245,10 @@ viewUnassignedDeploys appContext hasServices deploys serviceDeploySettings =
         viewUnassignedDeploy d =
             let
                 settingsMenu =
-                    ServiceDeploySettings.viewMenu { isAssignable = True } d.hash serviceDeploySettings
+                    ServiceDeploySettings.viewMenu
+                        { isAssignable = True, iconButton = True }
+                        d.hash
+                        serviceDeploySettings
             in
             div [ class "unassigned-deploy-row" ]
                 [ span [ class "unassigned-deploy-row_hash" ]
