@@ -275,7 +275,7 @@ view appContext serviceName model =
                             in
                             { content = PageContent.map AssignedServiceDeployPageMsg deploy_.content
                             , serviceTitle = ServiceName.toString service.name ++ " > " ++ ServiceHash.toShortString hash
-                            , description = deploy_.description
+                            , description = Html.map AssignedServiceDeployPageMsg deploy_.description
                             , exposedLink = exposedDeployLink
                             , modal = Maybe.map (Modal.map AssignedServiceDeployPageMsg) deploy_.modal
                             }

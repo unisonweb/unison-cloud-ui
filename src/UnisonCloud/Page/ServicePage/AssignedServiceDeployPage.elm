@@ -3,6 +3,7 @@ module UnisonCloud.Page.ServicePage.AssignedServiceDeployPage exposing (..)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Http
+import Lib.HttpApi as HttpApi
 import Maybe.Extra as MaybeE
 import RemoteData exposing (RemoteData(..), WebData)
 import UI.ByAt as ByAt
@@ -11,6 +12,7 @@ import UI.ErrorCard as ErrorCard
 import UI.Modal as Modal
 import UI.PageContent as PageContent exposing (PageContent)
 import UI.Placeholder as Placeholder
+import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.Log as Log
 import UnisonCloud.Service exposing (Service)
@@ -42,7 +44,7 @@ init appContext _ serviceHash =
       , log = log
       , serviceDeploySettings = ServiceDeploySettings.init
       }
-    , Cmd.map LogMsg logCmd
+    , Cmd.batch [ fetchServiceDeploy appContext serviceHash, Cmd.map LogMsg logCmd ]
     )
 
 
@@ -51,13 +53,17 @@ init appContext _ serviceHash =
 
 
 type Msg
-    = ServiceDeploySettingsMsg ServiceDeploySettings.Msg
+    = FetchServiceDeployFinished (WebData ServiceDeploySummary)
+    | ServiceDeploySettingsMsg ServiceDeploySettings.Msg
     | LogMsg Log.Msg
 
 
 update : AppContext -> ServiceName -> ServiceHash -> Msg -> Model -> ( Model, Cmd Msg )
 update appContext _ serviceHash msg model =
     case msg of
+        FetchServiceDeployFinished deploy ->
+            ( { model | deploy = deploy }, Cmd.none )
+
         ServiceDeploySettingsMsg spMsg ->
             let
                 ( serviceDeploySettings, cmd, _ ) =
@@ -79,6 +85,19 @@ update appContext _ serviceHash msg model =
                         model.log
             in
             ( { model | log = log }, Cmd.map LogMsg logCmd )
+
+
+
+-- EFFECTS
+
+
+fetchServiceDeploy : AppContext -> ServiceHash -> Cmd Msg
+fetchServiceDeploy appContext serviceHash =
+    CloudApi.serviceDeploy serviceHash
+        |> HttpApi.toRequest
+            ServiceDeploy.decodeSummary
+            (RemoteData.fromResult >> FetchServiceDeployFinished)
+        |> HttpApi.perform appContext.api
 
 
 
@@ -111,7 +130,7 @@ view :
     -> Model
     ->
         { content : PageContent Msg
-        , description : Html msg
+        , description : Html Msg
         , modal : Maybe (Modal.Modal Msg)
         , exposedUrl : Maybe Url
         }
@@ -148,22 +167,14 @@ view appContext _ serviceHash model =
                                 |> Maybe.map (Modal.map ServiceDeploySettingsMsg)
                             )
             in
-            { content =
-                PageContent.oneColumn
-                    [ div [ class "tab-settings" ]
-                        [ Html.map
-                            ServiceDeploySettingsMsg
-                            (ServiceDeploySettings.viewMenu
-                                { isAssignable = False }
-                                serviceHash
-                                model.serviceDeploySettings
-                            )
-                        ]
-                    , Html.map LogMsg log
-                    ]
+            { content = PageContent.oneColumn [ Html.map LogMsg log ]
             , description =
                 viewDescription
                     [ ByAt.view appContext.timeZone appContext.now byAt
+                    , div [ class "tab-settings" ]
+                        [ Html.map ServiceDeploySettingsMsg
+                            (ServiceDeploySettings.viewMenu { isAssignable = False } serviceHash model.serviceDeploySettings)
+                        ]
                     ]
             , modal = modal
             , exposedUrl = ServiceDeploy.exposedUrl appContext deploy
