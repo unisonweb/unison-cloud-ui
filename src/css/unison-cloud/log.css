@@ -185,13 +185,12 @@
 
 .log-entry_log-line .log-line_expanded tr:first-child th,
 .log-entry_log-line .log-line_expanded tr:first-child td {
-  border-radius: var(--border-radius-base) 0 0 0;
+  border-top-left-radius: var(--border-radius-base);
 }
 
 .log-entry_log-line .log-line_expanded tr:last-child th,
 .log-entry_log-line .log-line_expanded tr:last-child td {
-  border-bottom: 0;
-  border-radius: 0 0 0 var(--border-radius-base);
+  border-bottom-left-radius: var(--border-radius-base);
 }
 
 .log-entry_log-line .log-line_expanded th {
@@ -210,6 +209,7 @@
 
 .log-entry_log-line .log-line_log-message_message {
   text-wrap: balance;
+  max-width: 86ch;
 }
 
 .log-entry_log-line .log-line_log-message_truncated-word {
