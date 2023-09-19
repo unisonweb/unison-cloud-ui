@@ -195,7 +195,7 @@
 .log-entry_log-line .log-line_expanded tr:last-child th,
 .log-entry_log-line .log-line_expanded tr:last-child td {
   border-bottom: 0;
-  border-top-left-radius: var(--border-radius-base);
+  border-bottom-left-radius: var(--border-radius-base);
 }
 
 .log-entry_log-line .log-line_expanded th {
