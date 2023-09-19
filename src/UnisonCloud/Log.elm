@@ -489,10 +489,10 @@ viewDataTable data =
             let
                 maxLength =
                     if type_ == "key" then
-                        16
+                        12
 
                     else
-                        32
+                        56
             in
             if String.length s > maxLength then
                 let
