@@ -58,7 +58,7 @@ import List.Extra as ListE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
-import String.Extra exposing (ellipsis)
+import String.Extra as StringE
 import Task
 import Time
 import UI
@@ -146,7 +146,7 @@ truncating long words
 -}
 maxCharsPerLine : Int
 maxCharsPerLine =
-    90
+    84
 
 
 
@@ -458,8 +458,18 @@ viewLogMessage line =
             let
                 truncateLongWords w =
                     if String.length w > maxCharsPerLine then
-                        span [ class "log-line_truncated-word" ]
-                            [ text (ellipsis maxCharsPerLine w) ]
+                        let
+                            content =
+                                Tooltip.text (StringE.wrap 40 w)
+
+                            trigger =
+                                span [ class "log-line_truncated-word" ]
+                                    [ text (StringE.ellipsis maxCharsPerLine w) ]
+                        in
+                        content
+                            |> Tooltip.tooltip
+                            |> Tooltip.withArrow Tooltip.Start
+                            |> Tooltip.view trigger
 
                     else
                         text w
