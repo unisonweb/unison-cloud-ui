@@ -150,7 +150,7 @@
 }
 
 .log-entry_log-line .log-line_collapsed {
-  height: 1.5rem;
+  min-height: 1.5rem;
   display: flex;
   flex-direction: row;
   align-items: center;
