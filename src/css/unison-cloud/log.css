@@ -164,6 +164,7 @@
 
 .log-entry_log-line .log-line_expanded {
   margin-left: 7.5rem;
+  margin-right: 2rem;
   border: 1px solid var(--u-color_border);
   border-radius: var(--border-radius-base);
   position: relative;
@@ -219,7 +220,7 @@
 
 .log-entry_log-line .log-line_log-message_message {
   text-wrap: balance;
-  max-width: 86ch;
+  max-width: 90ch;
 }
 
 .log-entry_log-line .log-line_log-message_truncated-word {
