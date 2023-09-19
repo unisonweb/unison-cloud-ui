@@ -30,7 +30,21 @@ module UnisonCloud.Log exposing (..)
 
 import Browser.Dom as Dom
 import Dict
-import Html exposing (Html, div, h2, hr, p, table, tbody, td, text, th, tr)
+import Html
+    exposing
+        ( Html
+        , div
+        , h2
+        , hr
+        , p
+        , span
+        , table
+        , tbody
+        , td
+        , text
+        , th
+        , tr
+        )
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (on)
 import Html.Keyed
@@ -44,6 +58,7 @@ import List.Extra as ListE
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
+import String.Extra exposing (ellipsis)
 import Task
 import Time
 import UI
@@ -124,6 +139,14 @@ pollingInterval =
 pageSize : Int
 pageSize =
     30
+
+
+{-| The number of characters that comfortably fit on a line, used for
+truncating long words
+-}
+maxCharsPerLine : Int
+maxCharsPerLine =
+    90
 
 
 
@@ -431,8 +454,22 @@ viewLogMessage line =
         Just "" ->
             viewRawData
 
-        Just m ->
-            div [ class "log-line_log-message_message" ] [ text m ]
+        Just message ->
+            let
+                truncateLongWords w =
+                    if String.length w > maxCharsPerLine then
+                        span [ class "log-line_truncated-word" ]
+                            [ text (ellipsis maxCharsPerLine w) ]
+
+                    else
+                        text w
+
+                words =
+                    message
+                        |> String.split " "
+                        |> List.map truncateLongWords
+            in
+            div [ class "log-line_log-message_message" ] words
 
 
 viewDataTable : LogLine.LogLineData -> Html Msg
