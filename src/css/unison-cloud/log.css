@@ -236,26 +236,6 @@
   color: var(--u-color_icon_subdued);
 }
 
-/* last tooltip styled to appear above (like .tooltip.above) */
-.log-entry_log-line:last-child .tooltip .tooltip-bubble {
-  padding-bottom: 0.5rem;
-  bottom: 1.5rem;
-  top: auto;
-}
-
-.log-entry_log-line:last-child .tooltip .tooltip-bubble:after {
-  top: 100%;
-  bottom: auto;
-  border-top-color: var(--color-tooltip-bg);
-}
-
-.log-entry_log-line:last-child .tooltip .tooltip-bubble:before {
-  top: 100%;
-  bottom: auto;
-  border-top-color: var(--color-tooltip-border);
-}
-
-
 /* log level */
 
 .log-level {

@@ -424,8 +424,8 @@ finally, if there's no data, render an empty line.
 TODO:Add various highlights, like bolding of GET and POST.
 
 -}
-viewLogMessage : LogLine -> Html Msg
-viewLogMessage line =
+viewLogMessage : Tooltip.Position -> LogLine -> Html Msg
+viewLogMessage tooltipPosition line =
     let
         viewRawData =
             if LogLine.hasData line then
@@ -451,14 +451,14 @@ viewLogMessage line =
                 words =
                     message
                         |> String.split " "
-                        |> List.map (viewTruncated 72 "log-line-message_truncated-word")
+                        |> List.map (viewTruncated 72 tooltipPosition "log-line-message_truncated-word")
                         |> List.intersperse (text " ")
             in
             div [ class "log-line_log-message_message" ] words
 
 
-viewTruncated : Int -> String -> String -> Html msg
-viewTruncated maxLength className word =
+viewTruncated : Int -> Tooltip.Position -> String -> String -> Html msg
+viewTruncated maxLength tooltipPosition className word =
     if String.length word > maxLength then
         let
             content =
@@ -469,6 +469,7 @@ viewTruncated maxLength className word =
         in
         content
             |> Tooltip.tooltip
+            |> Tooltip.withPosition tooltipPosition
             |> Tooltip.withArrow Tooltip.Start
             |> Tooltip.view trigger
 
@@ -476,16 +477,24 @@ viewTruncated maxLength className word =
         text word
 
 
-viewDataTable : LogLine.LogLineData -> Html Msg
-viewDataTable data =
+viewDataTable : Tooltip.Position -> LogLine.LogLineData -> Html Msg
+viewDataTable tooltipPosition data =
     let
         key k =
-            viewTruncated 12 "log-line_log-message_data-table_truncated-key" k
+            viewTruncated 12
+                tooltipPosition
+                "log-line_log-message_data-table_truncated-key"
+                k
 
         value v =
             v
                 |> String.split " "
-                |> List.map (viewTruncated 56 "log-line_log-message_data-table_truncated-value-word")
+                |> List.map
+                    (viewTruncated
+                        56
+                        tooltipPosition
+                        "log-line_log-message_data-table_truncated-value-word"
+                    )
                 |> List.intersperse (text " ")
     in
     data
@@ -494,8 +503,8 @@ viewDataTable data =
         |> (\d -> table [ class "log-line_log-message_data-table" ] [ tbody [] d ])
 
 
-viewLoggedAt : Time.Zone -> DateTime -> Html Msg
-viewLoggedAt zone dateTime =
+viewLoggedAt : Time.Zone -> Tooltip.Position -> DateTime -> Html Msg
+viewLoggedAt zone tooltipPosition dateTime =
     let
         content =
             Tooltip.text (DateTime.toString DateTime.FullDateTime zone dateTime)
@@ -506,12 +515,13 @@ viewLoggedAt zone dateTime =
     in
     content
         |> Tooltip.tooltip
+        |> Tooltip.withPosition tooltipPosition
         |> Tooltip.withArrow Tooltip.Start
         |> Tooltip.view trigger
 
 
-viewLine : Time.Zone -> Model -> LogLine -> Html Msg
-viewLine zone model line =
+viewLine : Time.Zone -> Model -> Tooltip.Position -> LogLine -> Html Msg
+viewLine zone model tooltipPosition line =
     let
         isExpanded =
             Set.member line.id model.log.expandedLines
@@ -537,7 +547,9 @@ viewLine zone model line =
 
         expanded =
             if isExpanded then
-                div [ class "log-line_expanded" ] [ viewDataTable line.data ]
+                div [ class "log-line_expanded" ]
+                    [ viewDataTable tooltipPosition line.data
+                    ]
 
             else
                 UI.nothing
@@ -550,8 +562,8 @@ viewLine zone model line =
         [ div [ class "log-line_collapsed" ]
             [ caret
             , LogLevel.view line.level
-            , viewLoggedAt zone line.loggedAt
-            , viewLogMessage line
+            , viewLoggedAt zone tooltipPosition line.loggedAt
+            , viewLogMessage tooltipPosition line
             ]
         , expanded
         ]
@@ -567,21 +579,33 @@ viewDateBoundary date =
         ]
 
 
-viewEntry : Time.Zone -> Model -> LogEntry -> Html Msg
-viewEntry zone model entry =
+viewEntry : Time.Zone -> Model -> Int -> LogEntry -> Html Msg
+viewEntry zone model index entry =
+    let
+        isLastEntry =
+            -- we're going backwards through the list so the first entry in the list is the last in the UI.
+            index == 0
+
+        tooltipPosition =
+            if isLastEntry then
+                Tooltip.Above
+
+            else
+                Tooltip.Below
+    in
     case entry of
         Line line ->
-            viewLine zone model line
+            viewLine zone model tooltipPosition line
 
         DateBoundary date ->
             viewDateBoundary date
 
 
-viewKeyedEntry : Time.Zone -> Model -> LogEntry -> ( String, Html Msg )
-viewKeyedEntry zone model entry =
+viewKeyedEntry : Time.Zone -> Model -> Int -> LogEntry -> ( String, Html Msg )
+viewKeyedEntry zone model index entry =
     let
         row =
-            lazy (viewEntry zone model) entry
+            lazy (viewEntry zone model index) entry
 
         key =
             case entry of
@@ -715,7 +739,7 @@ view appContext model =
                 lines =
                     logLinesOldestToNewest model.log
                         |> LogEntries.fromLines timeZone
-                        |> List.map (viewKeyedEntry timeZone model)
+                        |> List.indexedMap (viewKeyedEntry timeZone model)
             in
             case lines of
                 [] ->
