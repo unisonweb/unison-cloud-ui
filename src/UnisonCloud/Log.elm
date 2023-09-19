@@ -468,6 +468,7 @@ viewLogMessage line =
                     message
                         |> String.split " "
                         |> List.map truncateLongWords
+                        |> List.intersperse (text " ")
             in
             div [ class "log-line_log-message_message" ] words
 
