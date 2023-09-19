@@ -205,10 +205,15 @@
 .log-entry_log-line .log-line_logged-at {
   color: var(--u-color_text_subdued);
   font-weight: 300;
+  tooltip: help;
 }
 
 .log-entry_log-line .log-line_log-message_message {
   text-wrap: balance;
+}
+
+.log-entry_log-line .log-line_log-message_truncated-word {
+  cursor: help;
 }
 
 .log-entry_log-line .log-line_log-message_message .tooltip {

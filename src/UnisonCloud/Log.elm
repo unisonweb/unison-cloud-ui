@@ -33,11 +33,11 @@ import Dict
 import Html
     exposing
         ( Html
+        , abbr
         , div
         , h2
         , hr
         , p
-        , span
         , table
         , tbody
         , td
@@ -456,14 +456,14 @@ viewLogMessage line =
         Just message ->
             let
                 truncateLongWords w =
-                    if String.length w > maxWordLenght then
+                    if String.length w > maxWordLength then
                         let
                             content =
-                                Tooltip.text (StringE.wrap maxWordLenght w)
+                                Tooltip.text (StringE.wrap maxWordLength w)
 
                             trigger =
-                                span [ class "log-line_truncated-word" ]
-                                    [ text (StringE.ellipsis maxCharsPerLine w) ]
+                                abbr [ class "log-line-message_truncated-word" ]
+                                    [ text (StringE.ellipsis maxWordLength w) ]
                         in
                         content
                             |> Tooltip.tooltip
