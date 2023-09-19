@@ -485,15 +485,15 @@ viewLogMessage line =
 viewDataTable : LogLine.LogLineData -> Html Msg
 viewDataTable data =
     let
-        truncatedValue v =
-            if String.length v > maxWordLength then
+        truncate type_ s =
+            if String.length s > maxWordLength then
                 let
                     content =
-                        Tooltip.text (StringE.wrap maxWordLength v)
+                        Tooltip.text (StringE.wrap maxWordLength s)
 
                     trigger =
-                        abbr [ class "log-line_log-message_data-table_truncated-value" ]
-                            [ text (StringE.ellipsis maxWordLength v) ]
+                        abbr [ class ("log-line_log-message_data-table_truncated-" ++ type_) ]
+                            [ text (StringE.ellipsis maxWordLength s) ]
                 in
                 content
                     |> Tooltip.tooltip
@@ -501,11 +501,11 @@ viewDataTable data =
                     |> Tooltip.view trigger
 
             else
-                text v
+                text s
     in
     data
         |> Dict.toList
-        |> List.map (\( k, v ) -> tr [] [ th [] [ text k ], td [] [ truncatedValue v ] ])
+        |> List.map (\( k, v ) -> tr [] [ th [] [ truncate "key" k ], td [] [ truncate "value" v ] ])
         |> (\d -> table [ class "log-line_log-message_data-table" ] [ tbody [] d ])
 
 
