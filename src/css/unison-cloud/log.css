@@ -105,8 +105,7 @@
   background: var(--u-color_border);
   content: "";
   top: 1rem;
-  height: 1rem;
-  bottom: 0;
+  bottom: -1rem;
   left: calc(2.5rem - 0.5px);
   width: 1px;
 }
