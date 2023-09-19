@@ -482,42 +482,40 @@ viewLogMessage line =
             div [ class "log-line_log-message_message" ] words
 
 
+truncate : Int -> String -> String -> Html msg
+truncate maxLength className word =
+    if String.length word > maxLength then
+        let
+            content =
+                Tooltip.text (StringE.wrap maxLength word)
+
+            trigger =
+                abbr [ class className ] [ text (StringE.ellipsis maxLength word) ]
+        in
+        content
+            |> Tooltip.tooltip
+            |> Tooltip.withArrow Tooltip.Start
+            |> Tooltip.view trigger
+
+    else
+        text word
+
+
 viewDataTable : LogLine.LogLineData -> Html Msg
 viewDataTable data =
     let
-        truncate type_ s =
-            if type_ == "value" && not (String.contains " " s) then
-                let
-                    maxLength =
-                        if type_ == "key" then
-                            12
+        key k =
+            truncate 12 "log-line_log-message_data-table_truncated-key" k
 
-                        else
-                            56
-                in
-                if String.length s > maxLength then
-                    let
-                        content =
-                            Tooltip.text (StringE.wrap maxLength s)
-
-                        trigger =
-                            abbr [ class ("log-line_log-message_data-table_truncated-" ++ type_) ]
-                                [ text (StringE.ellipsis maxLength s) ]
-                    in
-                    content
-                        |> Tooltip.tooltip
-                        |> Tooltip.withArrow Tooltip.Start
-                        |> Tooltip.view trigger
-
-                else
-                    text s
-
-            else
-                text s
+        value v =
+            v
+                |> String.split " "
+                |> List.map (truncate 56 "log-line_log-message_data-table_truncated-value-word")
+                |> List.intersperse (text " ")
     in
     data
         |> Dict.toList
-        |> List.map (\( k, v ) -> tr [] [ th [] [ truncate "key" k ], td [] [ truncate "value" v ] ])
+        |> List.map (\( k, v ) -> tr [] [ th [] [ key k ], td [] (value v) ])
         |> (\d -> table [ class "log-line_log-message_data-table" ] [ tbody [] d ])
 
 
