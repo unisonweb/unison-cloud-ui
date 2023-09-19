@@ -204,6 +204,7 @@
   text-align: right;
   font-weight: normal;
   color: var(--u-color_text_subdued);
+  vertical-align: top;
 }
 
 .log-entry_log-line .log-line_log-message_data-table .tooltip {
