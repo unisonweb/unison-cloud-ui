@@ -172,7 +172,7 @@
 .log-entry_log-line .log-line_expanded:before {
   content: "";
   top: -1px;
-  left: -6.1rem;
+  left: -5.1rem;
   position: absolute;
   border-left: 1px solid var(--u-color_border);
   border-bottom: 1px solid var(--u-color_border);
