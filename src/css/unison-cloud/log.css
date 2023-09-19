@@ -236,6 +236,10 @@
   color: var(--u-color_icon_subdued);
 }
 
+.log-entry_log-line .tooltip.above .tooltip-bubble {
+  bottom: 0.75rem;
+}
+
 /* log level */
 
 .log-level {
