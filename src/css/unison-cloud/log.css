@@ -70,6 +70,7 @@
   border-radius: 0.5rem;
   display: flex;
   flex-direction: row;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   line-height: 1;
@@ -150,10 +151,10 @@
 }
 
 .log-entry_log-line .log-line_collapsed {
-  min-height: 1.5rem;
+  min-height: 1.5rem; /* sometimes log lines are very long and we want them to wrap nicely, so don't enforce a height */
+  padding-top: 0.25rem; /* this helps things look centered with the 1.5rem min-height */
   display: flex;
   flex-direction: row;
-  align-items: center;
   flex-shrink: 0;
   gap: 0.5rem;
 }
