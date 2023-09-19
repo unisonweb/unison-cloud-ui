@@ -207,11 +207,11 @@
   font-weight: 300;
 }
 
-.log-entry_log-line .log-line_log-message {
+.log-entry_log-line .log-line_log-message_message {
   text-wrap: balance;
 }
 
-.log-entry_log-line .log-line_log-message .tooltip {
+.log-entry_log-line .log-line_log-message_message .tooltip {
   white-space: pre;
 }
 
