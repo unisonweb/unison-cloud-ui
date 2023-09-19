@@ -141,13 +141,6 @@ pageSize =
     30
 
 
-{-| The number of characters that comfortably fit in a world on a line.
--}
-maxWordLength : Int
-maxWordLength =
-    60
-
-
 
 -- UPDATE
 
@@ -455,35 +448,17 @@ viewLogMessage line =
 
         Just message ->
             let
-                truncateLongWords w =
-                    if String.length w > maxWordLength then
-                        let
-                            content =
-                                Tooltip.text (StringE.wrap maxWordLength w)
-
-                            trigger =
-                                abbr [ class "log-line-message_truncated-word" ]
-                                    [ text (StringE.ellipsis maxWordLength w) ]
-                        in
-                        content
-                            |> Tooltip.tooltip
-                            |> Tooltip.withArrow Tooltip.Start
-                            |> Tooltip.view trigger
-
-                    else
-                        text w
-
                 words =
                     message
                         |> String.split " "
-                        |> List.map truncateLongWords
+                        |> List.map (viewTruncated 72 "log-line-message_truncated-word")
                         |> List.intersperse (text " ")
             in
             div [ class "log-line_log-message_message" ] words
 
 
-truncate : Int -> String -> String -> Html msg
-truncate maxLength className word =
+viewTruncated : Int -> String -> String -> Html msg
+viewTruncated maxLength className word =
     if String.length word > maxLength then
         let
             content =
@@ -505,12 +480,12 @@ viewDataTable : LogLine.LogLineData -> Html Msg
 viewDataTable data =
     let
         key k =
-            truncate 12 "log-line_log-message_data-table_truncated-key" k
+            viewTruncated 12 "log-line_log-message_data-table_truncated-key" k
 
         value v =
             v
                 |> String.split " "
-                |> List.map (truncate 56 "log-line_log-message_data-table_truncated-value-word")
+                |> List.map (viewTruncated 56 "log-line_log-message_data-table_truncated-value-word")
                 |> List.intersperse (text " ")
     in
     data
