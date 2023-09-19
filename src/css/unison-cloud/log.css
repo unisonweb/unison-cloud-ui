@@ -206,6 +206,10 @@
   color: var(--u-color_text_subdued);
 }
 
+.log-entry_log-line .log-line_log-message_data-table .tooltip {
+  white-space: pre;
+}
+
 .log-entry_log-line .log-line_logged-at {
   color: var(--u-color_text_subdued);
   font-weight: 300;
