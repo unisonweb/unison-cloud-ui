@@ -486,27 +486,31 @@ viewDataTable : LogLine.LogLineData -> Html Msg
 viewDataTable data =
     let
         truncate type_ s =
-            let
-                maxLength =
-                    if type_ == "key" then
-                        12
-
-                    else
-                        56
-            in
-            if String.length s > maxLength then
+            if type_ == "value" && not (String.contains " " s) then
                 let
-                    content =
-                        Tooltip.text (StringE.wrap maxLength s)
+                    maxLength =
+                        if type_ == "key" then
+                            12
 
-                    trigger =
-                        abbr [ class ("log-line_log-message_data-table_truncated-" ++ type_) ]
-                            [ text (StringE.ellipsis maxLength s) ]
+                        else
+                            56
                 in
-                content
-                    |> Tooltip.tooltip
-                    |> Tooltip.withArrow Tooltip.Start
-                    |> Tooltip.view trigger
+                if String.length s > maxLength then
+                    let
+                        content =
+                            Tooltip.text (StringE.wrap maxLength s)
+
+                        trigger =
+                            abbr [ class ("log-line_log-message_data-table_truncated-" ++ type_) ]
+                                [ text (StringE.ellipsis maxLength s) ]
+                    in
+                    content
+                        |> Tooltip.tooltip
+                        |> Tooltip.withArrow Tooltip.Start
+                        |> Tooltip.view trigger
+
+                else
+                    text s
 
             else
                 text s
