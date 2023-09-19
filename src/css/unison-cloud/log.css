@@ -158,6 +158,10 @@
   gap: 0.5rem;
 }
 
+.log-entry_log-line .log-line_collapsed .button {
+  margin-top: -0.25rem; /* adjusting for the padding-top on the .log-line_collapsed container */
+}
+
 .log-entry_log-line .log-line_expanded {
   margin-left: 3.5rem;
   border: 1px solid var(--u-color_border);
@@ -190,7 +194,8 @@
 
 .log-entry_log-line .log-line_expanded tr:last-child th,
 .log-entry_log-line .log-line_expanded tr:last-child td {
-  border-bottom-left-radius: var(--border-radius-base);
+  border-bottom: 0;
+  border-top-left-radius: var(--border-radius-base);
 }
 
 .log-entry_log-line .log-line_expanded th {
