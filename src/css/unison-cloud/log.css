@@ -211,6 +211,10 @@
   text-wrap: balance;
 }
 
+.log-entry_log-line .log-line_log-message .tooltip {
+  white-space: pre;
+}
+
 .log-entry_log-line .log-line_log-message_no-data .icon {
   font-size: var(--font-size-extra-small);
   color: var(--u-color_icon_subdued);
