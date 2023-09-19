@@ -141,12 +141,11 @@ pageSize =
     30
 
 
-{-| The number of characters that comfortably fit on a line, used for
-truncating long words
+{-| The number of characters that comfortably fit in a world on a line.
 -}
-maxCharsPerLine : Int
-maxCharsPerLine =
-    84
+maxWordLength : Int
+maxWordLength =
+    60
 
 
 
@@ -457,10 +456,10 @@ viewLogMessage line =
         Just message ->
             let
                 truncateLongWords w =
-                    if String.length w > maxCharsPerLine then
+                    if String.length w > maxWordLenght then
                         let
                             content =
-                                Tooltip.text (StringE.wrap 40 w)
+                                Tooltip.text (StringE.wrap maxWordLenght w)
 
                             trigger =
                                 span [ class "log-line_truncated-word" ]
