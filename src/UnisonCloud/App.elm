@@ -2,6 +2,8 @@ module UnisonCloud.App exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
+import Time
+import UI.DateTime as DateTime
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppDocument as AppDocument
 import UnisonCloud.AppError exposing (AppError)
@@ -95,6 +97,7 @@ init appContext route =
 
 type Msg
     = NoOp
+    | Tick Time.Posix
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | ToggleHelpAndResourcesMenu
@@ -107,6 +110,16 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( model.page, msg ) of
+        ( _, Tick t ) ->
+            let
+                appContext =
+                    model.appContext
+
+                appContext_ =
+                    { appContext | now = DateTime.fromPosix t }
+            in
+            ( { model | appContext = appContext_ }, Cmd.none )
+
         ( _, LinkClicked urlRequest ) ->
             case urlRequest of
                 Browser.Internal url ->
@@ -209,7 +222,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Time.every 1000 Tick
 
 
 
