@@ -290,7 +290,7 @@ viewGetStartedModal =
     let
         getStarted =
             """.> project.create-empty
-amusing-giraffe/main> pull @unison/cloud-start/latest
+amusing-giraffe/main> pull @unison/cloud-start/releases/latest
 amusing-giraffe/main> run examples.helloWorld.deploy"""
 
         content =
