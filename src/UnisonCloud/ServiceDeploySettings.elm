@@ -421,7 +421,7 @@ viewAssignToServiceModal serviceHash assignToModal =
                                 "Service Name"
                                 form.newServiceName
                                 |> TextField.withHelpText "Must exist of letters, numbers, or dashes. No spaces, and no other symbols."
-                                |> TextField.withIsValid ServiceName.isValidName
+                                |> TextField.withValidityCheck ServiceName.isValidName
                                 |> TextField.withAutofocus
                                 |> TextField.view
                             ]

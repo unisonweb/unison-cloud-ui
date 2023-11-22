@@ -146,8 +146,8 @@ equals (ServiceHash a) (ServiceHash b) =
 -- VIEW
 
 
-view : ServiceHash -> Html msg
-view hash =
+view : (String -> msg) -> ServiceHash -> Html msg
+view onCopyMsg hash =
     let
         view_ =
             Tooltip.rich
@@ -160,7 +160,7 @@ view hash =
                         [ Icon.view Icon.hash, text (toUnprefixedShortString hash) ]
                     )
     in
-    CopyOnClick.view (toString hash) view_
+    CopyOnClick.view onCopyMsg (toString hash) view_
 
 
 

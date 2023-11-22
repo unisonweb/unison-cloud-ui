@@ -104,13 +104,13 @@ slack =
 login : Click msg
 login =
     -- TODO: Use Env.apiUrl
-    Click.externalHref "https://api.unison.cloud/login"
+    Click.externalHref_ Click.Self "https://api.unison.cloud/login"
 
 
 logout : Click msg
 logout =
     -- TODO: Use Env.apiUrl
-    Click.externalHref "https://api.unison.cloud/logout"
+    Click.externalHref_ Click.Self "https://api.unison.cloud/logout"
 
 
 exposedService : Click msg
