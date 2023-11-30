@@ -2,6 +2,7 @@ module UnisonCloud.ServiceDeploy exposing (..)
 
 import Json.Decode as Decode exposing (string)
 import Json.Decode.Pipeline exposing (optional, required)
+import Lib.UserHandle as UserHandle
 import Set exposing (Set)
 import UI.DateTime as DateTime exposing (DateTime)
 import UnisonCloud.AppContext exposing (AppContext)
@@ -73,6 +74,8 @@ exposedUrl appContext d =
     if isExposed d then
         Url.fromString
             ("https://"
+                ++ UserHandle.toUnprefixedString d.deployedBy.handle
+                ++ "."
                 ++ appContext.exposedServiceDomain
                 ++ "/h/"
                 ++ ServiceHash.toUnprefixedString d.hash
