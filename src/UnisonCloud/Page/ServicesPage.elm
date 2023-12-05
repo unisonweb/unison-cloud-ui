@@ -96,7 +96,7 @@ update : AppContext -> Msg -> Model -> ( Model, Cmd Msg )
 update appContext msg model =
     case msg of
         FetchServicesFinished services ->
-            ( { model | services = services }, Cmd.none )
+            ( { model | services = notFoundToEmptyList services }, Cmd.none )
 
         FetchUnassignedDeploysFinished deploys ->
             let
@@ -108,6 +108,7 @@ update appContext msg model =
                                 (Util.descending compare)
                             )
                         |> RemoteData.map (List.filter ServiceDeploy.isLive)
+                        |> notFoundToEmptyList
             in
             ( { model | unassignedDeploys = deploys_ }, Cmd.none )
 
@@ -158,6 +159,16 @@ update appContext msg model =
 
 
 -- EFFECTS
+
+
+notFoundToEmptyList : WebData (List a) -> WebData (List a)
+notFoundToEmptyList ds =
+    case ds of
+        Failure (Http.BadStatus 404) ->
+            Success []
+
+        _ ->
+            ds
 
 
 fetchServices : AppContext -> Cmd Msg
