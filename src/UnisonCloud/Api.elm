@@ -83,7 +83,7 @@ assignedServiceDeploys handle serviceName =
 
 unassignedServiceDeploys : Endpoint
 unassignedServiceDeploys =
-    GET { path = [ "unassigned" ], queryParams = [] }
+    GET { path = [ "deployments", "unassigned" ], queryParams = [] }
 
 
 serviceLogs : UserHandle -> ServiceName -> FetchLogParams -> Endpoint
