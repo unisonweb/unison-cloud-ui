@@ -143,27 +143,6 @@ equals (ServiceHash a) (ServiceHash b) =
 
 
 
--- VIEW
-
-
-view : (String -> msg) -> ServiceHash -> Html msg
-view onCopyMsg hash =
-    let
-        view_ =
-            Tooltip.rich
-                (span [ class "service-hash_tooltip" ]
-                    [ Icon.view Icon.clipboard, text "Click to copy the full hash" ]
-                )
-                |> Tooltip.tooltip
-                |> Tooltip.view
-                    (span [ class "service-hash" ]
-                        [ Icon.view Icon.hash, text (toUnprefixedShortString hash) ]
-                    )
-    in
-    CopyOnClick.view onCopyMsg (toString hash) view_
-
-
-
 -- DECODE
 
 

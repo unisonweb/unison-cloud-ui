@@ -3,7 +3,6 @@ import "ui-core/css/themes/unison-light.css";
 import "ui-core/css/code.css";
 import "ui-core/UI/CopyOnClick"; // Web component
 import "ui-core/UI/CopyrightYear"; // Web component
-import "ui-core/UI/FormatDateTime"; // Web component
 import "ui-core/Lib/OnClickOutside"; // Web component
 import "./UnisonCloud/SupportChatWidget"; // web component
 import detectOs from "ui-core/Lib/detectOs";

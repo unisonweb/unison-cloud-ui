@@ -569,12 +569,12 @@ viewLine zone model tooltipPosition line =
         ]
 
 
-viewDateBoundary : DateTime -> Html Msg
-viewDateBoundary date =
+viewDateBoundary : Time.Zone -> DateTime -> Html Msg
+viewDateBoundary zone date =
     div [ class "log-entry log-entry_date-boundary" ]
         [ hr [ class "log-entry_date-boundary_date-divider" ] []
         , div [ class "log-entry_icon" ] [ Icon.view Icon.calendar ]
-        , DateTime.view DateTime.ShortDate date
+        , DateTime.view DateTime.ShortDate zone date
         , hr [ class "log-entry_date-boundary_date-divider" ] []
         ]
 
@@ -598,7 +598,7 @@ viewEntry zone model index entry =
             viewLine zone model tooltipPosition line
 
         DateBoundary date ->
-            viewDateBoundary date
+            viewDateBoundary zone date
 
 
 viewKeyedEntry : Time.Zone -> Model -> Int -> LogEntry -> ( String, Html Msg )
