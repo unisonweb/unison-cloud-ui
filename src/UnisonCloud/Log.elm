@@ -34,10 +34,12 @@ import Html
     exposing
         ( Html
         , abbr
+        , details
         , div
         , h2
         , hr
         , p
+        , summary
         , table
         , tbody
         , td
@@ -758,5 +760,10 @@ view appContext model =
                     , modal
                     )
 
-        Failure _ ->
-            ( div [] [ text "Something went wrong in fetching the logs" ], Nothing )
+        Failure e ->
+            ( div []
+                [ text "Something went wrong in fetching the logs"
+                , details [] [ summary [] [ text "Error Details" ], div [] [ text (Util.httpErrorToString e) ] ]
+                ]
+            , Nothing
+            )
