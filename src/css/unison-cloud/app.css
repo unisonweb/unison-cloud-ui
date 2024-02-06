@@ -57,5 +57,5 @@ body:has(#modal-overlay) {
 }
 
 #app-header .account-menu .action-menu .action-menu_sheet {
-  width: 11.5rem;
+  width: 13rem;
 }

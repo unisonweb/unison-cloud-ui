@@ -102,8 +102,9 @@ view ctx appHeader_ =
 
         accountMenu =
             ActionMenu.items
-                (ActionMenu.optionItem Icon.exitDoor "Sign Out" Link.logout)
-                []
+                (ActionMenu.optionItem Icon.creditCard "Manage Subscription" (Link.stripeCustomerPortal ctx.session))
+                [ ActionMenu.optionItem Icon.exitDoor "Sign Out" Link.logout
+                ]
                 |> ActionMenu.fromCustom ctx.toggleAccountMenuMsg viewAccountMenuTrigger
                 |> ActionMenu.shouldBeOpen (isAccountMenuOpen ctx.openedAppHeaderMenu)
                 |> ActionMenu.view

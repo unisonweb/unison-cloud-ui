@@ -5,12 +5,15 @@ import Lib.UserHandle as UserHandle exposing (UserHandle)
 import Lib.Util exposing (decodeUrl)
 import UI.Avatar as Avatar exposing (Avatar)
 import UI.Icon as Icon
+import UnisonCloud.CloudPlan as CloudPlan exposing (CloudPlan)
 import Url exposing (Url)
 
 
 type alias Account a =
     { a
         | handle : UserHandle
+        , primaryEmail : String
+        , cloudPlan : CloudPlan
         , name : Maybe String
         , avatarUrl : Maybe Url
         , organizationMemberships : List OrganizationMembership
@@ -54,15 +57,19 @@ isOrganizationMember orgHandle account =
 decodeSummary : Decode.Decoder AccountSummary
 decodeSummary =
     let
-        makeSummary handle name_ avatarUrl orgs =
+        makeSummary handle primaryEmail plan name_ avatarUrl orgs =
             { handle = handle
+            , primaryEmail = primaryEmail
+            , cloudPlan = plan
             , name = name_
             , avatarUrl = avatarUrl
             , organizationMemberships = orgs
             }
     in
-    Decode.map4 makeSummary
+    Decode.map6 makeSummary
         (field "handle" UserHandle.decodeUnprefixed)
+        (field "primaryEmail" string)
+        (field "cloudTier" CloudPlan.decode)
         (maybe (field "name" string))
         (maybe (field "avatarUrl" decodeUrl))
         (field "organizationMemberships" (Decode.list (Decode.map OrganizationMembership UserHandle.decodeUnprefixed)))
