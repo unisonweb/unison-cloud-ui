@@ -3,6 +3,7 @@ module UnisonCloud.LogEntriesTest exposing (..)
 import Dict
 import Expect
 import Json.Decode as Decode
+import Result
 import Result.Extra as ResultE
 import Test exposing (..)
 import Time
@@ -66,7 +67,7 @@ logLinesRaw =
             ]
     in
     raw
-        |> List.map (Decode.decodeString LogLine.decode_)
+        |> List.map (Decode.decodeString LogLine.decode)
         |> ResultE.combine
         |> Result.withDefault []
 

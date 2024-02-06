@@ -39,8 +39,8 @@ dataToList line =
 -- DECODE
 
 
-decode_ : Decode.Decoder LogLine
-decode_ =
+decode : Decode.Decoder LogLine
+decode =
     let
         makeLine id loggedAt line =
             let
@@ -71,6 +71,20 @@ decode_ =
         |> required "userMsg" (Decode.dict Decode.string)
 
 
-decode : Decode.Decoder LogLine
-decode =
-    doubleEncoded decode_
+decodeList : List String -> List LogLine
+decodeList raw =
+    let
+        decodeItem item acc =
+            case Decode.decodeString decode item of
+                Ok l ->
+                    l :: acc
+
+                Err _ ->
+                    acc
+    in
+    List.foldr decodeItem [] raw
+
+
+decodeNested : Decode.Decoder LogLine
+decodeNested =
+    doubleEncoded decode

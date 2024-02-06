@@ -55,6 +55,7 @@ import Http
 import Json.Decode as Decode
 import Lib.HttpApi as HttpApi
 import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
+import Lib.UserHandle as UserHandle
 import Lib.Util as Util
 import List.Extra as ListE
 import RemoteData exposing (RemoteData(..), WebData)
@@ -75,6 +76,7 @@ import UI.Nudge as Nudge
 import UI.Placeholder as Placeholder
 import UI.Sizing as Sizing
 import UI.Tooltip as Tooltip
+import UnisonCloud.Account as Account
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
@@ -409,9 +411,14 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
 
                 ServiceDeployContext sh ->
                     CloudApi.serviceDeployLogs sh params_
+
+        decodeLogs =
+            Decode.map
+                LogLine.decodeList
+                (Decode.field "logs" (Decode.list Decode.string))
     in
     endpoint
-        |> HttpApi.toRequest (Decode.field "logs" (Decode.list LogLine.decode))
+        |> HttpApi.toRequest decodeLogs
             (RemoteData.fromResult >> doneMsg)
         |> HttpApi.perform appContext.api
 
@@ -761,9 +768,17 @@ view appContext model =
                     )
 
         Failure e ->
+            let
+                errorDetails =
+                    if Account.isOrganizationMember (UserHandle.unsafeFromString "unison") appContext.session then
+                        details [] [ summary [] [ text "Error Details" ], div [] [ text (Util.httpErrorToString e) ] ]
+
+                    else
+                        UI.nothing
+            in
             ( div []
                 [ text "Something went wrong in fetching the logs"
-                , details [] [ summary [] [ text "Error Details" ], div [] [ text (Util.httpErrorToString e) ] ]
+                , errorDetails
                 ]
             , Nothing
             )
