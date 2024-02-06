@@ -74,6 +74,12 @@ decode =
 decodeList : List String -> List LogLine
 decodeList raw =
     let
+        {-
+           TODO: We've encountered exactly 1 unparseable (via JSON.parse in JS
+           land and thus Elm) log line, so for now if we encounter lines like
+           that, we don't let them break the whole page, but remove them from the
+           list of logs
+        -}
         decodeItem item acc =
             case Decode.decodeString decode item of
                 Ok l ->
