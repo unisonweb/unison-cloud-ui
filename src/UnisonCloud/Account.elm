@@ -13,7 +13,12 @@ type alias Account a =
         | handle : UserHandle
         , name : Maybe String
         , avatarUrl : Maybe Url
+        , organizationMemberships : List OrganizationMembership
     }
+
+
+type OrganizationMembership
+    = OrganizationMembership UserHandle
 
 
 type alias AccountSummary =
@@ -35,6 +40,13 @@ toAvatar account =
         |> Avatar.withIcon Icon.user
 
 
+isOrganizationMember : UserHandle -> Account a -> Bool
+isOrganizationMember orgHandle account =
+    account.organizationMemberships
+        |> List.map (\(OrganizationMembership handle) -> handle)
+        |> List.member orgHandle
+
+
 
 -- DECODE
 
@@ -42,13 +54,15 @@ toAvatar account =
 decodeSummary : Decode.Decoder AccountSummary
 decodeSummary =
     let
-        makeSummary handle name_ avatarUrl =
+        makeSummary handle name_ avatarUrl orgs =
             { handle = handle
             , name = name_
             , avatarUrl = avatarUrl
+            , organizationMemberships = orgs
             }
     in
-    Decode.map3 makeSummary
+    Decode.map4 makeSummary
         (field "handle" UserHandle.decodeUnprefixed)
         (maybe (field "name" string))
         (maybe (field "avatarUrl" decodeUrl))
+        (field "organizationMemberships" (Decode.list (Decode.map OrganizationMembership UserHandle.decodeUnprefixed)))
