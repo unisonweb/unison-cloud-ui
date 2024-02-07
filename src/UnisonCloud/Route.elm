@@ -10,6 +10,7 @@ module UnisonCloud.Route exposing
     ( Route(..)
     , ServiceRoute(..)
     , fromUrl
+    , manageSubscription
     , navigate
     , overview
     , service
@@ -37,6 +38,7 @@ import Url.Builder exposing (relative, string)
 
 type Route
     = Overview
+    | ManageSubscription
     | Services
     | Service ServiceName ServiceRoute
     | ServiceDeploy ServiceHash
@@ -60,6 +62,11 @@ right now, the service list page is the home page.
 overview : Route
 overview =
     Overview
+
+
+manageSubscription : Route
+manageSubscription =
+    ManageSubscription
 
 
 services : Route
@@ -100,6 +107,7 @@ toRoute : Maybe String -> Parser Route
 toRoute queryString =
     oneOf
         [ b overviewParser
+        , b manageSubscriptionParser
         , b servicesParser
         , b serviceParser
         , b serviceDeployParser
@@ -112,6 +120,11 @@ overviewParser =
     -- Taking over from Overview as the home page until we can do more stuff in
     -- the cloud than services
     succeed Services |. slash |. end
+
+
+manageSubscriptionParser : Parser Route
+manageSubscriptionParser =
+    succeed ManageSubscription |. slash |. s "manage-subscription" |. end
 
 
 servicesParser : Parser Route
@@ -244,6 +257,9 @@ toUrlPattern r =
         Overview ->
             "overview"
 
+        ManageSubscription ->
+            "manage-subscription"
+
         Services ->
             "services"
 
@@ -273,6 +289,9 @@ toUrlString route =
             case route of
                 Overview ->
                     ( [], [] )
+
+                ManageSubscription ->
+                    ( [ "manage-subscription" ], [] )
 
                 Services ->
                     ( [ "services" ], [] )

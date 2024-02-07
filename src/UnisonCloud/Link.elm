@@ -33,6 +33,16 @@ unisonCloudWebsite =
     Click.externalHref "https://unison.cloud"
 
 
+cloudPricing : Click msg
+cloudPricing =
+    Click.externalHref "https://unison.cloud/#pricing"
+
+
+starterSignup : Click msg
+starterSignup =
+    Click.externalHref "https://unison.cloud/signup?plan=Starter"
+
+
 website : Click msg
 website =
     Click.externalHref "https://unison-lang.org"
@@ -138,6 +148,11 @@ overview =
     toClick Route.overview
 
 
+manageSubscription : Click msg
+manageSubscription =
+    toClick Route.manageSubscription
+
+
 services : Click msg
 services =
     toClick Route.services
@@ -175,6 +190,11 @@ serviceDeploy sh =
 view : String -> Click msg -> Html msg
 view label click =
     Click.view [] [ text label ] click
+
+
+view_ : Html msg -> Click msg -> Html msg
+view_ html click =
+    Click.view [] [ html ] click
 
 
 

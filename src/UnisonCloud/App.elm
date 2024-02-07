@@ -9,6 +9,7 @@ import UnisonCloud.AppDocument as AppDocument
 import UnisonCloud.AppError exposing (AppError)
 import UnisonCloud.AppHeader as AppHeader
 import UnisonCloud.Page.ErrorPage as ErrorPage
+import UnisonCloud.Page.ManageSubscriptionPage as ManageSubscriptionPage
 import UnisonCloud.Page.NotFoundPage as NotFoundPage
 import UnisonCloud.Page.OverviewPage as OverviewPage
 import UnisonCloud.Page.ServiceDeployPage as ServiceDeployPage
@@ -27,6 +28,7 @@ import Url exposing (Url)
 
 type Page
     = Overview
+    | ManageSubscription
     | Services ServicesPage.Model
     | Service ServiceName ServicePage.Model
     | ServiceDeploy ServiceHash ServiceDeployPage.Model
@@ -53,6 +55,9 @@ init appContext route =
             case route of
                 Route.Overview ->
                     ( Overview, Cmd.none )
+
+                Route.ManageSubscription ->
+                    ( ManageSubscription, Cmd.none )
 
                 Route.Services ->
                     let
@@ -143,6 +148,9 @@ update msg model =
                     case route of
                         Route.Overview ->
                             ( { model | page = Overview }, Cmd.none )
+
+                        Route.ManageSubscription ->
+                            ( { model | page = ManageSubscription }, Cmd.none )
 
                         Route.Services ->
                             let
@@ -250,6 +258,9 @@ view model =
             case model.page of
                 Overview ->
                     OverviewPage.view
+
+                ManageSubscription ->
+                    ManageSubscriptionPage.view appContext
 
                 Services services ->
                     AppDocument.map
