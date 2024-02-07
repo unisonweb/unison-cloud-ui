@@ -14,18 +14,19 @@ type alias LogEntries =
     List LogEntry
 
 
-{-| LogLines are ordered (from the backend) with the newest last in the list, which is how we want to
-render them, however, we use css to reverse the rendering of the list (which
-gives us some better scrolling behavior and control), so while we're adding
-date markers, by running through the list, we're also flipping its order, so
-that when css again flips it, it will be rendered with the newest entry in the
-bottom of the screen, like you'd see with `tail`.
+{-| LogLines are ordered (from the backend) with the newest last in the list,
+which is how we want to render them, however, we use css to reverse the
+rendering of the list (which gives us some better scrolling behavior and
+control), so while we're adding date markers, by running through the list,
+we're also flipping its order, so that when css again flips it, it will be
+rendered with the newest entry in the bottom of the screen, like you'd see with
+`tail`.
 -}
 fromLines : Time.Zone -> List LogLine -> List LogEntry
 fromLines timeZone lines =
     let
-        f l ( entries, currentDate ) =
-            case currentDate of
+        f l ( entries, date ) =
+            case date of
                 Nothing ->
                     ( [ Line l ], Just l.loggedAt )
 
