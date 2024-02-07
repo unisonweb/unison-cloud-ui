@@ -12,9 +12,11 @@ module UnisonCloud.Link exposing (..)
 
 import Html exposing (Html, text)
 import UI.Click as Click exposing (Click)
+import UnisonCloud.Account exposing (Account)
 import UnisonCloud.Route as Route exposing (Route)
 import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
+import Url
 
 
 
@@ -96,9 +98,17 @@ status =
     Click.externalHref "https://unison.statuspage.io"
 
 
-slack : Click msg
-slack =
-    Click.externalHref "https://unison-lang.com/slack"
+discord : Click msg
+discord =
+    Click.externalHref "https://unison-lang.com/discord"
+
+
+stripeCustomerPortal : Account a -> Click msg
+stripeCustomerPortal account =
+    Click.externalHref
+        ("https://billing.stripe.com/p/login/test_eVa7ukaREaUo54k144?prefilled_email="
+            ++ Url.percentEncode account.primaryEmail
+        )
 
 
 login : Click msg
