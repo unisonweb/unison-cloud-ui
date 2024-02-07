@@ -106,7 +106,7 @@ discord =
 stripeCustomerPortal : Account a -> Click msg
 stripeCustomerPortal account =
     Click.externalHref
-        ("https://billing.stripe.com/p/login/test_eVa7ukaREaUo54k144?prefilled_email="
+        ("https://billing.stripe.com/p/login/fZe7wj02ZdXC3AIfYY?prefilled_email="
             ++ Url.percentEncode account.primaryEmail
         )
 
