@@ -144,6 +144,12 @@ update msg model =
                 route =
                     Route.fromUrl model.appContext.basePath url
 
+                appContext =
+                    model.appContext
+
+                appContext_ =
+                    { appContext | currentUrl = url }
+
                 ( m, c ) =
                     case route of
                         Route.Overview ->
@@ -155,21 +161,21 @@ update msg model =
                         Route.Services ->
                             let
                                 ( services, servicesCmd ) =
-                                    ServicesPage.init model.appContext
+                                    ServicesPage.init appContext_
                             in
                             ( { model | page = Services services }, Cmd.map ServicesPageMsg servicesCmd )
 
                         Route.Service serviceName serviceRoute ->
                             let
                                 ( service, serviceCmd ) =
-                                    ServicePage.init model.appContext serviceName serviceRoute
+                                    ServicePage.init appContext_ serviceName serviceRoute
                             in
                             ( { model | page = Service serviceName service }, Cmd.map ServicePageMsg serviceCmd )
 
                         Route.ServiceDeploy serviceHash ->
                             let
                                 ( serviceDeploy, serviceDeployCmd ) =
-                                    ServiceDeployPage.init model.appContext serviceHash
+                                    ServiceDeployPage.init appContext_ serviceHash
                             in
                             ( { model | page = ServiceDeploy serviceHash serviceDeploy }, Cmd.map ServiceDeployPageMsg serviceDeployCmd )
 
@@ -179,7 +185,7 @@ update msg model =
                         Route.NotFound _ ->
                             ( { model | page = NotFound }, Cmd.none )
             in
-            ( m, c )
+            ( { m | appContext = appContext_ }, c )
 
         ( _, ToggleHelpAndResourcesMenu ) ->
             let
@@ -249,6 +255,8 @@ view model =
 
         appHeaderContext =
             { session = model.appContext.session
+            , api = appContext.api
+            , currentUrl = appContext.currentUrl
             , openedAppHeaderMenu = model.openedAppHeaderMenu
             , toggleHelpAndResourcesMenuMsg = ToggleHelpAndResourcesMenu
             , toggleAccountMenuMsg = ToggleAccountMenu
@@ -278,7 +286,7 @@ view model =
                         (ServiceDeployPage.view appContext serviceHash service)
 
                 Error err ->
-                    ErrorPage.view err
+                    ErrorPage.view appContext err
 
                 NotFound ->
                     NotFoundPage.view

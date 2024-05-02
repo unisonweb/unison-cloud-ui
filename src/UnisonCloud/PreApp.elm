@@ -38,6 +38,8 @@ type Model
 type alias PreAppContext =
     { flags : Flags
     , route : Route
+    , api : HttpApi.HttpApi
+    , currentUrl : Url
     , navKey : Nav.Key
     }
 
@@ -48,13 +50,20 @@ init flags url navKey =
         route =
             Route.fromUrl flags.basePath url
 
+        api =
+            HttpApi.httpApi True flags.apiUrl flags.xsrfToken
+
         preAppContext =
             { flags = flags
             , route = route
+            , api = api
+            , currentUrl = url
             , navKey = navKey
             }
     in
-    ( Initializing preAppContext, Task.attempt FetchPreReqsFinished (fetchPreReqs preAppContext) )
+    ( Initializing preAppContext
+    , Task.attempt FetchPreReqsFinished (fetchPreReqs preAppContext)
+    )
 
 
 type Msg
@@ -70,6 +79,7 @@ update msg model =
                 appContext =
                     AppContext.init preAppContext.flags
                         preAppContext.navKey
+                        preAppContext.currentUrl
                         (DateTime.fromPosix now)
                         timeZone
                         session
@@ -177,7 +187,7 @@ view model =
                 ]
             }
 
-        NotSignedIn _ ->
+        NotSignedIn ctx ->
             { title = "Unison Cloud"
             , body =
                 [ div [ id "app", class "sign-in-page" ]
@@ -192,7 +202,13 @@ view model =
                                             , span [ class "unison-cloud-wordmark_cloud" ] [ text "Cloud" ]
                                             ]
                                         , h2 [] [ text "Write code. Hit run. The cloud computes." ]
-                                        , Button.iconThenLabel_ Link.login Icon.cloud "Sign In"
+                                        , Button.iconThenLabel_
+                                            (Link.login
+                                                ctx.api
+                                                ctx.currentUrl
+                                            )
+                                            Icon.cloud
+                                            "Sign In"
                                             |> Button.large
                                             |> Button.emphasized
                                             |> Button.view

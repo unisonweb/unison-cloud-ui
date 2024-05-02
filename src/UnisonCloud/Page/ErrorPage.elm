@@ -8,6 +8,7 @@ import UI.Icon as Icon
 import UI.PageContent as PageContent
 import UI.PageLayout as PageLayout
 import UI.StatusMessage as StatusMessage
+import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.AppDocument exposing (AppDocument)
 import UnisonCloud.AppError exposing (AppError(..))
 import UnisonCloud.AppHeader as AppHeader
@@ -15,8 +16,8 @@ import UnisonCloud.Link as Link
 import UnisonCloud.PageFooter as PageFooter
 
 
-view : AppError -> AppDocument msg
-view appError =
+view : AppContext -> AppError -> AppDocument msg
+view appContext appError =
     let
         card =
             case appError of
@@ -27,7 +28,13 @@ view appError =
                             [ text "Your account is not yet enabled for Unison Cloud."
                             ]
                         ]
-                        |> StatusMessage.withCta (Button.iconThenLabel_ Link.login Icon.github "Create Account with GitHub" |> Button.medium)
+                        |> StatusMessage.withCta
+                            (Button.iconThenLabel_
+                                (Link.login appContext.api appContext.currentUrl)
+                                Icon.github
+                                "Create Account with GitHub"
+                                |> Button.medium
+                            )
                         |> StatusMessage.asCard
 
                 UnspecifiedError ->

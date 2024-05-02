@@ -2,6 +2,7 @@ module UnisonCloud.AppHeader exposing (..)
 
 import Html exposing (Html, div, h1, span, text)
 import Html.Attributes exposing (class, classList)
+import Lib.HttpApi exposing (HttpApi)
 import UI.ActionMenu as ActionMenu
 import UI.AppHeader as AppHeader exposing (AppHeader)
 import UI.Avatar as Avatar
@@ -9,6 +10,7 @@ import UI.Click as Click exposing (Click)
 import UI.Icon as Icon
 import UnisonCloud.Link as Link
 import UnisonCloud.Session exposing (Session)
+import Url exposing (Url)
 
 
 appTitle : AppHeader.AppTitle msg
@@ -52,7 +54,9 @@ type OpenedAppHeaderMenu
 
 type alias AppHeaderContext msg =
     { session : Session
+    , api : HttpApi
     , openedAppHeaderMenu : OpenedAppHeaderMenu
+    , currentUrl : Url
     , toggleHelpAndResourcesMenuMsg : msg
     , toggleAccountMenuMsg : msg
     }
@@ -103,7 +107,7 @@ view ctx appHeader_ =
         accountMenu =
             ActionMenu.items
                 (ActionMenu.optionItem Icon.creditCard "Manage Subscription" Link.manageSubscription)
-                [ ActionMenu.optionItem Icon.exitDoor "Sign Out" Link.logout
+                [ ActionMenu.optionItem Icon.exitDoor "Sign Out" (Link.logout ctx.api ctx.currentUrl)
                 ]
                 |> ActionMenu.fromCustom ctx.toggleAccountMenuMsg viewAccountMenuTrigger
                 |> ActionMenu.shouldBeOpen (isAccountMenuOpen ctx.openedAppHeaderMenu)

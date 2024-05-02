@@ -6,6 +6,7 @@ import Lib.OperatingSystem as OS exposing (OperatingSystem)
 import Time
 import UI.DateTime exposing (DateTime)
 import UnisonCloud.Session exposing (Session)
+import Url exposing (Url)
 
 
 type alias AppContext =
@@ -13,6 +14,7 @@ type alias AppContext =
     , operatingSystem : OperatingSystem
     , basePath : String
     , api : HttpApi
+    , currentUrl : Url
     , websiteApi : HttpApi
     , exposedServiceDomain : String
     , navKey : Nav.Key
@@ -31,8 +33,8 @@ type alias Flags =
     }
 
 
-init : Flags -> Nav.Key -> DateTime -> Time.Zone -> Session -> AppContext
-init flags navKey now timeZone session =
+init : Flags -> Nav.Key -> Url -> DateTime -> Time.Zone -> Session -> AppContext
+init flags navKey currentUrl now timeZone session =
     let
         api =
             HttpApi.httpApi True flags.apiUrl flags.xsrfToken
@@ -40,6 +42,7 @@ init flags navKey now timeZone session =
     { session = session
     , operatingSystem = OS.fromString flags.operatingSystem
     , basePath = flags.basePath
+    , currentUrl = currentUrl
     , api = api
     , websiteApi = HttpApi.httpApi False flags.websiteUrl Nothing
     , exposedServiceDomain = "unison-services.cloud"

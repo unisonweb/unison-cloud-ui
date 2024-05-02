@@ -11,12 +11,13 @@
 module UnisonCloud.Link exposing (..)
 
 import Html exposing (Html, text)
+import Lib.HttpApi as HttpApi exposing (HttpApi)
 import UI.Click as Click exposing (Click)
 import UnisonCloud.Account exposing (Account)
 import UnisonCloud.Route as Route exposing (Route)
 import UnisonCloud.Service.ServiceName exposing (ServiceName)
 import UnisonCloud.ServiceHash exposing (ServiceHash)
-import Url
+import Url exposing (Url)
 
 
 
@@ -121,22 +122,26 @@ stripeCustomerPortal account =
         )
 
 
-login : Click msg
-login =
-    -- TODO: Use Env.apiUrl
-    Click.externalHref_ Click.Blank "https://api.unison.cloud/login"
+login : HttpApi -> Url -> Click msg
+login api returnTo =
+    let
+        returnTo_ =
+            returnTo
+                |> Url.toString
+                |> Url.percentEncode
+    in
+    Click.externalHref_ Click.Self (HttpApi.baseApiUrl api ++ "login?return_to=" ++ returnTo_)
 
 
-logout : Click msg
-logout =
-    -- TODO: Use Env.apiUrl
-    Click.externalHref_ Click.Self "https://api.unison.cloud/logout"
-
-
-exposedService : Click msg
-exposedService =
-    -- TODO: Use Env.apiUrl
-    Click.externalHref "https://api.unison.cloud/logout"
+logout : HttpApi -> Url -> Click msg
+logout api returnTo =
+    let
+        returnTo_ =
+            returnTo
+                |> Url.toString
+                |> Url.percentEncode
+    in
+    Click.externalHref_ Click.Self (HttpApi.baseApiUrl api ++ "logout?return_to=" ++ returnTo_)
 
 
 
