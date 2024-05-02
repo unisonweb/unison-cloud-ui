@@ -129,8 +129,13 @@ login api returnTo =
             returnTo
                 |> Url.toString
                 |> Url.percentEncode
+
+        base =
+            api
+                |> HttpApi.baseApiUrl
+                |> String.replace "/v2/" "/"
     in
-    Click.externalHref_ Click.Self (HttpApi.baseApiUrl api ++ "login?return_to=" ++ returnTo_)
+    Click.externalHref_ Click.Self (base ++ "login?return_to=" ++ returnTo_)
 
 
 logout : HttpApi -> Url -> Click msg
@@ -140,8 +145,13 @@ logout api returnTo =
             returnTo
                 |> Url.toString
                 |> Url.percentEncode
+
+        base =
+            api
+                |> HttpApi.baseApiUrl
+                |> String.replace "/v2/" "/"
     in
-    Click.externalHref_ Click.Self (HttpApi.baseApiUrl api ++ "logout?return_to=" ++ returnTo_)
+    Click.externalHref_ Click.Self (base ++ "logout?return_to=" ++ returnTo_)
 
 
 
