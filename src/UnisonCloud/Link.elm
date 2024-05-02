@@ -145,8 +145,13 @@ logout api returnTo =
             returnTo
                 |> Url.toString
                 |> Url.percentEncode
+
+        base =
+            api
+                |> HttpApi.baseApiUrl
+                |> String.replace "/v2/" "/"
     in
-    Click.externalHref (HttpApi.baseApiUrl api ++ "logout?return_to=" ++ returnTo_)
+    Click.externalHref (base ++ "logout?return_to=" ++ returnTo_)
 
 
 
