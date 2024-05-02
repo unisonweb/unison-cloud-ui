@@ -203,10 +203,7 @@ view model =
                                             ]
                                         , h2 [] [ text "Write code. Hit run. The cloud computes." ]
                                         , Button.iconThenLabel_
-                                            (Link.login
-                                                ctx.api
-                                                ctx.currentUrl
-                                            )
+                                            (Link.login ctx.api ctx.currentUrl)
                                             Icon.cloud
                                             "Sign In"
                                             |> Button.large

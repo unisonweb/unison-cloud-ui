@@ -133,12 +133,11 @@ update msg model =
                 -- External links are handled via target blank and never end up
                 -- here except for login and logout
                 Browser.External url ->
-                    if String.contains "logout" url || String.contains "login" url then
-                        ( model, Nav.load url )
+                    -- if String.contains "logout" url || String.contains "login" url then
+                    ( model, Nav.load url )
 
-                    else
-                        ( model, Cmd.none )
-
+        -- else
+        --( model, Cmd.none )
         ( _, UrlChanged url ) ->
             let
                 route =
