@@ -123,37 +123,30 @@ stripeCustomerPortal account =
 
 
 login : HttpApi -> Url -> Click msg
-login api _ =
+login api returnTo =
     let
-        {-
-           returnTo_ =
-               returnTo
-                   |> Url.toString
-                   |> Url.percentEncode
-        -}
+        returnTo_ =
+            returnTo
+                |> Url.toString
+                |> Url.percentEncode
+
         base =
             api
                 |> HttpApi.baseApiUrl
                 |> String.replace "/v2/" "/"
     in
-    Click.externalHref_ Click.Self (base ++ "login")
+    Click.externalHref (base ++ "login?return_to=" ++ returnTo_)
 
 
 logout : HttpApi -> Url -> Click msg
-logout api _ =
+logout api returnTo =
     let
-        {-
-           returnTo_ =
-               returnTo
-                   |> Url.toString
-                   |> Url.percentEncode
-        -}
-        base =
-            api
-                |> HttpApi.baseApiUrl
-                |> String.replace "/v2/" "/"
+        returnTo_ =
+            returnTo
+                |> Url.toString
+                |> Url.percentEncode
     in
-    Click.externalHref_ Click.Self (base ++ "logout")
+    Click.externalHref (HttpApi.baseApiUrl api ++ "logout?return_to=" ++ returnTo_)
 
 
 
