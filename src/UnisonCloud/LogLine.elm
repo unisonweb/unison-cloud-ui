@@ -66,7 +66,10 @@ decode =
             }
 
         decodeUserValue =
-            Decode.oneOf [ Decode.string, Decode.map String.fromInt Decode.int ]
+            Decode.oneOf
+                [ Decode.string
+                , Decode.map String.fromInt Decode.int
+                ]
     in
     Decode.succeed makeLine
         |> required "id" Decode.string

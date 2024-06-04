@@ -440,7 +440,7 @@ viewLogMessage tooltipPosition line =
             if LogLine.hasData line then
                 line
                     |> LogLine.dataToList
-                    |> List.map (\( k, v ) -> "\"" ++ k ++ "\": " ++ "\"" ++ v)
+                    |> List.map (\( k, v ) -> "\"" ++ k ++ "\": " ++ "\"" ++ v ++ "\"")
                     |> String.join ", "
                     |> (\d -> text ("{ " ++ d ++ " }"))
                     |> (\d -> div [ class "log-line_log-message_raw-data" ] [ d ])
