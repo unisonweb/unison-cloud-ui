@@ -64,11 +64,14 @@ decode =
             , level = level
             , data = data
             }
+
+        decodeUserValue =
+            Decode.oneOf [ Decode.string, Decode.map String.fromInt Decode.int ]
     in
     Decode.succeed makeLine
         |> required "id" Decode.string
         |> required "time" DateTime.decode
-        |> required "userMsg" (Decode.dict Decode.string)
+        |> required "userMsg" (Decode.dict decodeUserValue)
 
 
 decodeList : List String -> List LogLine

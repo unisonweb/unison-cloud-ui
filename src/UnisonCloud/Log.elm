@@ -746,7 +746,8 @@ view appContext model =
                             UI.nothing
 
                 lines =
-                    logLinesOldestToNewest model.log
+                    model.log
+                        |> logLinesOldestToNewest
                         |> LogEntries.fromLines timeZone
                         |> List.indexedMap (viewKeyedEntry timeZone model)
             in
