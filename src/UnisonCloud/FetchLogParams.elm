@@ -76,15 +76,14 @@ withLimit l params =
 -- TRANSFORM
 
 
-toQueryParams : DateTime -> FetchLogParams -> List QueryParameter
-toQueryParams fourtyEightHoursAgo p =
+toQueryParams : FetchLogParams -> List QueryParameter
+toQueryParams p =
     let
         search =
             Maybe.map (string "search") p.search
 
         start =
             p.start
-                |> MaybeE.orElse (Just fourtyEightHoursAgo)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "start")
 

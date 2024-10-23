@@ -404,21 +404,13 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
         params_ =
             FetchLogParams.withLimit pageSize params
 
-        fortyEightHoursAgo =
-            appContext.now
-                |> DateTime.toPosix
-                |> Time.posixToMillis
-                |> (\t -> t - (48 * 60 * 60 * 1000))
-                |> Time.millisToPosix
-                |> DateTime.fromPosix
-
         endpoint =
             case logBrowsingContext of
                 ServiceContext name ->
-                    CloudApi.serviceLogs fortyEightHoursAgo appContext.session.handle name params_
+                    CloudApi.serviceLogs appContext.session.handle name params_
 
                 ServiceDeployContext sh ->
-                    CloudApi.serviceDeployLogs fortyEightHoursAgo sh params_
+                    CloudApi.serviceDeployLogs sh params_
 
         decodeLogs =
             Decode.map

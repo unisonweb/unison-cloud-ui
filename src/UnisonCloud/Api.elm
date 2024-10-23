@@ -14,10 +14,9 @@ module UnisonCloud.Api exposing
 import Http
 import Lib.HttpApi exposing (Endpoint(..))
 import Lib.UserHandle as UserHandle exposing (UserHandle)
-import UI.DateTime exposing (DateTime)
 import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
 import UnisonCloud.Service.ServiceName as ServiceName exposing (ServiceName)
-import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash, fromUrlString)
+import UnisonCloud.ServiceHash as ServiceHash exposing (ServiceHash)
 
 
 session : Endpoint
@@ -87,8 +86,8 @@ unassignedServiceDeploys =
     GET { path = [ "deployments", "unassigned" ], queryParams = [] }
 
 
-serviceLogs : DateTime -> UserHandle -> ServiceName -> FetchLogParams -> Endpoint
-serviceLogs fortyEightHoursAgo handle sName params =
+serviceLogs : UserHandle -> ServiceName -> FetchLogParams -> Endpoint
+serviceLogs handle sName params =
     GET
         { path =
             [ "users"
@@ -97,13 +96,13 @@ serviceLogs fortyEightHoursAgo handle sName params =
             , "service"
             , ServiceName.toString sName
             ]
-        , queryParams = FetchLogParams.toQueryParams fortyEightHoursAgo params
+        , queryParams = FetchLogParams.toQueryParams params
         }
 
 
-serviceDeployLogs : DateTime -> ServiceHash -> FetchLogParams -> Endpoint
-serviceDeployLogs fortyEightHoursAgo sh params =
+serviceDeployLogs : ServiceHash -> FetchLogParams -> Endpoint
+serviceDeployLogs sh params =
     GET
         { path = [ "logs", "deployment", ServiceHash.toApiString sh ]
-        , queryParams = FetchLogParams.toQueryParams fortyEightHoursAgo params
+        , queryParams = FetchLogParams.toQueryParams params
         }
