@@ -75,25 +75,28 @@ withLimit l params =
 
 -- TRANSFORM
 {-
+   `start` and `end` are fixed and do not need to be "reversed" when changing
+   direction. They always mean the same.
+
    From https://grafana.com/docs/loki/latest/reference/loki-http-api/#query-logs-within-a-range-of-time:
-      `start`:
-        The start time for the query as a nanosecond Unix epoch or another
-        supported format. Defaults to one hour ago. Loki returns results with timestamp
-        greater or equal to this value.
+   `start`:
+     The start time for the query as a nanosecond Unix epoch or another
+     supported format. Defaults to one hour ago. Loki returns results with timestamp
+     greater or equal to this value.
 
-        If `start is not provided, we will default it to the service deploy time.
-      `end`:
-        The end time for the query as a nanosecond Unix epoch or another supported
-        format. Defaults to now. Loki returns results with timestamp lower than this
-        value.
+     If `start is not provided, we will default it to the service deploy time.
+   `end`:
+     The end time for the query as a nanosecond Unix epoch or another supported
+     format. Defaults to now. Loki returns results with timestamp lower than this
+     value.
 
-        If `end is not provided, loki will default this to "now".
-      `direction`:
-        Determines the sort order of logs. Supported values are forward or backward.
-        Defaults to backward.
-      `limit`:
-        The max number of entries to return. It defaults to 100. Only applies
-        to query types which produce a stream (log lines) response.
+     If `end is not provided, loki will default this to "now".
+   `direction`:
+     Determines the sort order of logs. Supported values are forward or backward.
+     Defaults to backward.
+   `limit`:
+     The max number of entries to return. It defaults to 100. Only applies
+     to query types which produce a stream (log lines) response.
 -}
 
 
@@ -105,13 +108,13 @@ toQueryParams fourtyEightHoursAgo now p =
 
         start =
             p.start
-                |> MaybeE.orElse (Just now)
+                |> MaybeE.orElse (Just fourtyEightHoursAgo)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "start")
 
         end =
             p.end
-                |> MaybeE.orElse (Just fourtyEightHoursAgo)
+                |> MaybeE.orElse (Just now)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "end")
 
