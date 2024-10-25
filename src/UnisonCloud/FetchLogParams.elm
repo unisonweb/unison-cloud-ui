@@ -74,6 +74,23 @@ withLimit l params =
 
 
 -- TRANSFORM
+{-
+   From https://grafana.com/docs/loki/latest/reference/loki-http-api/#query-logs-within-a-range-of-time:
+      `start`:
+        The start time for the query as a nanosecond Unix epoch or another
+        supported format. Defaults to one hour ago. Loki returns results with timestamp
+        greater or equal to this value.
+      `end`:
+        The end time for the query as a nanosecond Unix epoch or another supported
+        format. Defaults to now. Loki returns results with timestamp lower than this
+        value.
+      `direction`:
+        Determines the sort order of logs. Supported values are forward or backward.
+        Defaults to backward.
+      `limit`:
+        The max number of entries to return. It defaults to 100. Only applies
+        to query types which produce a stream (log lines) response.
+-}
 
 
 toQueryParams : DateTime -> DateTime -> FetchLogParams -> List QueryParameter
@@ -84,13 +101,13 @@ toQueryParams fourtyEightHoursAgo now p =
 
         start =
             p.start
-                |> MaybeE.orElse (Just fourtyEightHoursAgo)
+                |> MaybeE.orElse (Just now)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "start")
 
         end =
             p.end
-                |> MaybeE.orElse (Just now)
+                |> MaybeE.orElse (Just fourtyEightHoursAgo)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "end")
 
