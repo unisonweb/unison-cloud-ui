@@ -87,8 +87,8 @@ unassignedServiceDeploys =
     GET { path = [ "deployments", "unassigned" ], queryParams = [] }
 
 
-serviceLogs : DateTime -> UserHandle -> ServiceName -> FetchLogParams -> Endpoint
-serviceLogs fortyEightHoursAgo handle sName params =
+serviceLogs : DateTime -> DateTime -> UserHandle -> ServiceName -> FetchLogParams -> Endpoint
+serviceLogs fortyEightHoursAgo now handle sName params =
     GET
         { path =
             [ "users"
@@ -97,13 +97,13 @@ serviceLogs fortyEightHoursAgo handle sName params =
             , "service"
             , ServiceName.toString sName
             ]
-        , queryParams = FetchLogParams.toQueryParams fortyEightHoursAgo params
+        , queryParams = FetchLogParams.toQueryParams fortyEightHoursAgo now params
         }
 
 
-serviceDeployLogs : DateTime -> ServiceHash -> FetchLogParams -> Endpoint
-serviceDeployLogs fortyEightHoursAgo sh params =
+serviceDeployLogs : DateTime -> DateTime -> ServiceHash -> FetchLogParams -> Endpoint
+serviceDeployLogs fortyEightHoursAgo now sh params =
     GET
         { path = [ "logs", "deployment", ServiceHash.toApiString sh ]
-        , queryParams = FetchLogParams.toQueryParams fortyEightHoursAgo params
+        , queryParams = FetchLogParams.toQueryParams fortyEightHoursAgo now params
         }

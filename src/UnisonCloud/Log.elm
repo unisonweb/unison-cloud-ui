@@ -257,7 +257,9 @@ update appContext logBrowsingContext msg model =
                         log_ =
                             { log | logLines = Loading }
                     in
-                    ( { model | log = log_ }, fetchInitialLogLines appContext logBrowsingContext )
+                    ( { model | log = log_ }
+                    , fetchInitialLogLines appContext logBrowsingContext
+                    )
 
                 Just bm ->
                     let
@@ -404,6 +406,9 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
         params_ =
             FetchLogParams.withLimit pageSize params
 
+        now =
+            appContext.now
+
         fortyEightHoursAgo =
             appContext.now
                 |> DateTime.toPosix
@@ -415,10 +420,10 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
         endpoint =
             case logBrowsingContext of
                 ServiceContext name ->
-                    CloudApi.serviceLogs fortyEightHoursAgo appContext.session.handle name params_
+                    CloudApi.serviceLogs fortyEightHoursAgo now appContext.session.handle name params_
 
                 ServiceDeployContext sh ->
-                    CloudApi.serviceDeployLogs fortyEightHoursAgo sh params_
+                    CloudApi.serviceDeployLogs fortyEightHoursAgo now sh params_
 
         decodeLogs =
             Decode.map
