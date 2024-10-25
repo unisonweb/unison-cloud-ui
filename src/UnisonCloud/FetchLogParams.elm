@@ -84,12 +84,12 @@ toQueryParams fourtyEightHoursAgo p =
 
         start =
             p.start
-                |> MaybeE.orElse (Just fourtyEightHoursAgo)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "start")
 
         end =
             p.end
+                |> MaybeE.orElse (Just fourtyEightHoursAgo)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "end")
 
