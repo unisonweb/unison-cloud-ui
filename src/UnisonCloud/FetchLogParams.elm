@@ -80,10 +80,14 @@ withLimit l params =
         The start time for the query as a nanosecond Unix epoch or another
         supported format. Defaults to one hour ago. Loki returns results with timestamp
         greater or equal to this value.
+
+        If `start is not provided, we will default it to the service deploy time.
       `end`:
         The end time for the query as a nanosecond Unix epoch or another supported
         format. Defaults to now. Loki returns results with timestamp lower than this
         value.
+
+        If `end is not provided, loki will default this to "now".
       `direction`:
         Determines the sort order of logs. Supported values are forward or backward.
         Defaults to backward.
