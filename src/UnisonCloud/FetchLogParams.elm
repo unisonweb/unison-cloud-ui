@@ -11,6 +11,8 @@ module UnisonCloud.FetchLogParams exposing
     )
 
 import Maybe.Extra as MaybeE
+import Miliseconds
+import Time
 import UI.DateTime as DateTime exposing (DateTime)
 import Url.Builder exposing (QueryParameter, int, string)
 
@@ -100,23 +102,32 @@ withLimit l params =
 -}
 
 
-toQueryParams : DateTime -> DateTime -> FetchLogParams -> List QueryParameter
-toQueryParams initialStartTime now p =
+toQueryParams : DateTime -> FetchLogParams -> List QueryParameter
+toQueryParams now p =
     let
         search =
             Maybe.map (string "search") p.search
-
-        start =
-            p.start
-                |> MaybeE.orElse (Just initialStartTime)
-                |> Maybe.map DateTime.toISO8601
-                |> Maybe.map (string "start")
 
         end =
             p.end
                 |> MaybeE.orElse (Just now)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "end")
+
+        startFallback =
+            p.end
+                |> MaybeE.orElse (Just now)
+                |> Maybe.map DateTime.toPosix
+                |> Maybe.map Time.posixToMillis
+                |> Maybe.map (\t -> t - Miliseconds.oneHour)
+                |> Maybe.map Time.millisToPosix
+                |> Maybe.map DateTime.fromPosix
+
+        start =
+            p.start
+                |> MaybeE.orElse startFallback
+                |> Maybe.map DateTime.toISO8601
+                |> Maybe.map (string "start")
 
         direction =
             Just (string "direction" (directionToString p.direction))

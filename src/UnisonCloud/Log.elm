@@ -504,24 +504,13 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
         now =
             appContext.now
 
-        initialStartTime =
-            appContext.now
-                |> DateTime.toPosix
-                |> Time.posixToMillis
-                -- 48 hours ago
-                -- |> (\t -> t - (48 * 60 * 60 * 1000))
-                -- 30 mins ago
-                |> (\t -> t - (30 * 60 * 1000))
-                |> Time.millisToPosix
-                |> DateTime.fromPosix
-
         endpoint =
             case logBrowsingContext of
                 ServiceContext name ->
-                    CloudApi.serviceLogs initialStartTime now appContext.session.handle name params_
+                    CloudApi.serviceLogs now appContext.session.handle name params_
 
                 ServiceDeployContext sh ->
-                    CloudApi.serviceDeployLogs initialStartTime now sh params_
+                    CloudApi.serviceDeployLogs now sh params_
 
         decodeLogs =
             Decode.map
