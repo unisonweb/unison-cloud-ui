@@ -59,7 +59,7 @@ import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 import Lib.UserHandle as UserHandle
 import Lib.Util as Util
 import List.Extra as ListE
-import ProdDebug
+import ProdDebug exposing (debugLog)
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -202,7 +202,19 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | logLines = logLines_ }
             in
-            ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
+            ( { model | log = log_ }
+            , Cmd.batch
+                [ debugLog
+                    ("Fetched initial log lines: "
+                        ++ (logLines_
+                                |> RemoteData.map List.length
+                                |> RemoteData.withDefault 0
+                                |> String.fromInt
+                           )
+                    )
+                , Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                ]
+            )
 
         FetchOlderLogLinesFinished olderLogLines ->
             let
@@ -213,7 +225,19 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | logLines = logLines, olderLogLines = olderLogLines }
             in
-            ( { model | log = log_ }, Debounce.unlock debounceConfig )
+            ( { model | log = log_ }
+            , Cmd.batch
+                [ debugLog
+                    ("Fetched older log lines: "
+                        ++ (logLines
+                                |> RemoteData.map List.length
+                                |> RemoteData.withDefault 0
+                                |> String.fromInt
+                           )
+                    )
+                , Debounce.unlock debounceConfig
+                ]
+            )
 
         RequestToFetchNewestLogLines ->
             let
@@ -255,7 +279,19 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | offScreenNewestLogLines = lines_ }
             in
-            ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
+            ( { model | log = log_ }
+            , Cmd.batch
+                [ debugLog
+                    ("Fetched newer log lines: "
+                        ++ (lines_
+                                |> RemoteData.map List.length
+                                |> RemoteData.withDefault 0
+                                |> String.fromInt
+                           )
+                    )
+                , Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                ]
+            )
 
         Scroll ev ->
             let
@@ -648,7 +684,9 @@ viewLine zone model tooltipPosition line =
             [ caret
             , LogLevel.view line.level
             , viewLoggedAt zone tooltipPosition line.loggedAt
-            , viewLogMessage tooltipPosition line
+            , text line.id
+
+            -- , viewLogMessage tooltipPosition line
             ]
         , expanded
         ]
