@@ -229,7 +229,7 @@ update appContext logBrowsingContext msg model =
             , Cmd.batch
                 [ debugLog
                     ("Fetched older log lines: "
-                        ++ (logLines
+                        ++ (olderLogLines
                                 |> RemoteData.map List.length
                                 |> RemoteData.withDefault 0
                                 |> String.fromInt
