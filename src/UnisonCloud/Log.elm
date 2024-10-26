@@ -286,13 +286,12 @@ update appContext logBrowsingContext msg model =
                                 ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ], True )
 
                             else
-                                ( log, Cmd.none, False )
-
-                        bookmarkDebug =
-                            -- ProdDebug.debugLog ("Got bookmark | offset : " ++ String.fromInt edgeOffset ++ " | closenessOffset : " ++ String.fromInt closenessOffset)
-                            Cmd.none
+                                ( log
+                                , ProdDebug.debugLog ("Nope. edgeOffset: " ++ String.fromInt edgeOffset ++ " <= closenessOffset: " ++ String.fromInt closenessOffset ++ "?")
+                                , False
+                                )
                     in
-                    ( { model | log = log_, isFetchingOlderLines = isFetchingOlderLines }, Cmd.batch [ bookmarkDebug, cmd ] )
+                    ( { model | log = log_, isFetchingOlderLines = isFetchingOlderLines }, cmd )
 
         ToggleLogLine line ->
             let
