@@ -310,16 +310,13 @@ update appContext logBrowsingContext msg model =
                                 ( log
                                 , debounce_
                                 , Cmd.batch
-                                    [ ProdDebug.debugLog "fetchingOlderLogs"
+                                    [ ProdDebug.debugLog "within edge window"
                                     , debounceCmd
                                     ]
                                 )
 
                             else
-                                ( log
-                                , model.debounce
-                                , ProdDebug.debugLog ("Nope. edgeOffset: " ++ String.fromInt edgeOffset ++ " <= closenessOffset: " ++ String.fromInt closenessOffset ++ "?")
-                                )
+                                ( log, model.debounce, Cmd.none )
                     in
                     ( { model | log = log_, debounce = debounce }, Cmd.batch [ scroll, cmd ] )
 
