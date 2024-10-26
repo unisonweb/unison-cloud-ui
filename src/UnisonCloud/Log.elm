@@ -40,6 +40,7 @@ import Html
         , h2
         , hr
         , p
+        , span
         , summary
         , table
         , tbody
@@ -48,7 +49,7 @@ import Html
         , th
         , tr
         )
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, classList, id, style)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
@@ -662,6 +663,16 @@ viewLine zone model tooltipPosition line =
 
             else
                 UI.nothing
+
+        coloredLogId =
+            let
+                shortId =
+                    line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
+
+                hexColor =
+                    shortId |> String.left 6
+            in
+            span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
     in
     div
         [ class "log-entry log-entry_log-line"
@@ -672,7 +683,7 @@ viewLine zone model tooltipPosition line =
             [ caret
             , LogLevel.view line.level
             , viewLoggedAt zone tooltipPosition line.loggedAt
-            , line.id |> String.split "-" |> List.head |> Maybe.withDefault "" |> text
+            , coloredLogId
             , viewLogMessage tooltipPosition line
             ]
         , expanded
