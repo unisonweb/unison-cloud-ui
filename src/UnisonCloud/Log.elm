@@ -298,8 +298,7 @@ update appContext logBrowsingContext msg model =
 
                             else
                                 ( log
-                                , Cmd.none
-                                  -- ProdDebug.debugLog ("Nope. edgeOffset: " ++ String.fromInt edgeOffset ++ " <= closenessOffset: " ++ String.fromInt closenessOffset ++ "?")
+                                , ProdDebug.debugLog ("Nope. edgeOffset: " ++ String.fromInt edgeOffset ++ " <= closenessOffset: " ++ String.fromInt closenessOffset ++ "?")
                                 )
 
                         ( debounce, debounceCmd ) =
