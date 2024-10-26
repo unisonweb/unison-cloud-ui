@@ -113,7 +113,7 @@ type alias Log =
 
 
 type alias Model =
-    { log : Log, modal : Modal }
+    { log : Log, modal : Modal, isFetchingOlderLines : Bool }
 
 
 init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
@@ -126,6 +126,11 @@ init appContext logBrowsingContext =
             , offScreenNewestLogLines = NotAsked
             }
       , modal = NoModal
+
+      -- TODO: this is a hack, should look at the log.olderLogLines RemoteData
+      -- (which we currently don't set to Loading when fetching them). If there
+      -- already is lines in that field, what do we do with them?
+      , isFetchingOlderLines = False
       }
     , fetchInitialLogLines appContext logBrowsingContext
     )
@@ -197,7 +202,7 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | logLines = logLines, olderLogLines = olderLogLines }
             in
-            ( { model | log = log_ }, Cmd.none )
+            ( { model | log = log_, isFetchingOlderLines = False }, Cmd.none )
 
         RequestToFetchNewestLogLines ->
             let
@@ -282,17 +287,17 @@ update appContext logBrowsingContext msg model =
                         isCloseToEdge =
                             edgeOffset <= closenessOffset
 
-                        ( log_, cmd ) =
-                            if isCloseToEdge then
-                                ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ] )
+                        ( log_, cmd, isFetchingOlderLines ) =
+                            if isCloseToEdge && not model.isFetchingOlderLines then
+                                ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ], True )
 
                             else
-                                ( log, ProdDebug.debugLog "Scroll is not close to edge..." )
+                                ( log, ProdDebug.debugLog "Scroll is not close to edge...", False )
 
                         bookmarkDebug =
                             ProdDebug.debugLog ("Got bookmark | offset : " ++ String.fromInt edgeOffset ++ " | closenessOffset : " ++ String.fromInt closenessOffset)
                     in
-                    ( { model | log = log_ }, Cmd.batch [ scrollDebug, bookmarkDebug, cmd ] )
+                    ( { model | log = log_, isFetchingOlderLines = isFetchingOlderLines }, Cmd.batch [ scrollDebug, bookmarkDebug, cmd ] )
 
         ToggleLogLine line ->
             let
