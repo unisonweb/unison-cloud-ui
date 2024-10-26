@@ -101,14 +101,14 @@ withLimit l params =
 
 
 toQueryParams : DateTime -> DateTime -> FetchLogParams -> List QueryParameter
-toQueryParams fourtyEightHoursAgo now p =
+toQueryParams initialStartTime now p =
     let
         search =
             Maybe.map (string "search") p.search
 
         start =
             p.start
-                |> MaybeE.orElse (Just fourtyEightHoursAgo)
+                |> MaybeE.orElse (Just initialStartTime)
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "start")
 
