@@ -290,7 +290,7 @@ update appContext logBrowsingContext msg model =
                             24
 
                         closenessOffset =
-                            1 * logRowHeight
+                            3 * logRowHeight
 
                         isCloseToEdge =
                             edgeOffset <= closenessOffset
