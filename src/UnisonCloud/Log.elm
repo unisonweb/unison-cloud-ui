@@ -273,8 +273,11 @@ update appContext logBrowsingContext msg model =
                         edgeOffset =
                             abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
 
+                        logRowHeight =
+                            24
+
                         closenessOffset =
-                            0
+                            3 * logRowHeight
 
                         isCloseToEdge =
                             edgeOffset <= closenessOffset
