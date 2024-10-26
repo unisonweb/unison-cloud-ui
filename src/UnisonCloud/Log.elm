@@ -205,15 +205,8 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }
             , Cmd.batch
-                [ debugLog
-                    ("Fetched initial log lines: "
-                        ++ (logLines_
-                                |> RemoteData.map List.length
-                                |> RemoteData.withDefault 0
-                                |> String.fromInt
-                           )
-                    )
-                , Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                [ -- debugLog ("Fetched initial log lines: " ++ (logLines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                  Util.delayMsg pollingInterval RequestToFetchNewestLogLines
                 ]
             )
 
@@ -233,19 +226,11 @@ update appContext logBrowsingContext msg model =
                         |> RemoteData.map (List.filter (\l -> not (List.member l.id allLogIds)))
 
                 log_ =
-                    { log | logLines = logLines, olderLogLines = newPage }
+                    { log | logLines = logLines, olderLogLines = dedupedOlderLogLines }
             in
             ( { model | log = log_ }
-            , Cmd.batch
-                [ debugLog
-                    ("Fetched older log lines (deduped): "
-                        ++ (dedupedOlderLogLines
-                                |> RemoteData.map List.length
-                                |> RemoteData.withDefault 0
-                                |> String.fromInt
-                           )
-                    )
-                ]
+            , Cmd.none
+              -- debugLog ("Fetched older log lines (deduped): " ++ (dedupedOlderLogLines |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
             )
 
         RequestToFetchNewestLogLines ->
@@ -264,8 +249,8 @@ update appContext logBrowsingContext msg model =
                             in
                             ( l
                             , Cmd.batch
-                                [ ProdDebug.debugLog "fetching newest lines"
-                                , fetchNewestLogLines appContext logBrowsingContext loggedAt
+                                [ -- debugLog "fetching newest lines"
+                                  fetchNewestLogLines appContext logBrowsingContext loggedAt
                                 ]
                             )
 
@@ -290,15 +275,8 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }
             , Cmd.batch
-                [ debugLog
-                    ("Fetched newer log lines: "
-                        ++ (lines_
-                                |> RemoteData.map List.length
-                                |> RemoteData.withDefault 0
-                                |> String.fromInt
-                           )
-                    )
-                , Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                [ -- debugLog ("Fetched newer log lines: " ++ (lines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                  Util.delayMsg pollingInterval RequestToFetchNewestLogLines
                 ]
             )
 
@@ -319,7 +297,7 @@ update appContext logBrowsingContext msg model =
                         |> Maybe.map .loggedAt
 
                 scroll =
-                    ProdDebug.debugLog "Scroll"
+                    debugLog "Scroll"
             in
             case bookmark of
                 Nothing ->
@@ -328,7 +306,7 @@ update appContext logBrowsingContext msg model =
                             { log | logLines = Loading }
                     in
                     ( { model | log = log_ }
-                    , Cmd.batch [ scroll, fetchInitialLogLines appContext logBrowsingContext ]
+                    , Cmd.batch [ fetchInitialLogLines appContext logBrowsingContext ]
                     )
 
                 Just bm ->
@@ -351,8 +329,8 @@ update appContext logBrowsingContext msg model =
                                     ( debounce_, debounceCmd ) =
                                         Debounce.push debounceConfig
                                             (Cmd.batch
-                                                [ ProdDebug.debugLog "Fetching old lines"
-                                                , fetchOlderLogLines
+                                                [ -- debugLog "Fetching old lines"
+                                                  fetchOlderLogLines
                                                     appContext
                                                     logBrowsingContext
                                                     bm
@@ -363,15 +341,15 @@ update appContext logBrowsingContext msg model =
                                 ( log
                                 , debounce_
                                 , Cmd.batch
-                                    [ ProdDebug.debugLog "within edge window"
-                                    , debounceCmd
+                                    [ -- debugLog "within edge window"
+                                      debounceCmd
                                     ]
                                 )
 
                             else
                                 ( log, model.debounce, Cmd.none )
                     in
-                    ( { model | log = log_, debounce = debounce }, Cmd.batch [ scroll, cmd ] )
+                    ( { model | log = log_, debounce = debounce }, Cmd.batch [ cmd ] )
 
         ToggleLogLine line ->
             let
@@ -673,15 +651,17 @@ viewLine zone model tooltipPosition line =
             else
                 UI.nothing
 
-        coloredLogId =
-            let
-                shortId =
-                    line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
+        {-
+           coloredLogId =
+               let
+                   shortId =
+                       line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
 
-                hexColor =
-                    shortId |> String.left 6
-            in
-            span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
+                   hexColor =
+                       shortId |> String.left 6
+               in
+               span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
+        -}
     in
     div
         [ class "log-entry log-entry_log-line"
@@ -692,7 +672,8 @@ viewLine zone model tooltipPosition line =
             [ caret
             , LogLevel.view line.level
             , viewLoggedAt zone tooltipPosition line.loggedAt
-            , coloredLogId
+
+            -- , coloredLogId
             , viewLogMessage tooltipPosition line
             ]
         , expanded
