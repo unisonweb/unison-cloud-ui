@@ -267,6 +267,9 @@ update appContext logBrowsingContext msg model =
                     allLogLines_
                         |> List.head
                         |> Maybe.map .loggedAt
+
+                scroll =
+                    ProdDebug.debugLog "Scroll"
             in
             case bookmark of
                 Nothing ->
@@ -275,7 +278,7 @@ update appContext logBrowsingContext msg model =
                             { log | logLines = Loading }
                     in
                     ( { model | log = log_ }
-                    , fetchInitialLogLines appContext logBrowsingContext
+                    , Cmd.batch [ scroll, fetchInitialLogLines appContext logBrowsingContext ]
                     )
 
                 Just bm ->
@@ -304,7 +307,7 @@ update appContext logBrowsingContext msg model =
                         ( debounce, debounceCmd ) =
                             Debounce.push debounceConfig cmd model.debounce
                     in
-                    ( { model | log = log_, debounce = debounce }, debounceCmd )
+                    ( { model | log = log_, debounce = debounce }, Cmd.batch [ scroll, debounceCmd ] )
 
         ToggleLogLine line ->
             let
