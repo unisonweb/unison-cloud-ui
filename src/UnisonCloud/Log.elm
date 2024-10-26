@@ -256,21 +256,15 @@ update appContext logBrowsingContext msg model =
                     allLogLines_
                         |> List.head
                         |> Maybe.map .loggedAt
-
-                scrollDebug =
-                    ProdDebug.debugLog "Scroll"
             in
             case bookmark of
                 Nothing ->
                     let
                         log_ =
                             { log | logLines = Loading }
-
-                        noBookmarkDebug =
-                            ProdDebug.debugLog "No bookmark, fetching initial"
                     in
                     ( { model | log = log_ }
-                    , Cmd.batch [ scrollDebug, noBookmarkDebug, fetchInitialLogLines appContext logBrowsingContext ]
+                    , fetchInitialLogLines appContext logBrowsingContext
                     )
 
                 Just bm ->
@@ -282,7 +276,7 @@ update appContext logBrowsingContext msg model =
                             24
 
                         closenessOffset =
-                            3 * logRowHeight
+                            2 * logRowHeight
 
                         isCloseToEdge =
                             edgeOffset <= closenessOffset
@@ -292,12 +286,13 @@ update appContext logBrowsingContext msg model =
                                 ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ], True )
 
                             else
-                                ( log, ProdDebug.debugLog "Scroll is not close to edge...", False )
+                                ( log, Cmd.none, False )
 
                         bookmarkDebug =
-                            ProdDebug.debugLog ("Got bookmark | offset : " ++ String.fromInt edgeOffset ++ " | closenessOffset : " ++ String.fromInt closenessOffset)
+                            -- ProdDebug.debugLog ("Got bookmark | offset : " ++ String.fromInt edgeOffset ++ " | closenessOffset : " ++ String.fromInt closenessOffset)
+                            Cmd.none
                     in
-                    ( { model | log = log_, isFetchingOlderLines = isFetchingOlderLines }, Cmd.batch [ scrollDebug, bookmarkDebug, cmd ] )
+                    ( { model | log = log_, isFetchingOlderLines = isFetchingOlderLines }, Cmd.batch [ bookmarkDebug, cmd ] )
 
         ToggleLogLine line ->
             let
