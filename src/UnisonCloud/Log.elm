@@ -160,7 +160,7 @@ Choose the strategy for your use case.
 -}
 debounceConfig : Debounce.Config Msg
 debounceConfig =
-    { strategy = Debounce.manual
+    { strategy = Debounce.later 500
     , transform = DebounceMsg
     }
 
@@ -235,7 +235,8 @@ update appContext logBrowsingContext msg model =
                                 |> String.fromInt
                            )
                     )
-                , Debounce.unlock debounceConfig
+
+                --, Debounce.unlock debounceConfig
                 ]
             )
 
