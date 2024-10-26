@@ -233,7 +233,7 @@ update appContext logBrowsingContext msg model =
                         |> RemoteData.map (List.filter (\l -> not (List.member l.id allLogIds)))
 
                 log_ =
-                    { log | logLines = logLines, olderLogLines = dedupedOlderLogLines }
+                    { log | logLines = logLines, olderLogLines = newPage }
             in
             ( { model | log = log_ }
             , Cmd.batch
