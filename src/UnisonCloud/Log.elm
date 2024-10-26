@@ -295,19 +295,33 @@ update appContext logBrowsingContext msg model =
                         isCloseToEdge =
                             edgeOffset <= closenessOffset
 
-                        ( log_, cmd ) =
+                        ( log_, debounce, cmd ) =
                             if isCloseToEdge then
-                                ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ] )
+                                let
+                                    ( debounce_, debounceCmd ) =
+                                        Debounce.push debounceConfig
+                                            (fetchOlderLogLines
+                                                appContext
+                                                logBrowsingContext
+                                                bm
+                                            )
+                                            model.debounce
+                                in
+                                ( log
+                                , debounce_
+                                , Cmd.batch
+                                    [ ProdDebug.debugLog "fetchingOlderLogs"
+                                    , debounceCmd
+                                    ]
+                                )
 
                             else
                                 ( log
+                                , model.debounce
                                 , ProdDebug.debugLog ("Nope. edgeOffset: " ++ String.fromInt edgeOffset ++ " <= closenessOffset: " ++ String.fromInt closenessOffset ++ "?")
                                 )
-
-                        ( debounce, debounceCmd ) =
-                            Debounce.push debounceConfig cmd model.debounce
                     in
-                    ( { model | log = log_, debounce = debounce }, Cmd.batch [ scroll, debounceCmd ] )
+                    ( { model | log = log_, debounce = debounce }, Cmd.batch [ scroll, cmd ] )
 
         ToggleLogLine line ->
             let
