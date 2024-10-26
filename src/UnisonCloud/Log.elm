@@ -683,8 +683,7 @@ viewLine zone model tooltipPosition line =
             [ caret
             , LogLevel.view line.level
             , viewLoggedAt zone tooltipPosition line.loggedAt
-
-            -- , text line.id
+            , line.id |> String.split "-" |> List.head |> Maybe.withDefault "" |> text
             , viewLogMessage tooltipPosition line
             ]
         , expanded
