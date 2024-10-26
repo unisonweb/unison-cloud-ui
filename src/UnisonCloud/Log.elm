@@ -229,7 +229,12 @@ update appContext logBrowsingContext msg model =
                                         _ ->
                                             { log | offScreenNewestLogLines = Loading }
                             in
-                            ( l, fetchNewestLogLines appContext logBrowsingContext loggedAt )
+                            ( l
+                            , Cmd.batch
+                                [ ProdDebug.debugLog "fetching newest lines"
+                                , fetchNewestLogLines appContext logBrowsingContext loggedAt
+                                ]
+                            )
 
                         _ ->
                             ( log, Cmd.none )
@@ -300,10 +305,13 @@ update appContext logBrowsingContext msg model =
                                 let
                                     ( debounce_, debounceCmd ) =
                                         Debounce.push debounceConfig
-                                            (fetchOlderLogLines
-                                                appContext
-                                                logBrowsingContext
-                                                bm
+                                            (Cmd.batch
+                                                [ ProdDebug.debugLog "Fetching old lines"
+                                                , fetchOlderLogLines
+                                                    appContext
+                                                    logBrowsingContext
+                                                    bm
+                                                ]
                                             )
                                             model.debounce
                                 in
