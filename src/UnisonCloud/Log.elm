@@ -160,7 +160,7 @@ Choose the strategy for your use case.
 -}
 debounceConfig : Debounce.Config Msg
 debounceConfig =
-    { strategy = Debounce.manualAfter 250
+    { strategy = Debounce.manual
     , transform = DebounceMsg
     }
 
