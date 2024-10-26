@@ -235,8 +235,6 @@ update appContext logBrowsingContext msg model =
                                 |> String.fromInt
                            )
                     )
-
-                --, Debounce.unlock debounceConfig
                 ]
             )
 
