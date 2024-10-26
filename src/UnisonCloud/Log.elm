@@ -29,6 +29,7 @@
 module UnisonCloud.Log exposing (..)
 
 import Browser.Dom as Dom
+import Debounce exposing (Debounce)
 import Dict
 import Html
     exposing
@@ -113,7 +114,10 @@ type alias Log =
 
 
 type alias Model =
-    { log : Log, modal : Modal, isFetchingOlderLines : Bool }
+    { log : Log
+    , modal : Modal
+    , debounce : Debounce (Cmd Msg)
+    }
 
 
 init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
@@ -126,11 +130,7 @@ init appContext logBrowsingContext =
             , offScreenNewestLogLines = NotAsked
             }
       , modal = NoModal
-
-      -- TODO: this is a hack, should look at the log.olderLogLines RemoteData
-      -- (which we currently don't set to Loading when fetching them). If there
-      -- already is lines in that field, what do we do with them?
-      , isFetchingOlderLines = False
+      , debounce = Debounce.init
       }
     , fetchInitialLogLines appContext logBrowsingContext
     )
@@ -155,6 +155,16 @@ pageSize =
 -- UPDATE
 
 
+{-| This defines how the debouncer should work.
+Choose the strategy for your use case.
+-}
+debounceConfig : Debounce.Config Msg
+debounceConfig =
+    { strategy = Debounce.later 1000
+    , transform = DebounceMsg
+    }
+
+
 type Msg
     = NoOp
     | FetchInitialLogLinesFinished (WebData (List LogLine))
@@ -166,6 +176,7 @@ type Msg
     | RevealNewOffscreenLogLines
     | ShowGetStartedWithLoggingModal
     | CloseModal
+    | DebounceMsg Debounce.Msg
 
 
 update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
@@ -202,7 +213,7 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | logLines = logLines, olderLogLines = olderLogLines }
             in
-            ( { model | log = log_, isFetchingOlderLines = False }, Cmd.none )
+            ( { model | log = log_ }, Cmd.none )
 
         RequestToFetchNewestLogLines ->
             let
@@ -276,23 +287,25 @@ update appContext logBrowsingContext msg model =
                             24
 
                         closenessOffset =
-                            -- 1 * logRowHeight
-                            0
+                            1 * logRowHeight
 
                         isCloseToEdge =
                             edgeOffset <= closenessOffset
 
-                        ( log_, cmd, isFetchingOlderLines ) =
-                            if isCloseToEdge && not model.isFetchingOlderLines then
-                                ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ], True )
+                        ( log_, cmd ) =
+                            if isCloseToEdge then
+                                ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ] )
 
                             else
                                 ( log
-                                , ProdDebug.debugLog ("Nope. edgeOffset: " ++ String.fromInt edgeOffset ++ " <= closenessOffset: " ++ String.fromInt closenessOffset ++ "?")
-                                , False
+                                , Cmd.none
+                                  -- ProdDebug.debugLog ("Nope. edgeOffset: " ++ String.fromInt edgeOffset ++ " <= closenessOffset: " ++ String.fromInt closenessOffset ++ "?")
                                 )
+
+                        ( debounce, debounceCmd ) =
+                            Debounce.push debounceConfig cmd model.debounce
                     in
-                    ( { model | log = log_, isFetchingOlderLines = isFetchingOlderLines }, cmd )
+                    ( { model | log = log_, debounce = debounce }, debounceCmd )
 
         ToggleLogLine line ->
             let
@@ -331,6 +344,19 @@ update appContext logBrowsingContext msg model =
 
         CloseModal ->
             ( { model | modal = NoModal }, Cmd.none )
+
+        DebounceMsg msg_ ->
+            let
+                ( debounce, cmd ) =
+                    Debounce.update
+                        debounceConfig
+                        (Debounce.takeLast identity)
+                        msg_
+                        model.debounce
+            in
+            ( { model | debounce = debounce }
+            , cmd
+            )
 
 
 

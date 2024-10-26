@@ -25,6 +25,7 @@
             "elm-community/maybe-extra": "5.3.0",
             "elm-community/result-extra": "2.4.0",
             "elm-community/string-extra": "4.0.1",
+            "jinjor/elm-debounce": "3.0.0",
             "krisajenkins/remotedata": "6.0.1",
             "mgold/elm-nonempty-list": "4.2.0",
             "noahzgordon/elm-color-extra": "1.0.2",
