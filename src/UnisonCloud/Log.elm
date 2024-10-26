@@ -160,7 +160,7 @@ Choose the strategy for your use case.
 -}
 debounceConfig : Debounce.Config Msg
 debounceConfig =
-    { strategy = Debounce.later 1000
+    { strategy = Debounce.manual
     , transform = DebounceMsg
     }
 
@@ -213,7 +213,7 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | logLines = logLines, olderLogLines = olderLogLines }
             in
-            ( { model | log = log_ }, Cmd.none )
+            ( { model | log = log_ }, Debounce.unlock debounceConfig )
 
         RequestToFetchNewestLogLines ->
             let
