@@ -217,20 +217,29 @@ update appContext logBrowsingContext msg model =
                 ]
             )
 
-        FetchOlderLogLinesFinished olderLogLines ->
+        FetchOlderLogLinesFinished newPage ->
             let
                 logLines =
                     log.logLines
                         |> RemoteData.map (\ls -> RemoteData.withDefault [] log.olderLogLines ++ ls)
 
+                allLogIds =
+                    log
+                        |> logLinesOldestToNewest
+                        |> List.map .id
+
+                dedupedOlderLogLines =
+                    newPage
+                        |> RemoteData.map (List.filter (\l -> not (List.member l.id allLogIds)))
+
                 log_ =
-                    { log | logLines = logLines, olderLogLines = olderLogLines }
+                    { log | logLines = logLines, olderLogLines = dedupedOlderLogLines }
             in
             ( { model | log = log_ }
             , Cmd.batch
                 [ debugLog
-                    ("Fetched older log lines: "
-                        ++ (olderLogLines
+                    ("Fetched older log lines (deduped): "
+                        ++ (dedupedOlderLogLines
                                 |> RemoteData.map List.length
                                 |> RemoteData.withDefault 0
                                 |> String.fromInt
