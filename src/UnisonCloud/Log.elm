@@ -58,6 +58,7 @@ import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 import Lib.UserHandle as UserHandle
 import Lib.Util as Util
 import List.Extra as ListE
+import ProdDebug
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -250,15 +251,21 @@ update appContext logBrowsingContext msg model =
                     allLogLines_
                         |> List.head
                         |> Maybe.map .loggedAt
+
+                scrollDebug =
+                    ProdDebug.debugLog "Scroll"
             in
             case bookmark of
                 Nothing ->
                     let
                         log_ =
                             { log | logLines = Loading }
+
+                        noBookmarkDebug =
+                            ProdDebug.debugLog "No bookmark, fetching initial"
                     in
                     ( { model | log = log_ }
-                    , fetchInitialLogLines appContext logBrowsingContext
+                    , Cmd.batch [ scrollDebug, noBookmarkDebug, fetchInitialLogLines appContext logBrowsingContext ]
                     )
 
                 Just bm ->
@@ -274,12 +281,15 @@ update appContext logBrowsingContext msg model =
 
                         ( log_, cmd ) =
                             if isCloseToEdge then
-                                ( log, fetchOlderLogLines appContext logBrowsingContext bm )
+                                ( log, Cmd.batch [ ProdDebug.debugLog "fetchingOlderLogs", fetchOlderLogLines appContext logBrowsingContext bm ] )
 
                             else
-                                ( log, Cmd.none )
+                                ( log, ProdDebug.debugLog "Scroll is not close to edge..." )
+
+                        bookmarkDebug =
+                            ProdDebug.debugLog ("Got bookmark | offset : " ++ String.fromInt edgeOffset ++ " | closenessOffset : " ++ String.fromInt closenessOffset)
                     in
-                    ( { model | log = log_ }, cmd )
+                    ( { model | log = log_ }, Cmd.batch [ scrollDebug, bookmarkDebug, cmd ] )
 
         ToggleLogLine line ->
             let

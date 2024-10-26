@@ -65,4 +65,8 @@ if (app.ports) {
   app.ports.copyText?.subscribe((text) => {
     navigator.clipboard.writeText(text);
   });
+
+  app.ports.debugLog?.subscribe((text) => {
+    console.debug(text);
+  });
 }
