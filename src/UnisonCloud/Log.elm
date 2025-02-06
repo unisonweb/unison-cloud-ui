@@ -40,7 +40,6 @@ import Html
         , h2
         , hr
         , p
-        , span
         , summary
         , table
         , tbody
@@ -49,7 +48,7 @@ import Html
         , th
         , tr
         )
-import Html.Attributes exposing (class, classList, id, style)
+import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
@@ -60,7 +59,6 @@ import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 import Lib.UserHandle as UserHandle
 import Lib.Util as Util
 import List.Extra as ListE
-import ProdDebug exposing (debugLog)
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -295,9 +293,6 @@ update appContext logBrowsingContext msg model =
                     allLogLines_
                         |> List.head
                         |> Maybe.map .loggedAt
-
-                scroll =
-                    debugLog "Scroll"
             in
             case bookmark of
                 Nothing ->
@@ -518,7 +513,7 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
 {-| If there's no message, print out the line data instead of it is present,
 finally, if there's no data, render an empty line.
 
-TODO:Add various highlights, like bolding of GET and POST.
+TODO: Add various highlights, like bolding of GET and POST.
 
 -}
 viewLogMessage : Tooltip.Position -> LogLine -> Html Msg
