@@ -29,6 +29,7 @@
 module UnisonCloud.Log exposing (..)
 
 import Browser.Dom as Dom
+import Debounce exposing (Debounce)
 import Dict
 import Html
     exposing
@@ -112,7 +113,10 @@ type alias Log =
 
 
 type alias Model =
-    { log : Log, modal : Modal }
+    { log : Log
+    , modal : Modal
+    , debounce : Debounce (Cmd Msg)
+    }
 
 
 init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
@@ -125,6 +129,7 @@ init appContext logBrowsingContext =
             , offScreenNewestLogLines = NotAsked
             }
       , modal = NoModal
+      , debounce = Debounce.init
       }
     , fetchInitialLogLines appContext logBrowsingContext
     )
@@ -149,6 +154,16 @@ pageSize =
 -- UPDATE
 
 
+{-| This defines how the debouncer should work.
+Choose the strategy for your use case.
+-}
+debounceConfig : Debounce.Config Msg
+debounceConfig =
+    { strategy = Debounce.later 500
+    , transform = DebounceMsg
+    }
+
+
 type Msg
     = NoOp
     | FetchInitialLogLinesFinished (WebData (List LogLine))
@@ -160,6 +175,7 @@ type Msg
     | RevealNewOffscreenLogLines
     | ShowGetStartedWithLoggingModal
     | CloseModal
+    | DebounceMsg Debounce.Msg
 
 
 update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
@@ -185,18 +201,35 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | logLines = logLines_ }
             in
-            ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
+            ( { model | log = log_ }
+            , Cmd.batch
+                [ -- debugLog ("Fetched initial log lines: " ++ (logLines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                  Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                ]
+            )
 
-        FetchOlderLogLinesFinished olderLogLines ->
+        FetchOlderLogLinesFinished newPage ->
             let
                 logLines =
                     log.logLines
                         |> RemoteData.map (\ls -> RemoteData.withDefault [] log.olderLogLines ++ ls)
 
+                allLogIds =
+                    log
+                        |> logLinesOldestToNewest
+                        |> List.map .id
+
+                dedupedOlderLogLines =
+                    newPage
+                        |> RemoteData.map (List.filter (\l -> not (List.member l.id allLogIds)))
+
                 log_ =
-                    { log | logLines = logLines, olderLogLines = olderLogLines }
+                    { log | logLines = logLines, olderLogLines = dedupedOlderLogLines }
             in
-            ( { model | log = log_ }, Cmd.none )
+            ( { model | log = log_ }
+            , Cmd.none
+              -- debugLog ("Fetched older log lines (deduped): " ++ (dedupedOlderLogLines |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+            )
 
         RequestToFetchNewestLogLines ->
             let
@@ -212,7 +245,12 @@ update appContext logBrowsingContext msg model =
                                         _ ->
                                             { log | offScreenNewestLogLines = Loading }
                             in
-                            ( l, fetchNewestLogLines appContext logBrowsingContext loggedAt )
+                            ( l
+                            , Cmd.batch
+                                [ -- debugLog "fetching newest lines"
+                                  fetchNewestLogLines appContext logBrowsingContext loggedAt
+                                ]
+                            )
 
                         _ ->
                             ( log, Cmd.none )
@@ -233,7 +271,12 @@ update appContext logBrowsingContext msg model =
                 log_ =
                     { log | offScreenNewestLogLines = lines_ }
             in
-            ( { model | log = log_ }, Util.delayMsg pollingInterval RequestToFetchNewestLogLines )
+            ( { model | log = log_ }
+            , Cmd.batch
+                [ -- debugLog ("Fetched newer log lines: " ++ (lines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                  Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                ]
+            )
 
         Scroll ev ->
             let
@@ -258,7 +301,7 @@ update appContext logBrowsingContext msg model =
                             { log | logLines = Loading }
                     in
                     ( { model | log = log_ }
-                    , fetchInitialLogLines appContext logBrowsingContext
+                    , Cmd.batch [ fetchInitialLogLines appContext logBrowsingContext ]
                     )
 
                 Just bm ->
@@ -266,20 +309,42 @@ update appContext logBrowsingContext msg model =
                         edgeOffset =
                             abs (ev.scrollHeight + ev.scrollTop - ev.clientHeight)
 
+                        logRowHeight =
+                            24
+
                         closenessOffset =
-                            0
+                            3 * logRowHeight
 
                         isCloseToEdge =
                             edgeOffset <= closenessOffset
 
-                        ( log_, cmd ) =
+                        ( log_, debounce, cmd ) =
                             if isCloseToEdge then
-                                ( log, fetchOlderLogLines appContext logBrowsingContext bm )
+                                let
+                                    ( debounce_, debounceCmd ) =
+                                        Debounce.push debounceConfig
+                                            (Cmd.batch
+                                                [ -- debugLog "Fetching old lines"
+                                                  fetchOlderLogLines
+                                                    appContext
+                                                    logBrowsingContext
+                                                    bm
+                                                ]
+                                            )
+                                            model.debounce
+                                in
+                                ( log
+                                , debounce_
+                                , Cmd.batch
+                                    [ -- debugLog "within edge window"
+                                      debounceCmd
+                                    ]
+                                )
 
                             else
-                                ( log, Cmd.none )
+                                ( log, model.debounce, Cmd.none )
                     in
-                    ( { model | log = log_ }, cmd )
+                    ( { model | log = log_, debounce = debounce }, Cmd.batch [ cmd ] )
 
         ToggleLogLine line ->
             let
@@ -318,6 +383,19 @@ update appContext logBrowsingContext msg model =
 
         CloseModal ->
             ( { model | modal = NoModal }, Cmd.none )
+
+        DebounceMsg msg_ ->
+            let
+                ( debounce, cmd ) =
+                    Debounce.update
+                        debounceConfig
+                        (Debounce.takeLast identity)
+                        msg_
+                        model.debounce
+            in
+            ( { model | debounce = debounce }
+            , cmd
+            )
 
 
 
@@ -409,21 +487,13 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
         now =
             appContext.now
 
-        fortyEightHoursAgo =
-            appContext.now
-                |> DateTime.toPosix
-                |> Time.posixToMillis
-                |> (\t -> t - (48 * 60 * 60 * 1000))
-                |> Time.millisToPosix
-                |> DateTime.fromPosix
-
         endpoint =
             case logBrowsingContext of
                 ServiceContext name ->
-                    CloudApi.serviceLogs fortyEightHoursAgo now appContext.session.handle name params_
+                    CloudApi.serviceLogs now appContext.session.handle name params_
 
                 ServiceDeployContext sh ->
-                    CloudApi.serviceDeployLogs fortyEightHoursAgo now sh params_
+                    CloudApi.serviceDeployLogs now sh params_
 
         decodeLogs =
             Decode.map
@@ -443,7 +513,7 @@ fetchLogLines_ appContext logBrowsingContext params doneMsg =
 {-| If there's no message, print out the line data instead of it is present,
 finally, if there's no data, render an empty line.
 
-TODO:Add various highlights, like bolding of GET and POST.
+TODO: Add various highlights, like bolding of GET and POST.
 
 -}
 viewLogMessage : Tooltip.Position -> LogLine -> Html Msg
@@ -575,6 +645,18 @@ viewLine zone model tooltipPosition line =
 
             else
                 UI.nothing
+
+        {-
+           coloredLogId =
+               let
+                   shortId =
+                       line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
+
+                   hexColor =
+                       shortId |> String.left 6
+               in
+               span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
+        -}
     in
     div
         [ class "log-entry log-entry_log-line"
@@ -585,6 +667,8 @@ viewLine zone model tooltipPosition line =
             [ caret
             , LogLevel.view line.level
             , viewLoggedAt zone tooltipPosition line.loggedAt
+
+            -- , coloredLogId
             , viewLogMessage tooltipPosition line
             ]
         , expanded
