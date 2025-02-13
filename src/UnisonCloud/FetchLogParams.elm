@@ -113,17 +113,8 @@ toQueryParams now p =
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "end")
 
-        startFallback =
-            p.end
-                |> MaybeE.orElse (Just now)
-                |> Maybe.map DateTime.toPosix
-                |> Maybe.map Time.posixToMillis
-                |> Maybe.map Time.millisToPosix
-                |> Maybe.map DateTime.fromPosix
-
         start =
             p.start
-                |> MaybeE.orElse startFallback
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "start")
 
