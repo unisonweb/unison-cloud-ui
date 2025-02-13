@@ -34,3 +34,8 @@ minutes n =
 hours : Int -> Int
 hours n =
     n * oneHour
+
+
+days : Int -> Int
+days n =
+    n * oneDay
