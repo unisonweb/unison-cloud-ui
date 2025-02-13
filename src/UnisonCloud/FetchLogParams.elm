@@ -11,7 +11,6 @@ module UnisonCloud.FetchLogParams exposing
     )
 
 import Maybe.Extra as MaybeE
-import Miliseconds
 import Time
 import UI.DateTime as DateTime exposing (DateTime)
 import Url.Builder exposing (QueryParameter, int, string)
@@ -119,7 +118,6 @@ toQueryParams now p =
                 |> MaybeE.orElse (Just now)
                 |> Maybe.map DateTime.toPosix
                 |> Maybe.map Time.posixToMillis
-                |> Maybe.map (\t -> t - Miliseconds.oneHour)
                 |> Maybe.map Time.millisToPosix
                 |> Maybe.map DateTime.fromPosix
 
