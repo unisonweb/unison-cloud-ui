@@ -120,7 +120,7 @@ toQueryParams now p =
                 |> MaybeE.orElse (Just now)
                 |> Maybe.map DateTime.toPosix
                 |> Maybe.map Time.posixToMillis
-                |> Maybe.map (\t -> t - Miliseconds.days 2)
+                |> Maybe.map (\t -> t - Miliseconds.days 30)
                 |> Maybe.map Time.millisToPosix
                 |> Maybe.map DateTime.fromPosix
 
