@@ -69,6 +69,7 @@ decode =
             Decode.oneOf
                 [ Decode.string
                 , Decode.map String.fromInt Decode.int
+                , Decode.map String.fromFloat Decode.float
                 ]
     in
     Decode.succeed makeLine
