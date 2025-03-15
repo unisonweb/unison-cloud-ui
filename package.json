@@ -22,7 +22,7 @@
   },
   "homepage": "https://unison.cloud",
   "devDependencies": {
-    "@octokit/core": "^4.0.5",
+    "@octokit/core": "^6.1.4",
     "@unison-lang/ui-core-scripts": "^1.1.9",
     "archiver": "^5.3.0",
     "copy-webpack-plugin": "^8.1.1",
@@ -35,16 +35,16 @@
     "elm-review": "^2.5.5",
     "elm-test": "^0.19.1-revision6",
     "elm-webpack-loader": "^8.0.0",
-    "favicons": "^7.0.1",
+    "favicons": "^7.2.0",
     "favicons-webpack-plugin": "^6.0.0-alpha.1",
-    "filemanager-webpack-plugin": "^4.0.0",
+    "filemanager-webpack-plugin": "^8.0.0",
     "html-webpack-plugin": "^5.3.1",
-    "postcss": "^8.4.16",
+    "postcss": "^8.5.3",
     "postcss-loader": "^7.0.1",
     "postcss-preset-env": "^7.8.0",
     "prettier": "2.8.4",
     "style-loader": "^2.0.0",
-    "webpack": "^5.66.0",
+    "webpack": "^5.98.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.7.3"
   },
@@ -52,7 +52,7 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "@sentry/browser": "^7.26.0",
+    "@sentry/browser": "^7.119.1",
     "@sentry/tracing": "^7.26.0",
     "plausible-tracker": "^0.3.8"
   }
