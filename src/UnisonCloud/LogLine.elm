@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Json.Decode as Decode
 import Json.Decode.Extra exposing (doubleEncoded)
 import Json.Decode.Pipeline exposing (required)
+import Json.Encode as Encode
 import UI.DateTime as DateTime exposing (DateTime)
 import UnisonCloud.LogLevel as LogLevel exposing (LogLevel)
 
@@ -70,6 +71,7 @@ decode =
                 [ Decode.string
                 , Decode.map String.fromInt Decode.int
                 , Decode.map String.fromFloat Decode.float
+                , Decode.map (Encode.encode 0) Decode.value
                 ]
     in
     Decode.succeed makeLine
