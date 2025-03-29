@@ -65,7 +65,7 @@ serviceDeploy sh =
 
 undeployServiceDeploy : ServiceHash -> Endpoint
 undeployServiceDeploy sh =
-    DELETE { path = [ "deployments", ServiceHash.toApiString sh ], queryParams = [] }
+    DELETE { path = [ "deployments", ServiceHash.toApiString sh ], queryParams = [], body = Http.emptyBody }
 
 
 assignedServiceDeploys : UserHandle -> ServiceName -> Endpoint

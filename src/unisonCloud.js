@@ -8,7 +8,6 @@ import "./UnisonCloud/SupportChatWidget"; // web component
 import detectOs from "ui-core/Lib/detectOs";
 import preventDefaultGlobalKeyboardEvents from "ui-core/Lib/preventDefaultGlobalKeyboardEvents";
 import * as Sentry from "@sentry/browser";
-import { BrowserTracing } from "@sentry/tracing";
 
 import { getCookie } from "./util";
 import * as Metrics from "./metrics";
@@ -34,7 +33,7 @@ Metrics.init();
 if (APP_ENV === "production") {
   Sentry.init({
     dsn: "https://8d9abe3e4e5fc91fce30fe26d8799ed7@o4503934538547200.ingest.sentry.io/4505721469272064",
-    integrations: [new BrowserTracing()],
+    integrations: [Sentry.browserTracingIntegration()],
     sampleRate: 0.25,
     environment: APP_ENV,
   });

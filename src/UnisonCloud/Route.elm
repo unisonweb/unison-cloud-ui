@@ -25,8 +25,6 @@ module UnisonCloud.Route exposing
     )
 
 import Browser.Navigation as Nav
-import Code.Definition.Reference exposing (Reference(..))
-import Code.HashQualified exposing (HashQualified(..))
 import Code.UrlParsers exposing (b, s, slash)
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import UnisonCloud.AppError as AppError exposing (AppError)
