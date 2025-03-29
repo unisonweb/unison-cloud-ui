@@ -2,6 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const postcssPresetEnv = require("postcss-preset-env");
+const postcssGlobalData = require("@csstools/postcss-global-data");
 const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
 
 const API_URL = process.env.API_URL || "http://127.0.0.1:5424/v2";
@@ -33,12 +34,14 @@ module.exports = {
             options: {
               postcssOptions: {
                 plugins: [
+                  postcssGlobalData({
+                    files: [`${UI_CORE_SRC}/css/ui/viewport.css`],
+                  }),
                   postcssPresetEnv({
                     features: {
                       "is-pseudo-class": false,
-                      "custom-media-queries": {
-                        importFrom: `${UI_CORE_SRC}/css/ui/viewport.css`,
-                      },
+                      "nesting-rules": true,
+                      "has-pseudo-class": true,
                     },
                   }),
                 ],
@@ -117,17 +120,19 @@ module.exports = {
     historyApiFallback: {
       disableDotRule: true,
     },
-    proxy: {
-      "/api": {
+    proxy: [
+      {
+        context: ["/api"],
         target: API_URL,
         pathRewrite: { "^/api": "" },
         logLevel: "debug",
       },
-      "/website": {
+      {
+        context: ["/website"],
         target: WEBSITE_URL,
         pathRewrite: { "^/website": "" },
         logLevel: "debug",
       },
-    },
+    ],
   },
 };

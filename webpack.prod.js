@@ -4,6 +4,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
 const webpack = require("webpack");
 const postcssPresetEnv = require("postcss-preset-env");
+const postcssGlobalData = require("@csstools/postcss-global-data");
 
 const API_URL = process.env.API_URL || "https://api.unison.cloud/v2";
 const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
@@ -25,12 +26,14 @@ const unisonCloud = {
             options: {
               postcssOptions: {
                 plugins: [
+                  postcssGlobalData({
+                    files: [`${UI_CORE_SRC}/css/ui/viewport.css`],
+                  }),
                   postcssPresetEnv({
                     features: {
                       "is-pseudo-class": false,
-                      "custom-media-queries": {
-                        importFrom: `${UI_CORE_SRC}/css/ui/viewport.css`,
-                      },
+                      "nesting-rules": true,
+                      "has-pseudo-class": true,
                     },
                   }),
                 ],
