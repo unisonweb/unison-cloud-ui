@@ -10,11 +10,32 @@ import UnisonCloud.LogLine as LogLine
 decode : Test
 decode =
     describe "LogLine.decode"
-        [ test "Parses userMsg with number" <|
+        [ test "Parses userMsg with an string" <|
+            \_ ->
+                let
+                    result =
+                        Decode.decodeString LogLine.decode "{\"nodeId\":\"4b5feaaf6d022bc59f090d742dfaeeb6\",\"time\":\"2024-06-04T15:37:02.189950691-00:00\",\"level\":\"INFO\",\"userId\":\"5eb081899fb14b51910fb3d8e6d9dbce\",\"jobId\":\"0769a94d647546183f7fff82c2ce5eb1\",\"meta\":{\"serviceHash\":\"wk44kutkdujrwopq63o47y6uxn3u463sgxnlwwm2rago5a3vxdkq\"},\"envId\":\"9fb3d995-7f26-410d-a3ad-7b28bcdbfd22\",\"type\":\"UserLogMsg\",\"id\":\"0be5a288-6b17-405f-8094-bf4f106d6c6c\",\"userMsg\":{\"xbx\":\"somestring\"}}"
+                in
+                Expect.equal True (ResultE.isOk result)
+        , test "Parses userMsg with an int" <|
             \_ ->
                 let
                     result =
                         Decode.decodeString LogLine.decode "{\"nodeId\":\"4b5feaaf6d022bc59f090d742dfaeeb6\",\"time\":\"2024-06-04T15:37:02.189950691-00:00\",\"level\":\"INFO\",\"userId\":\"5eb081899fb14b51910fb3d8e6d9dbce\",\"jobId\":\"0769a94d647546183f7fff82c2ce5eb1\",\"meta\":{\"serviceHash\":\"wk44kutkdujrwopq63o47y6uxn3u463sgxnlwwm2rago5a3vxdkq\"},\"envId\":\"9fb3d995-7f26-410d-a3ad-7b28bcdbfd22\",\"type\":\"UserLogMsg\",\"id\":\"0be5a288-6b17-405f-8094-bf4f106d6c6c\",\"userMsg\":{\"xbx\":2}}"
+                in
+                Expect.equal True (ResultE.isOk result)
+        , test "Parsers userMsg with a float" <|
+            \_ ->
+                let
+                    result =
+                        Decode.decodeString LogLine.decode "{\"nodeId\":\"4b5feaaf6d022bc59f090d742dfaeeb6\",\"time\":\"2024-06-04T15:37:02.189950691-00:00\",\"level\":\"INFO\",\"userId\":\"5eb081899fb14b51910fb3d8e6d9dbce\",\"jobId\":\"0769a94d647546183f7fff82c2ce5eb1\",\"meta\":{\"serviceHash\":\"wk44kutkdujrwopq63o47y6uxn3u463sgxnlwwm2rago5a3vxdkq\"},\"envId\":\"9fb3d995-7f26-410d-a3ad-7b28bcdbfd22\",\"type\":\"UserLogMsg\",\"id\":\"0be5a288-6b17-405f-8094-bf4f106d6c6c\",\"userMsg\":{\"xbx\":2.4}}"
+                in
+                Expect.equal True (ResultE.isOk result)
+        , test "Parsers userMsg with a nested json structure" <|
+            \_ ->
+                let
+                    result =
+                        Decode.decodeString LogLine.decode "{\"nodeId\":\"4b5feaaf6d022bc59f090d742dfaeeb6\",\"time\":\"2024-06-04T15:37:02.189950691-00:00\",\"level\":\"INFO\",\"userId\":\"5eb081899fb14b51910fb3d8e6d9dbce\",\"jobId\":\"0769a94d647546183f7fff82c2ce5eb1\",\"meta\":{\"serviceHash\":\"wk44kutkdujrwopq63o47y6uxn3u463sgxnlwwm2rago5a3vxdkq\"},\"envId\":\"9fb3d995-7f26-410d-a3ad-7b28bcdbfd22\",\"type\":\"UserLogMsg\",\"id\":\"0be5a288-6b17-405f-8094-bf4f106d6c6c\",\"userMsg\":{\"xbx\":{\"nested\": \"json\"}}}"
                 in
                 Expect.equal True (ResultE.isOk result)
         ]
