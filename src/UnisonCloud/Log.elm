@@ -117,19 +117,18 @@ type alias Model =
     { log : Log
     , modal : Modal
     , debounce : Debounce (Cmd Msg)
-    , colorLogLines : Bool
+    , enableDebugging : Bool
     }
 
 
 init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
 init appContext logBrowsingContext =
     let
-        colorLines =
-            if UserHandle.toString appContext.session.handle == "@hojberg" then
-                True
+        handle =
+            UserHandle.toString appContext.session.handle
 
-            else
-                False
+        enableDebugging =
+            handle == "@hojberg" || handle == "@systemfw"
     in
     ( { log =
             { expandedLines = Set.empty
@@ -140,7 +139,7 @@ init appContext logBrowsingContext =
             }
       , modal = NoModal
       , debounce = Debounce.init
-      , colorLogLines = colorLines
+      , enableDebugging = enableDebugging
       }
     , fetchInitialLogLines appContext logBrowsingContext
     )
@@ -658,7 +657,7 @@ viewLine zone model tooltipPosition line =
                 UI.nothing
 
         coloredLogId =
-            if model.colorLogLines then
+            if model.enableDebugging then
                 let
                     shortId =
                         line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
