@@ -21,6 +21,12 @@
   z-index: var(--layer-floating-controls);
 }
 
+.log .debug-panel .checkbox-field {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
 .log .log-entries {
   position: absolute;
   left: 0;
