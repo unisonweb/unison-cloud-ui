@@ -6,6 +6,16 @@
   position: relative;
 }
 
+.log .debug-panel {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: var(--u-color_element);
+  padding: 1rem;
+  border-radius: var(--border-radius-base);
+  border: 1px solid var(--u-color_border);
+}
+
 .log .log-entries {
   position: absolute;
   left: 0;

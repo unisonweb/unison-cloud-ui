@@ -883,7 +883,8 @@ viewDebugPanel debug =
     case debug of
         Debug form ->
             div [ class "debug-panel" ]
-                [ CheckboxField.field "Show colored log ids"
+                [ text "Debug"
+                , CheckboxField.field "Show colored log ids"
                     (UpdateDebug { form | colorIds = not form.colorIds })
                     form.colorIds
                     |> CheckboxField.view
