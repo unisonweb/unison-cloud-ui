@@ -73,6 +73,7 @@ import UI.Card as Card
 import UI.DateTime as DateTime exposing (DateTime)
 import UI.EmptyState as EmptyState
 import UI.EmptyStateCard as EmptyStateCard
+import UI.Form.CheckboxField as CheckboxField
 import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.Nudge as Nudge
@@ -114,11 +115,23 @@ type alias Log =
     }
 
 
+type alias DebugForm =
+    { colorIds : Bool
+    , logDataSummaries : Bool
+    , logScrollEvents : Bool
+    }
+
+
+type Debug
+    = NoDebug
+    | Debug DebugForm
+
+
 type alias Model =
     { log : Log
     , modal : Modal
     , debounce : Debounce (Cmd Msg)
-    , enableDebugging : Bool
+    , debug : Debug
     }
 
 
@@ -128,8 +141,16 @@ init appContext logBrowsingContext =
         handle =
             UserHandle.toString appContext.session.handle
 
-        enableDebugging =
-            handle == "@hojberg"
+        debug =
+            if handle == "@hojberg" then
+                Debug
+                    { colorIds = True
+                    , logDataSummaries = True
+                    , logScrollEvents = True
+                    }
+
+            else
+                NoDebug
     in
     ( { log =
             { expandedLines = Set.empty
@@ -140,7 +161,7 @@ init appContext logBrowsingContext =
             }
       , modal = NoModal
       , debounce = Debounce.init
-      , enableDebugging = enableDebugging
+      , debug = debug
       }
     , fetchInitialLogLines appContext logBrowsingContext
     )
@@ -187,15 +208,35 @@ type Msg
     | ShowGetStartedWithLoggingModal
     | CloseModal
     | DebounceMsg Debounce.Msg
+    | UpdateDebug DebugForm
 
 
-debugLog : Model -> String -> Cmd Msg
-debugLog model msg =
-    if model.enableDebugging then
-        ProdDebug.debugLog msg
+debugLogData : Debug -> String -> Cmd Msg
+debugLogData debug msg =
+    case debug of
+        Debug { logDataSummaries } ->
+            if logDataSummaries then
+                ProdDebug.debugLog msg
 
-    else
-        Cmd.none
+            else
+                Cmd.none
+
+        _ ->
+            Cmd.none
+
+
+debugLogScroll : Debug -> String -> Cmd Msg
+debugLogScroll debug msg =
+    case debug of
+        Debug { logScrollEvents } ->
+            if logScrollEvents then
+                ProdDebug.debugLog msg
+
+            else
+                Cmd.none
+
+        _ ->
+            Cmd.none
 
 
 update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
@@ -223,7 +264,7 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }
             , Cmd.batch
-                [ debugLog model ("Fetched initial log lines: " ++ (logLines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                [ debugLogData model.debug ("Fetched initial log lines: " ++ (logLines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
                 , Util.delayMsg
                     pollingInterval
                     RequestToFetchNewestLogLines
@@ -249,7 +290,7 @@ update appContext logBrowsingContext msg model =
                     { log | logLines = logLines, olderLogLines = dedupedOlderLogLines }
             in
             ( { model | log = log_ }
-            , debugLog model ("Fetched older log lines (deduped): " ++ (dedupedOlderLogLines |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+            , debugLogData model.debug ("Fetched older log lines (deduped): " ++ (dedupedOlderLogLines |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
             )
 
         RequestToFetchNewestLogLines ->
@@ -268,7 +309,7 @@ update appContext logBrowsingContext msg model =
                             in
                             ( l
                             , Cmd.batch
-                                [ debugLog model "fetching newest lines"
+                                [ debugLogData model.debug "fetching newest lines"
                                 , fetchNewestLogLines appContext logBrowsingContext loggedAt
                                 ]
                             )
@@ -294,7 +335,7 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }
             , Cmd.batch
-                [ debugLog model ("Fetched newer log lines: " ++ (lines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                [ debugLogData model.debug ("Fetched newer log lines: " ++ (lines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
                 , Util.delayMsg pollingInterval RequestToFetchNewestLogLines
                 ]
             )
@@ -345,7 +386,7 @@ update appContext logBrowsingContext msg model =
                                     ( debounce_, debounceCmd ) =
                                         Debounce.push debounceConfig
                                             (Cmd.batch
-                                                [ debugLog model "Fetching old lines"
+                                                [ debugLogData model.debug "Fetching old lines"
                                                 , fetchOlderLogLines
                                                     appContext
                                                     logBrowsingContext
@@ -357,7 +398,7 @@ update appContext logBrowsingContext msg model =
                                 ( log
                                 , debounce_
                                 , Cmd.batch
-                                    [ debugLog model "within edge window"
+                                    [ debugLogScroll model.debug "within edge window"
                                     , debounceCmd
                                     ]
                                 )
@@ -417,6 +458,14 @@ update appContext logBrowsingContext msg model =
             ( { model | debounce = debounce }
             , cmd
             )
+
+        UpdateDebug newForm ->
+            case model.debug of
+                Debug _ ->
+                    ( { model | debug = Debug newForm }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 
@@ -668,18 +717,23 @@ viewLine zone model tooltipPosition line =
                 UI.nothing
 
         coloredLogId =
-            if model.enableDebugging then
-                let
-                    shortId =
-                        line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
+            case model.debug of
+                Debug { colorIds } ->
+                    if colorIds then
+                        let
+                            shortId =
+                                line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
 
-                    hexColor =
-                        shortId |> String.left 6
-                in
-                span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
+                            hexColor =
+                                shortId |> String.left 6
+                        in
+                        span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
 
-            else
-                UI.nothing
+                    else
+                        UI.nothing
+
+                _ ->
+                    UI.nothing
     in
     div
         [ class "log-entry log-entry_log-line"
@@ -824,6 +878,29 @@ warn "operation failed, ignoring" [("name", "bob"), ("fruit", "🍍")]
             ]
 
 
+viewDebugPanel : Debug -> Html Msg
+viewDebugPanel debug =
+    case debug of
+        Debug form ->
+            div [ class "debug-panel" ]
+                [ CheckboxField.field "Show colored log ids"
+                    (UpdateDebug { form | colorIds = not form.colorIds })
+                    form.colorIds
+                    |> CheckboxField.view
+                , CheckboxField.field "Console.log data summaries"
+                    (UpdateDebug { form | logDataSummaries = not form.logDataSummaries })
+                    form.logDataSummaries
+                    |> CheckboxField.view
+                , CheckboxField.field "Console.log scroll events"
+                    (UpdateDebug { form | logScrollEvents = not form.logScrollEvents })
+                    form.logDataSummaries
+                    |> CheckboxField.view
+                ]
+
+        _ ->
+            UI.nothing
+
+
 view : AppContext -> Model -> ( Html Msg, Maybe (Modal.Modal Msg) )
 view appContext model =
     let
@@ -876,7 +953,8 @@ view appContext model =
 
                 _ ->
                     ( div [ class "log" ]
-                        [ Html.Keyed.node "div"
+                        [ viewDebugPanel model.debug
+                        , Html.Keyed.node "div"
                             [ id "log-entries"
                             , on "scroll" (ScrollEvent.decodeToMsg Scroll)
                             , class "log-entries"
