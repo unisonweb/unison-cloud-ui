@@ -60,6 +60,7 @@ import Lib.ScrollEvent as ScrollEvent exposing (ScrollEvent)
 import Lib.UserHandle as UserHandle
 import Lib.Util as Util
 import List.Extra as ListE
+import ProdDebug
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import Set.Extra as SetE
@@ -128,7 +129,7 @@ init appContext logBrowsingContext =
             UserHandle.toString appContext.session.handle
 
         enableDebugging =
-            handle == "@hojberg" || handle == "@systemfw"
+            handle == "@hojberg"
     in
     ( { log =
             { expandedLines = Set.empty
@@ -188,6 +189,15 @@ type Msg
     | DebounceMsg Debounce.Msg
 
 
+debugLog : Model -> String -> Cmd Msg
+debugLog model msg =
+    if model.enableDebugging then
+        ProdDebug.debugLog msg
+
+    else
+        Cmd.none
+
+
 update : AppContext -> LogBrowsingContext -> Msg -> Model -> ( Model, Cmd Msg )
 update appContext logBrowsingContext msg model =
     let
@@ -213,8 +223,10 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }
             , Cmd.batch
-                [ -- debugLog ("Fetched initial log lines: " ++ (logLines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
-                  Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                [ debugLog model ("Fetched initial log lines: " ++ (logLines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                , Util.delayMsg
+                    pollingInterval
+                    RequestToFetchNewestLogLines
                 ]
             )
 
@@ -237,8 +249,7 @@ update appContext logBrowsingContext msg model =
                     { log | logLines = logLines, olderLogLines = dedupedOlderLogLines }
             in
             ( { model | log = log_ }
-            , Cmd.none
-              -- debugLog ("Fetched older log lines (deduped): " ++ (dedupedOlderLogLines |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+            , debugLog model ("Fetched older log lines (deduped): " ++ (dedupedOlderLogLines |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
             )
 
         RequestToFetchNewestLogLines ->
@@ -257,8 +268,8 @@ update appContext logBrowsingContext msg model =
                             in
                             ( l
                             , Cmd.batch
-                                [ -- debugLog "fetching newest lines"
-                                  fetchNewestLogLines appContext logBrowsingContext loggedAt
+                                [ debugLog model "fetching newest lines"
+                                , fetchNewestLogLines appContext logBrowsingContext loggedAt
                                 ]
                             )
 
@@ -283,8 +294,8 @@ update appContext logBrowsingContext msg model =
             in
             ( { model | log = log_ }
             , Cmd.batch
-                [ -- debugLog ("Fetched newer log lines: " ++ (lines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
-                  Util.delayMsg pollingInterval RequestToFetchNewestLogLines
+                [ debugLog model ("Fetched newer log lines: " ++ (lines_ |> RemoteData.map List.length |> RemoteData.withDefault 0 |> String.fromInt))
+                , Util.delayMsg pollingInterval RequestToFetchNewestLogLines
                 ]
             )
 
@@ -334,8 +345,8 @@ update appContext logBrowsingContext msg model =
                                     ( debounce_, debounceCmd ) =
                                         Debounce.push debounceConfig
                                             (Cmd.batch
-                                                [ -- debugLog "Fetching old lines"
-                                                  fetchOlderLogLines
+                                                [ debugLog model "Fetching old lines"
+                                                , fetchOlderLogLines
                                                     appContext
                                                     logBrowsingContext
                                                     bm
@@ -346,8 +357,8 @@ update appContext logBrowsingContext msg model =
                                 ( log
                                 , debounce_
                                 , Cmd.batch
-                                    [ -- debugLog "within edge window"
-                                      debounceCmd
+                                    [ debugLog model "within edge window"
+                                    , debounceCmd
                                     ]
                                 )
 
