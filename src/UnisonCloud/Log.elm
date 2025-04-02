@@ -40,6 +40,7 @@ import Html
         , h2
         , hr
         , p
+        , span
         , summary
         , table
         , tbody
@@ -48,7 +49,7 @@ import Html
         , th
         , tr
         )
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, classList, id, style)
 import Html.Events exposing (on)
 import Html.Keyed
 import Html.Lazy exposing (lazy)
@@ -116,11 +117,20 @@ type alias Model =
     { log : Log
     , modal : Modal
     , debounce : Debounce (Cmd Msg)
+    , colorLogLines : Bool
     }
 
 
 init : AppContext -> LogBrowsingContext -> ( Model, Cmd Msg )
 init appContext logBrowsingContext =
+    let
+        colorLines =
+            if UserHandle.toString appContext.session.handle == "@hojberg" then
+                True
+
+            else
+                False
+    in
     ( { log =
             { expandedLines = Set.empty
             , olderLogLines = NotAsked
@@ -130,6 +140,7 @@ init appContext logBrowsingContext =
             }
       , modal = NoModal
       , debounce = Debounce.init
+      , colorLogLines = colorLines
       }
     , fetchInitialLogLines appContext logBrowsingContext
     )
@@ -646,17 +657,19 @@ viewLine zone model tooltipPosition line =
             else
                 UI.nothing
 
-        {-
-           coloredLogId =
-               let
-                   shortId =
-                       line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
+        coloredLogId =
+            if model.colorLogLines then
+                let
+                    shortId =
+                        line.id |> String.split "-" |> List.head |> Maybe.withDefault ""
 
-                   hexColor =
-                       shortId |> String.left 6
-               in
-               span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
-        -}
+                    hexColor =
+                        shortId |> String.left 6
+                in
+                span [ style "background" ("#" ++ hexColor) ] [ text shortId ]
+
+            else
+                UI.nothing
     in
     div
         [ class "log-entry log-entry_log-line"
@@ -667,8 +680,7 @@ viewLine zone model tooltipPosition line =
             [ caret
             , LogLevel.view line.level
             , viewLoggedAt zone tooltipPosition line.loggedAt
-
-            -- , coloredLogId
+            , coloredLogId
             , viewLogMessage tooltipPosition line
             ]
         , expanded
