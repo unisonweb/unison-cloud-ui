@@ -7,9 +7,9 @@
 }
 
 .log .debug-panel {
-  position: absolute;
-  top: -20rem;
-  right: 0;
+  position: fixed;
+  top: 5rem;
+  right: 2rem;
   background: var(--u-color_element);
   padding: 0.5rem;
   border-radius: var(--border-radius-base);
