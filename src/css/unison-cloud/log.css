@@ -8,12 +8,17 @@
 
 .log .debug-panel {
   position: absolute;
-  top: 2rem;
-  right: 2rem;
+  top: -20rem;
+  right: 0;
   background: var(--u-color_element);
-  padding: 1rem;
+  padding: 0.5rem;
   border-radius: var(--border-radius-base);
   border: 1px solid var(--u-color_border);
+  font-size: var(--font-size-small);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: var(--layer-floating-controls);
 }
 
 .log .log-entries {

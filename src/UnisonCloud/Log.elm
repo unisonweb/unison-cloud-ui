@@ -894,7 +894,7 @@ viewDebugPanel debug =
                     |> CheckboxField.view
                 , CheckboxField.field "Console.log scroll events"
                     (UpdateDebug { form | logScrollEvents = not form.logScrollEvents })
-                    form.logDataSummaries
+                    form.logScrollEvents
                     |> CheckboxField.view
                 ]
 
