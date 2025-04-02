@@ -119,6 +119,7 @@ type alias DebugForm =
     { colorIds : Bool
     , logDataSummaries : Bool
     , logScrollEvents : Bool
+    , pauseAutoRefresh : Bool
     }
 
 
@@ -147,6 +148,7 @@ init appContext logBrowsingContext =
                     { colorIds = True
                     , logDataSummaries = True
                     , logScrollEvents = True
+                    , pauseAutoRefresh = False
                     }
 
             else
@@ -317,7 +319,16 @@ update appContext logBrowsingContext msg model =
                         _ ->
                             ( log, Cmd.none )
             in
-            ( { model | log = log_ }, cmd )
+            case model.debug of
+                Debug { pauseAutoRefresh } ->
+                    if pauseAutoRefresh then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { model | log = log_ }, cmd )
+
+                _ ->
+                    ( { model | log = log_ }, cmd )
 
         FetchNewestLogLinesFinished lines ->
             let
@@ -895,6 +906,10 @@ viewDebugPanel debug =
                 , CheckboxField.field "Console.log scroll events"
                     (UpdateDebug { form | logScrollEvents = not form.logScrollEvents })
                     form.logScrollEvents
+                    |> CheckboxField.view
+                , CheckboxField.field "Pause auto refresh"
+                    (UpdateDebug { form | pauseAutoRefresh = not form.pauseAutoRefresh })
+                    form.pauseAutoRefresh
                     |> CheckboxField.view
                 ]
 
