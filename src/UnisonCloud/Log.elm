@@ -84,7 +84,6 @@ import UnisonCloud.Account as Account
 import UnisonCloud.Api as CloudApi
 import UnisonCloud.AppContext exposing (AppContext)
 import UnisonCloud.FetchLogParams as FetchLogParams exposing (FetchLogParams)
-import UnisonCloud.Link as Link
 import UnisonCloud.LogEntries as LogEntries exposing (LogEntry(..))
 import UnisonCloud.LogLevel as LogLevel
 import UnisonCloud.LogLine as LogLine exposing (LogLine)
@@ -841,52 +840,10 @@ viewEmptyState =
     EmptyState.iconCloud
         (EmptyState.CircleCenterPiece (text "🪵"))
         |> EmptyState.withContent
-            [ h2 [] [ text "Nothing's been logged yet" ]
+            [ h2 [] [ text "Nothing's been logged in the last 48 hours" ]
             , p [] [ text "Logs will show up here as the service is called." ]
-            , Button.iconThenLabel
-                ShowGetStartedWithLoggingModal
-                Icon.graduationCap
-                "Get started with logging"
-                |> Button.decorativeBlue
-                |> Button.view
             ]
         |> EmptyStateCard.view_ Card.SurfaceBackground
-
-
-viewGetStartedWithLoggingModal : Modal.Modal Msg
-viewGetStartedWithLoggingModal =
-    let
-        getStarted =
-            """info "beginning transmogrification..." []
-warn "operation failed, ignoring" [("name", "bob"), ("fruit", "🍍")]
-"""
-
-        content =
-            div []
-                [ p []
-                    [ text "Log messages can be arbitrary JSON, using the low level functions "
-                    , UI.inlineCode [] (text "Log.json")
-                    , text "and"
-                    , UI.inlineCode [] (text "Log.lazyJson")
-                    , text "but there are convenience functions for common cases. Unison Cloud's log viewer is set up to nicely render these. Here's a short example:"
-                    ]
-                , UI.codeBlock [] (text getStarted)
-                ]
-    in
-    content
-        |> Modal.content
-        |> Modal.modal "log_get-started-with-logging-modal" CloseModal
-        |> Modal.withHeader "Get started with logging"
-        |> Modal.withLeftSideFooter
-            [ div []
-                [ text "Learn more in the "
-                , Link.view "Cloud project documentation." Link.cloudDocs
-                ]
-            ]
-        |> Modal.withActions
-            [ Button.iconThenLabel CloseModal Icon.thumbsUp "Got It"
-                |> Button.emphasized
-            ]
 
 
 viewDebugPanel : Debug -> Html Msg
@@ -924,12 +881,7 @@ view appContext model =
             appContext.timeZone
 
         modal =
-            case model.modal of
-                NoModal ->
-                    Nothing
-
-                GetStartedWithLoggingModal ->
-                    Just viewGetStartedWithLoggingModal
+            Nothing
     in
     case model.log.logLines of
         NotAsked ->
