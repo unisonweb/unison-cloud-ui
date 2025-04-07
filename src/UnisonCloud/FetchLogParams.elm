@@ -83,8 +83,8 @@ withLimit l params =
    From https://grafana.com/docs/loki/latest/reference/loki-http-api/#query-logs-within-a-range-of-time:
    `start`:
      The start time for the query as a nanosecond Unix epoch or another
-     supported format. Defaults to 30 days ago. Loki returns results with timestamp
-     greater or equal to this value.
+     supported format. Defaults to 48 hours ago. Loki returns results with
+     timestamp greater or equal to this value.
 
      If `start is not provided, we will default it to the service deploy time.
    `end`:
@@ -114,13 +114,13 @@ toQueryParams now p =
                 |> Maybe.map DateTime.toISO8601
                 |> Maybe.map (string "end")
 
-        -- 30 days ago
+        -- 48 hours ago
         startFallback =
             p.end
                 |> MaybeE.orElse (Just now)
                 |> Maybe.map DateTime.toPosix
                 |> Maybe.map Time.posixToMillis
-                |> Maybe.map (\t -> t - Miliseconds.days 30)
+                |> Maybe.map (\t -> t - Miliseconds.hours 48)
                 |> Maybe.map Time.millisToPosix
                 |> Maybe.map DateTime.fromPosix
 
