@@ -1,7 +1,7 @@
 module UnisonCloud.Service.ServiceId exposing (..)
 
 import Json.Decode as Decode
-import Lib.Util as Util
+import Lib.Decode.Helpers as DecodeH
 import Regex
 
 
@@ -51,4 +51,4 @@ equals (ServiceId a) (ServiceId b) =
 decode : Decode.Decoder ServiceId
 decode =
     Decode.map fromString Decode.string
-        |> Decode.andThen (Util.decodeFailInvalid "Invalid ServiceId")
+        |> Decode.andThen (DecodeH.failInvalid "Invalid ServiceId")

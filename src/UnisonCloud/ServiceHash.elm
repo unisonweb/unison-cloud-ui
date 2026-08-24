@@ -1,7 +1,7 @@
 module UnisonCloud.ServiceHash exposing (..)
 
 import Json.Decode as Decode
-import Lib.Util as Util
+import Lib.Decode.Helpers as DecodeH
 import Regex
 
 
@@ -144,4 +144,4 @@ equals (ServiceHash a) (ServiceHash b) =
 decode : Decode.Decoder ServiceHash
 decode =
     Decode.map fromApiString Decode.string
-        |> Decode.andThen (Util.decodeFailInvalid "Invalid ServiceHash")
+        |> Decode.andThen (DecodeH.failInvalid "Invalid ServiceHash")

@@ -8,8 +8,8 @@ module UnisonCloud.User exposing
 
 import Json.Decode as Decode exposing (nullable, string)
 import Json.Decode.Pipeline exposing (required)
+import Lib.Decode.Helpers exposing (url)
 import Lib.UserHandle as UserHandle exposing (UserHandle)
-import Lib.Util exposing (decodeUrl)
 import UI.Avatar as Avatar exposing (Avatar)
 import UI.Icon as Icon
 import Url exposing (Url)
@@ -58,4 +58,4 @@ decodeSummary =
     Decode.succeed makeSummary
         |> required "handle" UserHandle.decodeUnprefixed
         |> required "name" (nullable string)
-        |> required "avatarUrl" (nullable decodeUrl)
+        |> required "avatarUrl" (nullable url)

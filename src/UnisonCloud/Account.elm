@@ -1,8 +1,8 @@
 module UnisonCloud.Account exposing (..)
 
 import Json.Decode as Decode exposing (field, maybe, string)
+import Lib.Decode.Helpers exposing (url)
 import Lib.UserHandle as UserHandle exposing (UserHandle)
-import Lib.Util exposing (decodeUrl)
 import UI.Avatar as Avatar exposing (Avatar)
 import UI.Icon as Icon
 import UnisonCloud.CloudPlan as CloudPlan exposing (CloudPlan)
@@ -71,5 +71,5 @@ decodeSummary =
         (field "primaryEmail" string)
         (field "cloudTier" CloudPlan.decode)
         (maybe (field "name" string))
-        (maybe (field "avatarUrl" decodeUrl))
+        (maybe (field "avatarUrl" url))
         (field "organizationMemberships" (Decode.list (Decode.map OrganizationMembership UserHandle.decodeUnprefixed)))

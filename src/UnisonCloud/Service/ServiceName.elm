@@ -1,7 +1,7 @@
 module UnisonCloud.Service.ServiceName exposing (..)
 
 import Json.Decode as Decode
-import Lib.Util as Util
+import Lib.Decode.Helpers as DecodeH
 import Regex
 
 
@@ -51,4 +51,4 @@ equals (ServiceName a) (ServiceName b) =
 decode : Decode.Decoder ServiceName
 decode =
     Decode.map fromString Decode.string
-        |> Decode.andThen (Util.decodeFailInvalid "Invalid ServiceName")
+        |> Decode.andThen (DecodeH.failInvalid "Invalid ServiceName")
