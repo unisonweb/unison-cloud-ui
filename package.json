@@ -25,7 +25,7 @@
     "@csstools/postcss-global-data": "^3.0.0",
     "@octokit/core": "^6.1.4",
     "@unison-lang/ui-core-scripts": "^1.1.9",
-    "copy-webpack-plugin": "^13.0.0",
+    "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.2",
     "elm": "^0.19.1-5",
     "elm-asset-webpack-loader": "^1.1.2",
